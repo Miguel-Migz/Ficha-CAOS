@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.A.O.S — Ficha de Personagem</title>
+<style>
+  :root{
+    --bg: #131019;
+    --bg-panel: #1b1724;
+    --bg-panel-alt: #221d2e;
+    --bg-inset: #0f0c15;
+    --border: #34293f;
+    --border-soft: #2a2233;
+    --text: #ece6f5;
+    --text-dim: #9c8fb3;
+    --text-faint: #6c6180;
+    --accent-arcane: #9b6bf2;
+    --accent-arcane-dim: #5b4a7a;
+    --accent-ember: #e2593f;
+    --accent-gold: #d3a24d;
+    --font-display: Iowan Old Style, "Palatino Linotype", Georgia, serif;
+    --font-body: -apple-system, "Segoe UI", Inter, sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--font-body); line-height:1.4;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(155,107,242,0.08), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(226,89,63,0.06), transparent 55%);
+    min-height:100vh;
+  }
+  .wrap{ max-width:1720px; margin:0 auto; padding:28px 32px 80px; }
+  .layout-grid{ display:grid; grid-template-columns:1fr 1.15fr; gap:18px; align-items:start; }
+  .layout-col{ display:flex; flex-direction:column; gap:18px; }
+  @media (max-width:1080px){
+    .layout-grid{ grid-template-columns:1fr; }
+  }
+
+  /* ---------- Header ---------- */
+  header.masthead{
+    display:flex; align-items:baseline; justify-content:space-between;
+    border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:22px;
+    flex-wrap:wrap; gap:10px;
+  }
+  .masthead-title{
+    font-family:var(--font-display); font-size:1.5rem; letter-spacing:0.06em;
+    color:var(--text); font-weight:600;
+  }
+  .masthead-title span{ color:var(--accent-arcane); }
+  .masthead-sub{ font-size:0.75rem; color:var(--text-faint); letter-spacing:0.08em; text-transform:uppercase; }
+
+  /* ---------- Panels ---------- */
+  .panel{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:10px;
+    padding:20px; margin-bottom:18px;
+  }
+  .panel-title{
+    font-family:var(--font-display); font-size:1.05rem; color:var(--accent-gold);
+    letter-spacing:0.04em; margin:0 0 16px; display:flex; align-items:center; gap:10px;
+  }
+  .panel-title::before{ content:""; width:5px; height:5px; background:var(--accent-gold); border-radius:50%; flex-shrink:0; }
+
+  /* ---------- Identidade ---------- */
+  .id-grid{ display:grid; grid-template-columns:2fr 1fr 1fr; gap:14px; }
+  .id-grid.row2{ grid-template-columns:1fr 1fr 1fr; margin-top:14px; }
+  label.field{ display:flex; flex-direction:column; gap:5px; font-size:0.72rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; }
+  input[type=text], select, input[type=number]{
+    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
+    border-radius:6px; padding:9px 10px; font-family:var(--font-body); font-size:0.92rem;
+  }
+  input:focus, select:focus{ outline:2px solid var(--accent-arcane); outline-offset:1px; border-color:var(--accent-arcane); }
+  .nivel-stepper{ display:flex; align-items:center; gap:8px; }
+  .nivel-stepper input{ width:56px; text-align:center; }
+  .step-btn{
+    width:30px; height:30px; border-radius:6px; border:1px solid var(--border-soft);
+    background:var(--bg-panel-alt); color:var(--text); cursor:pointer; font-size:1rem; line-height:1;
+  }
+  .step-btn:hover{ border-color:var(--accent-arcane); color:var(--accent-arcane); }
+
+  .prof-badge{
+    display:inline-flex; align-items:center; gap:8px; margin-top:14px;
+    background:var(--bg-inset); border:1px solid var(--accent-gold); border-radius:20px;
+    padding:6px 14px; font-family:var(--font-mono); font-size:0.85rem; color:var(--accent-gold);
+  }
+  .prof-badge b{ color:var(--text); font-family:var(--font-body); font-weight:600; margin-right:2px; }
+
+  /* ---------- Atributos ---------- */
+  /* ---------- Status Vitais e Combate ---------- */
+  .vitals-grid{ display:grid; grid-template-columns:1.6fr 1fr; grid-auto-rows:1fr; gap:12px; }
+  .vital-card{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:14px 16px; display:flex; flex-direction:column; gap:12px;
+  }
+  .vital-top-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .vital-left{ display:flex; align-items:center; gap:10px; }
+  .vital-card-label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); white-space:nowrap; }
+  .vital-inputs{ display:flex; align-items:center; gap:4px; }
+  .vital-inputs input{ width:52px; text-align:center; font-family:var(--font-mono); font-size:0.95rem; padding:6px 4px; }
+  .vital-inputs .slash{ color:var(--text-faint); font-family:var(--font-mono); }
+  .vital-card.protecao-card .vital-card-label{ color:var(--accent-arcane); }
+  .dano-cura-row{ display:flex; align-items:center; gap:5px; }
+  .dano-cura-row input{ width:44px; text-align:center; font-family:var(--font-mono); font-size:0.78rem; padding:6px 4px; }
+  .dc-btn{
+    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
+    border-radius:6px; padding:6px 10px; font-size:0.74rem; cursor:pointer; white-space:nowrap;
+  }
+  .dc-btn.dano{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .dc-btn.dano:hover{ background:rgba(226,89,63,0.15); }
+  .dc-btn.cura{ border-color:#6fbf73; color:#6fbf73; }
+  .dc-btn.cura:hover{ background:rgba(111,191,115,0.12); }
+  .bar-track{ background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:8px; height:26px; overflow:hidden; }
+  .bar-fill{ height:100%; transition:width 0.2s ease; }
+  .bar-fill.vida{ background:linear-gradient(90deg, #3f9142, #6fbf73); }
+  .bar-fill.protecao{ background:repeating-linear-gradient(135deg, #3f9142, #3f9142 8px, #6fbf73 8px, #6fbf73 16px); }
+
+  .derived-card{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:16px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .derived-label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); margin-bottom:10px; }
+  .derived-card input{ width:88px; text-align:center; font-family:var(--font-display); font-size:1.4rem; font-weight:600; color:var(--accent-gold); padding:8px 6px; }
+
+  .attr-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; }
+  .attr-card{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:8px 4px; text-align:center; position:relative; overflow:hidden;
+  }
+  .attr-card.fisica{ border-top:2px solid var(--accent-ember); }
+  .attr-card.mental{ border-top:2px solid var(--accent-arcane); }
+  .attr-name{ font-size:0.62rem; text-transform:uppercase; letter-spacing:0.03em; color:var(--text-dim); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .attr-value{ font-family:var(--font-display); font-size:1.4rem; font-weight:600; color:var(--text); line-height:1.1; }
+  .attr-dice{ font-family:var(--font-mono); font-size:0.66rem; color:var(--text-faint); margin-top:1px; margin-bottom:6px; }
+  .attr-controls{ display:flex; justify-content:center; gap:4px; }
+  .attr-controls .step-btn{ width:22px; height:22px; font-size:0.85rem; padding:0; }
+
+  /* ---------- Perícias ---------- */
+  .pericia-cat{ margin-bottom:18px; }
+  .pericia-cat:last-child{ margin-bottom:0; }
+  .pericia-cat-label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-faint); margin:0 0 8px; border-bottom:1px solid var(--border-soft); padding-bottom:6px; }
+  .pericia-row{
+    display:grid; grid-template-columns:1fr auto auto auto auto auto; gap:10px; align-items:center;
+    padding:8px 6px; border-radius:6px; font-size:0.86rem;
+  }
+  .pericia-row:hover{ background:var(--bg-panel-alt); }
+  .pericia-nome{ display:flex; flex-direction:column; }
+  .pericia-nome span.attrtag{ font-size:0.66rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.04em; }
+  .toggle{
+    display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-dim); cursor:pointer; user-select:none;
+    white-space:nowrap;
+  }
+  .toggle input{ accent-color:var(--accent-arcane); width:14px; height:14px; }
+  .formula{
+    font-family:var(--font-mono); font-size:0.78rem; color:var(--accent-gold); white-space:nowrap; min-width:110px; text-align:right;
+  }
+  .roll-btn{
+    background:var(--accent-arcane-dim); border:1px solid var(--accent-arcane); color:var(--text);
+    border-radius:6px; padding:6px 12px; font-size:0.76rem; cursor:pointer; white-space:nowrap;
+  }
+  .roll-btn:hover{ background:var(--accent-arcane); }
+  .roll-btn.oficio{ background:var(--bg-inset); border-color:var(--accent-gold); color:var(--accent-gold); }
+
+  /* ---------- Roll result toast ---------- */
+  #roll-log{
+    position:fixed; bottom:20px; right:20px; max-width:320px; z-index:50;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .roll-toast{
+    background:var(--bg-panel); border:1px solid var(--accent-arcane); border-radius:8px;
+    padding:12px 14px; font-size:0.82rem; box-shadow:0 8px 24px rgba(0,0,0,0.45);
+    animation: fadein 0.2s ease-out;
+  }
+  .roll-toast .rt-title{ color:var(--accent-gold); font-weight:600; margin-bottom:4px; }
+  .roll-toast .rt-total{ font-family:var(--font-mono); font-size:1.3rem; color:var(--text); }
+  .roll-toast .rt-breakdown{ font-family:var(--font-mono); font-size:0.72rem; color:var(--text-faint); margin-top:3px; }
+  @keyframes fadein{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Actions bar ---------- */
+  .actions{
+    position:sticky; bottom:0; display:flex; gap:10px; justify-content:flex-end;
+    padding:14px 0 4px; margin-top:10px; flex-wrap:wrap;
+  }
+  .btn{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); color:var(--text);
+    padding:9px 16px; border-radius:7px; font-size:0.82rem; cursor:pointer; font-family:var(--font-body);
+  }
+  .btn:hover{ border-color:var(--accent-arcane); }
+  .btn.primary{ background:var(--accent-arcane-dim); border-color:var(--accent-arcane); }
+  .btn.danger:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .save-indicator{ font-size:0.72rem; color:var(--text-faint); align-self:center; margin-right:auto; }
+  #import-input{ display:none; }
+
+  @media (max-width:640px){
+    .id-grid, .id-grid.row2{ grid-template-columns:1fr; }
+    .attr-grid{ grid-template-columns:repeat(3, 1fr); }
+    .vitals-grid{ grid-template-columns:1fr; }
+    .pericia-row{ grid-template-columns:1fr; row-gap:6px; padding:12px 8px; border-bottom:1px solid var(--border-soft); }
+    .formula{ text-align:left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <div class="masthead-title">C.<span>A</span>.O.S</div>
+      <div class="masthead-sub">Ficha de Personagem — Módulo Identidade / Atributos / Perícias</div>
+    </div>
+  </header>
+
+  <!-- ===================== LAYOUT PRINCIPAL: 2 COLUNAS ===================== -->
+  <div class="layout-grid">
+
+    <!-- ---- COLUNA ESQUERDA: PERICIAS ---- -->
+    <div class="layout-col">
+      <section class="panel">
+        <h2 class="panel-title">Perícias</h2>
+        <div class="pericia-cat">
+          <div class="pericia-cat-label">Físicas</div>
+          <div id="pericias-fisicas"></div>
+        </div>
+        <div class="pericia-cat">
+          <div class="pericia-cat-label">Mentais</div>
+          <div id="pericias-mentais"></div>
+        </div>
+        <div class="pericia-cat">
+          <div class="pericia-cat-label">Ofício</div>
+          <div id="pericias-oficio"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ---- COLUNA DIREITA: IDENTIDADE / STATUS VITAIS / ATRIBUTOS ---- -->
+    <div class="layout-col">
+
+      <!-- ===================== IDENTIDADE ===================== -->
+      <section class="panel">
+        <h2 class="panel-title">Identidade</h2>
+        <div class="id-grid">
+          <label class="field">Nome
+            <input type="text" id="f-nome" placeholder="Nome do personagem">
+          </label>
+          <label class="field">Classe
+            <select id="f-classe">
+              <option>Sicário</option>
+              <option>Mandrake</option>
+              <option>Baluarte</option>
+              <option>Valhacouto</option>
+            </select>
+          </label>
+          <label class="field">Subclasse
+            <select id="f-subclasse">
+              <option>Arcanista</option>
+              <option>Dizimador</option>
+              <option>Colosso</option>
+              <option>Protetor</option>
+            </select>
+          </label>
+        </div>
+        <div class="id-grid row2">
+          <label class="field">Antecedente
+            <input type="text" id="f-antecedente" placeholder="Ex: Nobre">
+          </label>
+          <label class="field">Ofício
+            <select id="f-oficio">
+              <option value="">— nenhum —</option>
+              <option>Alquimia</option><option>Arte da Guerra</option><option>Ferraria</option>
+              <option>Carpintaria</option><option>Culinária</option><option>Escultura</option>
+              <option>Herborismo</option><option>Lapidar</option><option>Metalurgia</option>
+              <option>Pintura</option><option>Relojoaria</option><option>Sapataria</option>
+              <option>Tecelagem</option><option>Engenharia</option>
+            </select>
+          </label>
+          <label class="field">Nível
+            <div class="nivel-stepper">
+              <button class="step-btn" data-nivel-step="-1">–</button>
+              <input type="number" id="f-nivel" min="1" max="20" value="1">
+              <button class="step-btn" data-nivel-step="1">+</button>
+            </div>
+          </label>
+        </div>
+        <div class="prof-badge">
+          <b>Proficiência</b> <span id="prof-valor">1</span> — todo teste treinado soma <span id="prof-dado">1d12</span>
+        </div>
+      </section>
+
+      <!-- ===================== STATUS VITAIS E COMBATE ===================== -->
+      <section class="panel">
+        <h2 class="panel-title">Status Vitais e Combate</h2>
+        <div class="vitals-grid">
+
+          <div class="vital-card">
+            <div class="vital-top-row">
+              <div class="vital-left">
+                <span class="vital-card-label">Vida</span>
+                <div class="vital-inputs">
+                  <input type="number" id="v-pv-atual" min="0">
+                  <span class="slash">/</span>
+                  <input type="number" id="v-pv-max" min="0">
+                </div>
+              </div>
+              <div class="dano-cura-row">
+                <input type="number" id="v-pv-delta" placeholder="Qtd">
+                <button class="dc-btn dano" data-vital="pv" data-sinal="-1">Dano</button>
+                <button class="dc-btn cura" data-vital="pv" data-sinal="1">Cura</button>
+              </div>
+            </div>
+            <div class="bar-track"><div class="bar-fill vida" id="v-pv-bar" style="width:100%"></div></div>
+          </div>
+
+          <div class="derived-card">
+            <span class="derived-label">DT</span>
+            <input type="text" id="v-dt">
+          </div>
+
+          <div class="vital-card protecao-card">
+            <div class="vital-top-row">
+              <div class="vital-left">
+                <span class="vital-card-label">Proteção</span>
+                <div class="vital-inputs">
+                  <input type="number" id="v-prot-atual" min="0">
+                  <span class="slash">/</span>
+                  <input type="number" id="v-prot-max" min="0">
+                </div>
+              </div>
+              <div class="dano-cura-row">
+                <input type="number" id="v-prot-delta" placeholder="Qtd">
+                <button class="dc-btn dano" data-vital="prot" data-sinal="-1">Dano</button>
+                <button class="dc-btn cura" data-vital="prot" data-sinal="1">Cura</button>
+              </div>
+            </div>
+            <div class="bar-track"><div class="bar-fill protecao" id="v-prot-bar" style="width:100%"></div></div>
+          </div>
+
+          <div class="derived-card">
+            <span class="derived-label">Deslocamento</span>
+            <input type="text" id="v-desloc-input">
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===================== ATRIBUTOS ===================== -->
+      <section class="panel">
+        <h2 class="panel-title">Atributos</h2>
+        <div class="attr-grid" id="attr-grid"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="actions">
+    <span class="save-indicator" id="save-indicator">salvo automaticamente</span>
+    <button class="btn" id="btn-reset">Resetar ficha</button>
+    <button class="btn" id="btn-import">Importar JSON</button>
+    <input type="file" id="import-input" accept="application/json">
+    <button class="btn primary" id="btn-export">Exportar JSON</button>
+  </div>
+
+</div>
+
+<div id="roll-log"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const STORAGE_KEY = "caos_ficha_modulo1_v1";
+
+  const ATRIBUTOS_DEF = [
+    { chave:"forca",      nome:"Força",      categoria:"fisica" },
+    { chave:"agilidade",  nome:"Agilidade",  categoria:"fisica" },
+    { chave:"vigor",      nome:"Vigor",      categoria:"fisica" },
+    { chave:"instinto",   nome:"Instinto",   categoria:"mental" },
+    { chave:"influencia", nome:"Influência", categoria:"mental" },
+    { chave:"mente",      nome:"Mente",      categoria:"mental" },
+  ];
+
+  const PERICIAS_DEF = {
+    fisicas: [
+      { nome:"Atletismo",       atributoBase:"forca" },
+      { nome:"Acrobacia",       atributoBase:"agilidade" },
+      { nome:"Furtividade",     atributoBase:"agilidade" },
+      { nome:"Crime",           atributoBase:"agilidade" },
+      { nome:"Reflexos",        atributoBase:"agilidade" },
+      { nome:"Prestidigitação", atributoBase:"agilidade" },
+      { nome:"Pilotagem",       atributoBase:"agilidade" },
+      { nome:"Concentração",    atributoBase:"vigor" },
+      { nome:"Fortitude",       atributoBase:"vigor" },
+    ],
+    mentais: [
+      { nome:"Arcanismo",    atributoBase:"mente" },
+      { nome:"Medicina",     atributoBase:"mente" },
+      { nome:"História",     atributoBase:"mente" },
+      { nome:"Investigação", atributoBase:"mente" },
+      { nome:"Misticismo",   atributoBase:"mente" },
+      { nome:"Natureza",     atributoBase:"mente" },
+      { nome:"Táticas",      atributoBase:"mente" },
+      { nome:"Vontade",      atributoBase:"mente" },
+      { nome:"Religião",     atributoBase:"mente" },
+      { nome:"Avaliação",    atributoBase:"instinto" },
+      { nome:"Observar",     atributoBase:"instinto" },
+      { nome:"Ouvir",        atributoBase:"instinto" },
+      { nome:"Procurar",     atributoBase:"instinto" },
+      { nome:"Sentir",       atributoBase:"instinto" },
+      { nome:"Intuição",     atributoBase:"instinto" },
+      { nome:"Atuação",      atributoBase:"influencia" },
+      { nome:"Blefar",       atributoBase:"influencia" },
+      { nome:"Diplomacia",   atributoBase:"influencia" },
+      { nome:"Enganação",    atributoBase:"influencia" },
+      { nome:"Intimidação",  atributoBase:"influencia" },
+      { nome:"Persuasão",    atributoBase:"influencia" },
+      { nome:"Sedução",      atributoBase:"influencia" },
+      { nome:"Eloquência",   atributoBase:"influencia" },
+    ]
+  };
+
+  function estadoPadrao(){
+    const atributos = {};
+    ATRIBUTOS_DEF.forEach(a => atributos[a.chave] = { pontos: 1 });
+
+    const pericias = { fisicas:[], mentais:[], oficio:{ escolhido:"", isOficio:true } };
+    ["fisicas","mentais"].forEach(cat=>{
+      pericias[cat] = PERICIAS_DEF[cat].map(p => ({
+        nome:p.nome, atributoBase:p.atributoBase, treinado:false, expert:false
+      }));
+    });
+
+    return {
+      identidade:{ nome:"", classe:"Sicário", subclasse:"Arcanista", antecedente:"", oficio:"", nivel:1 },
+      atributos,
+      pericias,
+      recursos:{
+        pvAtual: 10, pvMaximo: 10,
+        protAtual: 0, protMaximo: 0,
+        dt: "16",
+        deslocamento: "10m"
+      }
+    };
+  }
+
+  let estado = carregar() || estadoPadrao();
+
+  // ---------- persistência ----------
+  function salvar(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
+    const ind = document.getElementById("save-indicator");
+    ind.textContent = "salvo " + new Date().toLocaleTimeString("pt-BR");
+  }
+  function carregar(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      const dados = JSON.parse(raw);
+      const padrao = estadoPadrao();
+      // mescla com os padrões: fichas salvas antes de um novo campo existir não ficam com valores undefined
+      return {
+        identidade: Object.assign({}, padrao.identidade, dados.identidade),
+        atributos:  Object.assign({}, padrao.atributos, dados.atributos),
+        pericias:   dados.pericias || padrao.pericias,
+        recursos:   Object.assign({}, padrao.recursos, dados.recursos)
+      };
+    }catch(e){ return null; }
+  }
+
+  // ---------- regras derivadas ----------
+  function calcularProficiencia(nivel){
+    return 1 + Math.floor(nivel / 3);
+  }
+
+  function rolarPericia(pericia){
+    if(pericia.isOficio){
+      return { sucessoAutomatico:true, mensagem:`Sucesso Automático (Ofício: ${estado.identidade.oficio || "não definido"})` };
+    }
+    const quantidadeD20 = estado.atributos[pericia.atributoBase].pontos; // valor bruto do atributo, nunca alterado
+    const proficiencia = calcularProficiencia(estado.identidade.nivel);
+
+    const rolagensD20 = Array.from({length: Math.max(quantidadeD20,0)}, () => 1 + Math.floor(Math.random()*20));
+
+    let rolagensD12 = [];
+    let bonusMaximizado = 0;
+    if(pericia.treinado){
+      if(pericia.expert){
+        // Expert maximiza os dados de proficiência em vez de rolar (ex: 2d12 vira +24, não são rolados)
+        bonusMaximizado = proficiencia * 12;
+      } else {
+        rolagensD12 = Array.from({length: Math.max(proficiencia,0)}, () => 1 + Math.floor(Math.random()*12));
+      }
+    }
+
+    const total = rolagensD20.reduce((a,b)=>a+b,0) + rolagensD12.reduce((a,b)=>a+b,0) + bonusMaximizado;
+
+    return {
+      sucessoAutomatico:false, total, rolagensD20, rolagensD12, bonusFixo:bonusMaximizado,
+      formula: formulaPericia(pericia)
+    };
+  }
+
+  function formulaPericia(pericia){
+    if(pericia.isOficio) return "Automático";
+    const qtd = estado.atributos[pericia.atributoBase].pontos;
+    const prof = calcularProficiencia(estado.identidade.nivel);
+    let f = `${qtd}d20`;
+    if(pericia.treinado){
+      f += pericia.expert ? ` + ${prof*12} (${prof}d12 máx)` : ` + ${prof}d12`;
+    }
+    return f;
+  }
+
+  // ---------- render ----------
+  function render(){
+    document.getElementById("f-nome").value = estado.identidade.nome;
+    document.getElementById("f-classe").value = estado.identidade.classe;
+    document.getElementById("f-subclasse").value = estado.identidade.subclasse;
+    document.getElementById("f-antecedente").value = estado.identidade.antecedente;
+    document.getElementById("f-oficio").value = estado.identidade.oficio;
+    document.getElementById("f-nivel").value = estado.identidade.nivel;
+
+    const prof = calcularProficiencia(estado.identidade.nivel);
+    document.getElementById("prof-valor").textContent = prof;
+    document.getElementById("prof-dado").textContent = `${prof}d12`;
+
+    renderVitals();
+    renderAtributos();
+    renderPericias("fisicas", "pericias-fisicas");
+    renderPericias("mentais", "pericias-mentais");
+    renderOficio();
+  }
+
+  function renderVitals(){
+    const r = estado.recursos;
+
+    document.getElementById("v-pv-atual").value = r.pvAtual;
+    document.getElementById("v-pv-max").value = r.pvMaximo;
+    const pctPv = r.pvMaximo > 0 ? clamp((r.pvAtual / r.pvMaximo) * 100, 0, 100) : 0;
+    document.getElementById("v-pv-bar").style.width = pctPv + "%";
+
+    document.getElementById("v-prot-atual").value = r.protAtual;
+    document.getElementById("v-prot-max").value = r.protMaximo;
+    const pctProt = r.protMaximo > 0 ? clamp((r.protAtual / r.protMaximo) * 100, 0, 100) : 0;
+    document.getElementById("v-prot-bar").style.width = pctProt + "%";
+
+    document.getElementById("v-dt").value = r.dt;
+    document.getElementById("v-desloc-input").value = r.deslocamento;
+  }
+
+  function renderAtributos(){
+    const grid = document.getElementById("attr-grid");
+    grid.innerHTML = "";
+    ATRIBUTOS_DEF.forEach(def => {
+      const val = estado.atributos[def.chave].pontos;
+      const card = document.createElement("div");
+      card.className = `attr-card ${def.categoria}`;
+      card.innerHTML = `
+        <div class="attr-name">${def.nome}</div>
+        <div class="attr-value">${val}</div>
+        <div class="attr-dice">${val}d20</div>
+        <div class="attr-controls">
+          <button class="step-btn" data-attr="${def.chave}" data-step="-1">–</button>
+          <button class="step-btn" data-attr="${def.chave}" data-step="1">+</button>
+        </div>`;
+      grid.appendChild(card);
+    });
+    grid.querySelectorAll("[data-attr]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const chave = btn.dataset.attr;
+        const step = parseInt(btn.dataset.step,10);
+        const novo = estado.atributos[chave].pontos + step;
+        estado.atributos[chave].pontos = Math.max(0, Math.min(10, novo));
+        render(); salvar();
+      });
+    });
+  }
+
+  function renderPericias(categoria, containerId){
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    estado.pericias[categoria].forEach((pericia, idx) => {
+      const row = document.createElement("div");
+      row.className = "pericia-row";
+      row.innerHTML = `
+        <div class="pericia-nome">${pericia.nome}<span class="attrtag">${pericia.atributoBase}</span></div>
+        <label class="toggle"><input type="checkbox" data-cat="${categoria}" data-idx="${idx}" data-field="treinado" ${pericia.treinado?"checked":""}> Treinado</label>
+        <label class="toggle"><input type="checkbox" data-cat="${categoria}" data-idx="${idx}" data-field="expert" ${pericia.expert?"checked":""} ${!pericia.treinado?"disabled":""}> Expert</label>
+        <div class="formula">${formulaPericia(pericia)}</div>
+        <button class="roll-btn" data-cat="${categoria}" data-idx="${idx}">Rolar</button>
+        <span></span>`;
+      container.appendChild(row);
+    });
+    container.querySelectorAll('input[type=checkbox]').forEach(chk=>{
+      chk.addEventListener("change", ()=>{
+        const cat = chk.dataset.cat, idx = chk.dataset.idx, field = chk.dataset.field;
+        estado.pericias[cat][idx][field] = chk.checked;
+        if(field === "treinado" && !chk.checked) estado.pericias[cat][idx].expert = false;
+        render(); salvar();
+      });
+    });
+    container.querySelectorAll(".roll-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const cat = btn.dataset.cat, idx = btn.dataset.idx;
+        mostrarResultado(estado.pericias[cat][idx].nome, rolarPericia(estado.pericias[cat][idx]));
+      });
+    });
+  }
+
+  function renderOficio(){
+    const container = document.getElementById("pericias-oficio");
+    const nomeOficio = estado.identidade.oficio || "Nenhum ofício definido";
+    container.innerHTML = `
+      <div class="pericia-row">
+        <div class="pericia-nome">${nomeOficio}<span class="attrtag">sucesso automático</span></div>
+        <span></span><span></span>
+        <div class="formula">Automático</div>
+        <button class="roll-btn oficio" id="btn-testar-oficio" ${!estado.identidade.oficio ? "disabled" : ""}>Testar</button>
+        <span></span>
+      </div>`;
+    const btn = document.getElementById("btn-testar-oficio");
+    if(btn){
+      btn.addEventListener("click", ()=>{
+        mostrarResultado(nomeOficio, rolarPericia(estado.pericias.oficio));
+      });
+    }
+  }
+
+  function mostrarResultado(nome, resultado){
+    const log = document.getElementById("roll-log");
+    const toast = document.createElement("div");
+    toast.className = "roll-toast";
+    if(resultado.sucessoAutomatico){
+      toast.innerHTML = `<div class="rt-title">${nome}</div><div class="rt-total">✓ Sucesso Automático</div>`;
+    } else {
+      toast.innerHTML = `
+        <div class="rt-title">${nome}</div>
+        <div class="rt-total">${resultado.total}</div>
+        <div class="rt-breakdown">${resultado.formula} → d20:[${resultado.rolagensD20.join(", ")}] ${resultado.rolagensD12.length ? "d12:["+resultado.rolagensD12.join(", ")+"]" : ""} ${resultado.bonusFixo ? "+"+resultado.bonusFixo : ""}</div>`;
+    }
+    log.appendChild(toast);
+    setTimeout(()=> toast.remove(), 6000);
+  }
+
+  // ---------- eventos de identidade ----------
+  document.getElementById("f-nome").addEventListener("input", e=>{ estado.identidade.nome = e.target.value; salvar(); });
+  document.getElementById("f-classe").addEventListener("change", e=>{ estado.identidade.classe = e.target.value; salvar(); });
+  document.getElementById("f-subclasse").addEventListener("change", e=>{ estado.identidade.subclasse = e.target.value; salvar(); });
+  document.getElementById("f-antecedente").addEventListener("input", e=>{ estado.identidade.antecedente = e.target.value; salvar(); });
+  document.getElementById("f-oficio").addEventListener("change", e=>{ estado.identidade.oficio = e.target.value; render(); salvar(); });
+  document.getElementById("f-nivel").addEventListener("change", e=>{
+    let v = parseInt(e.target.value,10) || 1;
+    v = Math.max(1, Math.min(20, v));
+    estado.identidade.nivel = v; render(); salvar();
+  });
+  document.querySelectorAll("[data-nivel-step]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const step = parseInt(btn.dataset.nivelStep,10);
+      estado.identidade.nivel = Math.max(1, Math.min(20, estado.identidade.nivel + step));
+      render(); salvar();
+    });
+  });
+
+  // ---------- eventos de status vitais e combate ----------
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  document.getElementById("v-pv-atual").addEventListener("change", e=>{
+    estado.recursos.pvAtual = clamp(parseInt(e.target.value,10) || 0, 0, estado.recursos.pvMaximo);
+    render(); salvar();
+  });
+  document.getElementById("v-pv-max").addEventListener("change", e=>{
+    const novoMax = Math.max(0, parseInt(e.target.value,10) || 0);
+    estado.recursos.pvMaximo = novoMax;
+    estado.recursos.pvAtual = Math.min(estado.recursos.pvAtual, novoMax);
+    render(); salvar();
+  });
+  document.getElementById("v-prot-atual").addEventListener("change", e=>{
+    estado.recursos.protAtual = clamp(parseInt(e.target.value,10) || 0, 0, estado.recursos.protMaximo);
+    render(); salvar();
+  });
+  document.getElementById("v-prot-max").addEventListener("change", e=>{
+    const novoMax = Math.max(0, parseInt(e.target.value,10) || 0);
+    estado.recursos.protMaximo = novoMax;
+    estado.recursos.protAtual = Math.min(estado.recursos.protAtual, novoMax);
+    render(); salvar();
+  });
+  document.getElementById("v-dt").addEventListener("input", e=>{
+    estado.recursos.dt = e.target.value; salvar();
+  });
+  document.getElementById("v-desloc-input").addEventListener("input", e=>{
+    estado.recursos.deslocamento = e.target.value; salvar();
+  });
+
+  document.querySelectorAll(".dc-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const vital = btn.dataset.vital; // "pv" ou "prot"
+      const sinal = parseInt(btn.dataset.sinal,10); // -1 (dano) ou 1 (cura)
+      const inputQtd = document.getElementById(vital === "pv" ? "v-pv-delta" : "v-prot-delta");
+      const qtd = Math.abs(parseInt(inputQtd.value,10) || 0);
+      if(vital === "pv"){
+        estado.recursos.pvAtual = clamp(estado.recursos.pvAtual + sinal*qtd, 0, estado.recursos.pvMaximo);
+      } else {
+        estado.recursos.protAtual = clamp(estado.recursos.protAtual + sinal*qtd, 0, estado.recursos.protMaximo);
+      }
+      inputQtd.value = "";
+      render(); salvar();
+    });
+  });
+
+  // ---------- export / import / reset ----------
+  document.getElementById("btn-export").addEventListener("click", ()=>{
+    const blob = new Blob([JSON.stringify(estado, null, 2)], { type:"application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ficha-caos-${(estado.identidade.nome || "personagem").toLowerCase().replace(/\s+/g,"-")}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("btn-import").addEventListener("click", ()=> document.getElementById("import-input").click());
+  document.getElementById("import-input").addEventListener("change", e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try{
+        const dados = JSON.parse(evt.target.result);
+        const padrao = estadoPadrao();
+        estado = {
+          identidade: Object.assign({}, padrao.identidade, dados.identidade),
+          atributos:  Object.assign({}, padrao.atributos, dados.atributos),
+          pericias:   dados.pericias || padrao.pericias,
+          recursos:   Object.assign({}, padrao.recursos, dados.recursos)
+        };
+        render(); salvar();
+      }catch(err){
+        alert("Não foi possível ler o arquivo. Verifique se é um JSON exportado desta ficha.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("btn-reset").addEventListener("click", ()=>{
+    if(confirm("Isso vai apagar todos os dados da ficha atual. Continuar?")){
+      estado = estadoPadrao();
+      render(); salvar();
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
