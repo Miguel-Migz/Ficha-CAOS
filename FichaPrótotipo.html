@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.A.O.S — Projeto da Ficha de Personagem</title>
+<style>
+  :root{
+    --bg: #131019;
+    --bg-panel: #1b1724;
+    --bg-panel-alt: #221d2e;
+    --bg-inset: #0f0c15;
+    --border: #34293f;
+    --border-soft: #2a2233;
+    --text: #ece6f5;
+    --text-dim: #9c8fb3;
+    --text-faint: #6c6180;
+    --accent-arcane: #9b6bf2;
+    --accent-gold: #d3a24d;
+    --font-display: Iowan Old Style, "Palatino Linotype", Georgia, serif;
+    --font-body: -apple-system, "Segoe UI", Inter, sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--font-body); line-height:1.5;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(155,107,242,0.08), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(226,89,63,0.06), transparent 55%);
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .wrap{ max-width:720px; width:100%; }
+
+  header{ margin-bottom:28px; border-bottom:1px solid var(--border); padding-bottom:16px; }
+  .title{ font-family:var(--font-display); font-size:2rem; letter-spacing:0.06em; font-weight:600; }
+  .title span{ color:var(--accent-arcane); }
+  .subtitle{ font-size:0.8rem; color:var(--text-faint); letter-spacing:0.06em; text-transform:uppercase; margin-top:6px; }
+
+  .status-badge{
+    display:inline-flex; align-items:center; gap:8px; margin:16px 0 0;
+    background:var(--bg-inset); border:1px solid var(--accent-gold); border-radius:20px;
+    padding:6px 14px; font-family:var(--font-mono); font-size:0.78rem; color:var(--accent-gold);
+  }
+
+  .cards{ display:flex; flex-direction:column; gap:14px; margin-top:24px; }
+  a.card{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:10px;
+    padding:20px 22px; text-decoration:none; color:var(--text);
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  a.card:hover{ border-color:var(--accent-arcane); background:var(--bg-panel-alt); }
+  .card-text .card-title{ font-family:var(--font-display); font-size:1.15rem; color:var(--accent-gold); margin-bottom:4px; }
+  .card-text .card-desc{ font-size:0.84rem; color:var(--text-dim); }
+  .card-arrow{ font-size:1.3rem; color:var(--text-faint); flex-shrink:0; }
+  a.card:hover .card-arrow{ color:var(--accent-arcane); }
+
+  footer{ margin-top:32px; font-size:0.72rem; color:var(--text-faint); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title">C.<span>A</span>.O.S</div>
+    <div class="subtitle">Ficha de Personagem Automatizada — Projeto</div>
+    <div class="status-badge">● Em desenvolvimento — Módulo atual: Identidade / Status Vitais / Atributos / Perícias</div>
+  </header>
+
+  <div class="cards">
+    <a class="card" href="./caos-ficha-modulo1.html">
+      <div class="card-text">
+        <div class="card-title">Abrir Ficha de Personagem</div>
+        <div class="card-desc">Identidade, Status Vitais e Combate, Atributos e Perícias — com rolagem funcional e salvamento automático.</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <a class="card" href="./index.md">
+      <div class="card-text">
+        <div class="card-title">Documentação do Projeto</div>
+        <div class="card-desc">Modelo de dados, regras já implementadas e pendências conhecidas.</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+  </div>
+
+  <footer>Sistema autoral C.A.O.S — ficha construída em HTML, CSS e JavaScript puro.</footer>
+
+</div>
+</body>
+</html>
