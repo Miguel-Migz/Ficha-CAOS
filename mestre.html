@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.A.O.S — Painel do Mestre</title>
+<style>
+  :root{
+    --bg: #131019;
+    --bg-panel: #1b1724;
+    --bg-panel-alt: #221d2e;
+    --bg-inset: #0f0c15;
+    --border: #34293f;
+    --border-soft: #2a2233;
+    --text: #ece6f5;
+    --text-dim: #9c8fb3;
+    --text-faint: #6c6180;
+    --accent-arcane: #9b6bf2;
+    --accent-arcane-dim: #5b4a7a;
+    --accent-ember: #e2593f;
+    --accent-gold: #d3a24d;
+    --font-display: Iowan Old Style, "Palatino Linotype", Georgia, serif;
+    --font-body: -apple-system, "Segoe UI", Inter, sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--font-body); line-height:1.4;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(155,107,242,0.08), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(226,89,63,0.06), transparent 55%);
+    min-height:100vh;
+  }
+  .wrap{ max-width:1400px; margin:0 auto; padding:28px 24px 80px; }
+
+  header.masthead{
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:22px; flex-wrap:wrap; gap:10px;
+  }
+  .masthead-title{ font-family:var(--font-display); font-size:1.5rem; letter-spacing:0.06em; font-weight:600; }
+  .masthead-title span{ color:var(--accent-arcane); }
+  .masthead-sub{ font-size:0.75rem; color:var(--text-faint); letter-spacing:0.08em; text-transform:uppercase; margin-top:4px; }
+  .status-pill{
+    display:inline-flex; align-items:center; gap:6px; font-size:0.74rem; color:var(--text-dim);
+    background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:20px; padding:6px 14px;
+  }
+  .status-dot{ width:7px; height:7px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
+  .status-pill.online .status-dot{ background:#4fd57a; box-shadow:0 0 6px #4fd57a; }
+  .status-pill.offline .status-dot{ background:var(--accent-ember); }
+
+  .empty-state{
+    text-align:center; color:var(--text-faint); padding:60px 20px; border:1px dashed var(--border-soft);
+    border-radius:12px; font-size:0.92rem;
+  }
+
+  .personagens-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px; }
+
+  .pcard{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:18px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .pcard-header{ display:flex; align-items:center; gap:12px; }
+  .pcard-avatar{
+    width:52px; height:52px; border-radius:50%; background:var(--bg-inset); border:2px solid var(--border-soft);
+    flex-shrink:0; overflow:hidden; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-size:1rem; color:var(--text-faint);
+  }
+  .pcard-avatar img{ width:100%; height:100%; object-fit:cover; }
+  .pcard-nome{ font-family:var(--font-display); font-size:1.1rem; font-weight:600; }
+  .pcard-sub{ font-size:0.76rem; color:var(--text-dim); margin-top:2px; }
+
+  .pcard-vitais{ display:flex; flex-direction:column; gap:8px; }
+  .vital-linha{ display:flex; align-items:center; gap:8px; }
+  .vital-label{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); width:60px; flex-shrink:0; }
+  .vital-bar-track{ flex:1; background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:6px; height:16px; overflow:hidden; position:relative; }
+  .vital-bar-fill{ height:100%; transition:width 0.2s ease; }
+  .vital-bar-fill.vida{ background:linear-gradient(90deg, #3f9142, #6fbf73); }
+  .vital-bar-fill.protecao{ background:repeating-linear-gradient(135deg, #4d9eea, #4d9eea 6px, #3b7fc4 6px, #3b7fc4 12px); }
+  .vital-numeros{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.68rem; font-family:var(--font-mono); color:var(--text); text-shadow:0 1px 2px rgba(0,0,0,0.6); }
+
+  .pcard-meta-row{ display:flex; gap:14px; flex-wrap:wrap; font-size:0.72rem; color:var(--text-dim); font-family:var(--font-mono); }
+  .pcard-meta-row b{ color:var(--text-faint); font-family:var(--font-body); font-weight:600; margin-right:3px; }
+
+  .pcard-acoes{ display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--border-soft); padding-top:12px; }
+  .acao-linha{ display:flex; gap:6px; align-items:center; }
+  .acao-linha span{ font-size:0.72rem; color:var(--text-faint); width:44px; flex-shrink:0; }
+  .acao-linha input{
+    width:64px; background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
+    border-radius:6px; padding:6px 8px; font-family:var(--font-mono); font-size:0.82rem; text-align:center;
+  }
+  .acao-btn{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); color:var(--text);
+    border-radius:6px; padding:6px 12px; font-size:0.76rem; cursor:pointer; flex:1;
+  }
+  .acao-btn.dano{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .acao-btn.dano:hover{ background:rgba(226,89,63,0.15); }
+  .acao-btn.cura{ border-color:#6fbf73; color:#6fbf73; }
+  .acao-btn.cura:hover{ background:rgba(111,191,115,0.12); }
+
+  .pcard-footer{ display:flex; justify-content:space-between; align-items:center; font-size:0.66rem; color:var(--text-faint); }
+  .pcard-footer a{ color:var(--accent-arcane); text-decoration:none; }
+  .pcard-footer a:hover{ text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <div class="masthead-title">C.<span>A</span>.O.S — Painel do Mestre</div>
+      <div class="masthead-sub">Visão em tempo real de todos os personagens</div>
+    </div>
+    <span class="status-pill" id="status-pill"><span class="status-dot"></span><span id="status-texto">conectando…</span></span>
+  </header>
+
+  <div id="conteudo">
+    <div class="empty-state">Carregando personagens…</div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDHbydGJAa1hb5S0w2zvqwM0Y6Y4AKspCQ",
+    authDomain: "caos-rpg.firebaseapp.com",
+    databaseURL: "https://caos-rpg-default-rtdb.firebaseio.com",
+    projectId: "caos-rpg",
+    storageBucket: "caos-rpg.firebasestorage.app",
+    messagingSenderId: "1056651562841",
+    appId: "1:1056651562841:web:c37def09772c89e797c648"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const SYNC_PATH = "personagens";
+
+  const statusPill = document.getElementById("status-pill");
+  const statusTexto = document.getElementById("status-texto");
+  const conteudo = document.getElementById("conteudo");
+
+  onValue(ref(db, ".info/connected"), (snap)=>{
+    const online = snap.val() === true;
+    statusPill.className = "status-pill " + (online ? "online" : "offline");
+    statusTexto.textContent = online ? "conectado" : "sem conexão";
+  });
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  function iniciais(nome){
+    if(!nome) return "?";
+    return nome.trim().split(/\s+/).slice(0,2).map(p=>p[0].toUpperCase()).join("");
+  }
+
+  function aplicarDelta(id, campo, atual, maximo, sinal, inputEl){
+    const qtd = Math.abs(parseInt(inputEl.value,10) || 0);
+    if(qtd === 0) return;
+    const novo = clamp(atual + sinal*qtd, 0, maximo || 9999);
+    const updates = {};
+    updates[`${SYNC_PATH}/${id}/recursos/${campo}`] = novo;
+    updates[`${SYNC_PATH}/${id}/atualizadoEm`] = Date.now();
+    update(ref(db), updates).catch(err => console.warn("Falha ao atualizar:", err));
+    inputEl.value = "";
+  }
+
+  function renderPersonagens(dados){
+    if(!dados){
+      conteudo.innerHTML = `<div class="empty-state">Nenhum personagem sincronizado ainda.<br>Abra a ficha em outra aba pra ela aparecer aqui.</div>`;
+      return;
+    }
+
+    const lista = Object.values(dados)
+      .filter(p => p && p.identidade)
+      .sort((a,b) => (a.identidade.nome || "").localeCompare(b.identidade.nome || "", "pt-BR"));
+
+    if(lista.length === 0){
+      conteudo.innerHTML = `<div class="empty-state">Nenhum personagem sincronizado ainda.<br>Abra a ficha em outra aba pra ela aparecer aqui.</div>`;
+      return;
+    }
+
+    const grid = document.createElement("div");
+    grid.className = "personagens-grid";
+
+    lista.forEach(p => {
+      const id = p.id;
+      const ident = p.identidade || {};
+      const rec = p.recursos || {};
+      const pvAtual = rec.pvAtual || 0, pvMax = rec.pvMaximo || 0;
+      const protAtual = rec.protAtual || 0, protMax = rec.protMaximo || 0;
+      const pctPv = pvMax > 0 ? clamp((pvAtual/pvMax)*100, 0, 100) : 0;
+      const pctProt = protMax > 0 ? clamp((protAtual/protMax)*100, 0, 100) : 0;
+
+      const card = document.createElement("div");
+      card.className = "pcard";
+      card.innerHTML = `
+        <div class="pcard-header">
+          <div class="pcard-avatar">${ident.foto ? `<img src="${ident.foto}" alt="">` : iniciais(ident.nome)}</div>
+          <div>
+            <div class="pcard-nome">${ident.nome || "Personagem sem nome"}</div>
+            <div class="pcard-sub">${ident.classe || ""}${ident.subclasse ? " · "+ident.subclasse : ""} — Nível ${ident.nivel || 1}</div>
+          </div>
+        </div>
+
+        <div class="pcard-vitais">
+          <div class="vital-linha">
+            <span class="vital-label">Vida</span>
+            <div class="vital-bar-track">
+              <div class="vital-bar-fill vida" style="width:${pctPv}%"></div>
+              <div class="vital-numeros">${pvAtual} / ${pvMax}</div>
+            </div>
+          </div>
+          <div class="vital-linha">
+            <span class="vital-label">Proteção</span>
+            <div class="vital-bar-track">
+              <div class="vital-bar-fill protecao" style="width:${pctProt}%"></div>
+              <div class="vital-numeros">${protAtual} / ${protMax}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pcard-meta-row">
+          <span><b>DT</b>${rec.dt ?? "—"}</span>
+          <span><b>Desloc.</b>${rec.deslocamento ?? "—"}</span>
+          <span><b>Prof.</b>${ident.proficiencia ?? "—"}</span>
+          <span><b>Cansaço</b>${ident.cansaco ?? 0}</span>
+          <span><b>Exaustão</b>${ident.exaustao ?? 0}</span>
+        </div>
+
+        <div class="pcard-acoes">
+          <div class="acao-linha">
+            <span>Vida</span>
+            <input type="number" placeholder="Qtd" id="qtd-pv-${id}">
+            <button class="acao-btn dano" data-campo="pvAtual" data-sinal="-1">Dano</button>
+            <button class="acao-btn cura" data-campo="pvAtual" data-sinal="1">Cura</button>
+          </div>
+          <div class="acao-linha">
+            <span>Proteção</span>
+            <input type="number" placeholder="Qtd" id="qtd-prot-${id}">
+            <button class="acao-btn dano" data-campo="protAtual" data-sinal="-1">Dano</button>
+            <button class="acao-btn cura" data-campo="protAtual" data-sinal="1">Cura</button>
+          </div>
+        </div>
+
+        <div class="pcard-footer">
+          <span>Atualizado ${p.atualizadoEm ? new Date(p.atualizadoEm).toLocaleTimeString("pt-BR") : "—"}</span>
+        </div>
+      `;
+
+      const inputPv = card.querySelector(`#qtd-pv-${id}`);
+      const inputProt = card.querySelector(`#qtd-prot-${id}`);
+      card.querySelectorAll('[data-campo="pvAtual"]').forEach(btn=>{
+        btn.addEventListener("click", ()=> aplicarDelta(id, "pvAtual", pvAtual, pvMax, parseInt(btn.dataset.sinal,10), inputPv));
+      });
+      card.querySelectorAll('[data-campo="protAtual"]').forEach(btn=>{
+        btn.addEventListener("click", ()=> aplicarDelta(id, "protAtual", protAtual, protMax, parseInt(btn.dataset.sinal,10), inputProt));
+      });
+
+      grid.appendChild(card);
+    });
+
+    conteudo.innerHTML = "";
+    conteudo.appendChild(grid);
+  }
+
+  onValue(ref(db, SYNC_PATH), (snapshot) => {
+    renderPersonagens(snapshot.val());
+  }, (erro) => {
+    console.warn("Erro ao ler personagens:", erro);
+    conteudo.innerHTML = `<div class="empty-state">Não foi possível conectar ao Firebase.<br>Confira as regras de acesso do banco de dados.</div>`;
+  });
+</script>
+</body>
+</html>
