@@ -1,0 +1,2393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.A.O.S — Ficha de Personagem</title>
+<style>
+  :root{
+    --bg: #131019;
+    --bg-panel: #1b1724;
+    --bg-panel-alt: #221d2e;
+    --bg-inset: #0f0c15;
+    --border: #34293f;
+    --border-soft: #2a2233;
+    --text: #ece6f5;
+    --text-dim: #9c8fb3;
+    --text-faint: #6c6180;
+    --accent-arcane: #9b6bf2;
+    --accent-arcane-dim: #5b4a7a;
+    --accent-ember: #e2593f;
+    --accent-gold: #d3a24d;
+    --font-display: Iowan Old Style, "Palatino Linotype", Georgia, serif;
+    --font-body: -apple-system, "Segoe UI", Inter, sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--font-body); line-height:1.4;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(155,107,242,0.08), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(226,89,63,0.06), transparent 55%);
+    min-height:100vh;
+  }
+  .wrap{ max-width:1720px; margin:0 auto; padding:28px 32px 80px; }
+  .layout-grid{ display:grid; grid-template-columns:1fr 1.15fr; gap:18px; align-items:start; }
+  .layout-col{ display:flex; flex-direction:column; gap:18px; }
+  @media (max-width:1080px){
+    .layout-grid{ grid-template-columns:1fr; }
+  }
+
+  /* ---------- Header ---------- */
+  header.masthead{
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:22px;
+    flex-wrap:wrap; gap:10px;
+  }
+  .masthead-title{
+    font-family:var(--font-display); font-size:1.5rem; letter-spacing:0.06em;
+    color:var(--text); font-weight:600;
+  }
+  .masthead-title span{ color:var(--accent-arcane); }
+  .masthead-sub{ font-size:0.75rem; color:var(--text-faint); letter-spacing:0.08em; text-transform:uppercase; }
+  .masthead-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* ---------- Modal: Lista de Personagens ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(8,6,12,0.72);
+    align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .modal-overlay.aberto{ display:flex; }
+  .modal-panel{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:12px;
+    width:100%; max-width:520px; max-height:80vh; display:flex; flex-direction:column;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-header{ display:flex; align-items:center; justify-content:space-between; padding:18px 20px 14px; border-bottom:1px solid var(--border-soft); }
+  .modal-close{
+    background:none; border:none; color:var(--text-faint); font-size:1.3rem; cursor:pointer; line-height:1; padding:2px 6px;
+  }
+  .modal-close:hover{ color:var(--accent-ember); }
+  .modal-body{ padding:14px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+  .modal-footer{ padding:14px 20px 18px; border-top:1px solid var(--border-soft); }
+  .modal-footer .btn{ width:100%; }
+
+  .personagem-card{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:10px 12px;
+  }
+  .personagem-card.ativo{ border-color:var(--accent-arcane); }
+  .personagem-card-info{ flex:1; cursor:pointer; min-width:0; }
+  .personagem-card-nome{ font-family:var(--font-display); font-size:0.95rem; color:var(--text); }
+  .personagem-card-tag{
+    font-size:0.6rem; text-transform:uppercase; letter-spacing:0.03em; color:var(--accent-arcane);
+    border:1px solid var(--accent-arcane); border-radius:4px; padding:1px 5px; margin-left:6px; vertical-align:middle;
+  }
+  .personagem-card-meta{ font-size:0.74rem; color:var(--text-faint); margin-top:2px; }
+  .personagem-card-excluir{
+    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
+    border-radius:5px; width:24px; height:24px; font-size:0.8rem; cursor:pointer; line-height:1; flex-shrink:0;
+  }
+  .personagem-card-excluir:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
+
+  /* ---------- Histórico de Rolagens ---------- */
+  .historico-item{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:10px 12px; display:flex; align-items:center; gap:10px;
+  }
+  .historico-info{ flex:1; min-width:0; }
+  .historico-nome{ font-family:var(--font-display); font-size:0.9rem; color:var(--text); }
+  .historico-detalhe{ font-size:0.72rem; color:var(--text-faint); font-family:var(--font-mono); margin-top:2px; overflow-wrap:anywhere; }
+  .historico-hora{ font-size:0.66rem; color:var(--text-faint); margin-top:2px; }
+  .historico-total{
+    font-family:var(--font-display); font-size:1.3rem; font-weight:600; color:var(--accent-gold);
+    flex-shrink:0; min-width:36px; text-align:right;
+  }
+  .historico-total.automatico{ font-size:0.9rem; color:#4fd57a; }
+
+  /* ---------- Modal: Editar Foto (recorte) ---------- */
+  .crop-panel{ max-width:360px; }
+  .crop-body{ display:flex; flex-direction:column; align-items:center; }
+  .crop-viewport{
+    width:260px; height:260px; border-radius:50%; overflow:hidden; position:relative;
+    background:var(--bg-inset); border:2px solid var(--accent-arcane); margin:4px auto 0;
+    cursor:grab; touch-action:none;
+  }
+  .crop-viewport.arrastando{ cursor:grabbing; }
+  .crop-viewport img{
+    position:absolute; top:50%; left:50%; max-width:none; pointer-events:none; user-select:none;
+  }
+  .crop-zoom-row{ display:flex; align-items:center; gap:10px; margin-top:18px; padding:0 8px; width:100%; }
+  .crop-zoom-icon{ color:var(--text-faint); font-size:1rem; user-select:none; flex-shrink:0; }
+  .crop-zoom-row input[type=range]{ flex:1; accent-color:var(--accent-arcane); }
+
+  .personagem-card{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:12px 14px;
+  }
+  .personagem-card.ativo{ border-color:var(--accent-arcane); background:rgba(155,107,242,0.08); }
+  .personagem-info{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .personagem-nome{ font-family:var(--font-display); font-size:1rem; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .personagem-meta{ font-size:0.72rem; color:var(--text-faint); }
+  .personagem-tag-ativo{ font-size:0.62rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--accent-arcane); font-weight:600; margin-left:6px; }
+  .personagem-acoes{ display:flex; gap:6px; flex-shrink:0; }
+  .personagem-acoes .btn{ padding:6px 12px; font-size:0.76rem; }
+  .personagem-acoes .btn-excluir{ border-color:var(--border-soft); color:var(--text-faint); }
+  .personagem-acoes .btn-excluir:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .personagens-vazio{ text-align:center; color:var(--text-faint); font-size:0.86rem; padding:20px 0; }
+
+  /* ---------- Panels ---------- */
+  .panel{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:10px;
+    padding:20px; margin-bottom:18px;
+  }
+  .panel-title{
+    font-family:var(--font-display); font-size:1.05rem; color:var(--accent-gold);
+    letter-spacing:0.04em; margin:0 0 16px; display:flex; align-items:center; gap:10px;
+  }
+  .panel-title::before{ content:""; width:5px; height:5px; background:var(--accent-gold); border-radius:50%; flex-shrink:0; }
+
+  /* ---------- Identidade ---------- */
+  .id-grid{ display:grid; grid-template-columns:2fr 1fr 1fr; gap:14px; }
+
+  .identidade-corpo{
+    display:grid; grid-template-columns:auto 2.2fr 1fr 1fr; align-items:stretch;
+    margin-top:16px; padding-top:16px; border-top:1px solid var(--border-soft);
+  }
+  .identidade-col{
+    display:flex; flex-direction:column; justify-content:space-between; gap:14px;
+    padding:0 20px; border-left:1px solid var(--border-soft);
+  }
+  .identidade-col-avatar{ border-left:none; padding-left:0; align-items:center; justify-content:center; }
+
+  .avatar-wrap{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; flex-shrink:0; }
+  .avatar-circle{
+    width:160px; height:160px; border-radius:50%; background:var(--bg-inset);
+    border:2px solid var(--border-soft); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; overflow:hidden; flex-shrink:0;
+  }
+  .avatar-circle:hover{ border-color:var(--accent-arcane); }
+  .avatar-circle img{ width:100%; height:100%; object-fit:cover; display:block; }
+  #avatar-placeholder{ font-size:0.78rem; color:var(--text-faint); text-align:center; padding:0 12px; line-height:1.3; }
+  .avatar-remove{
+    background:none; border:none; color:var(--text-faint); font-size:0.66rem; cursor:pointer;
+    text-decoration:underline; font-family:var(--font-body); padding:0;
+  }
+  .avatar-remove:hover{ color:var(--accent-ember); }
+
+  @media (max-width:640px){
+    .identidade-corpo{ grid-template-columns:1fr; }
+    .identidade-col{ border-left:none; border-top:1px solid var(--border-soft); padding:14px 0 0; align-items:center; text-align:center; }
+    .identidade-col-avatar{ border-top:none; padding-top:0; }
+  }
+  .id-grid.row2{ grid-template-columns:1fr 1fr 1fr; margin-top:14px; }
+  label.field{ display:flex; flex-direction:column; gap:5px; font-size:0.72rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; }
+  input[type=text], select, input[type=number]{
+    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
+    border-radius:6px; padding:9px 10px; font-family:var(--font-body); font-size:0.92rem;
+  }
+  input:focus, select:focus{ outline:2px solid var(--accent-arcane); outline-offset:1px; border-color:var(--accent-arcane); }
+  .nivel-stepper{ display:flex; align-items:center; gap:8px; }
+  .nivel-stepper input{ width:56px; text-align:center; }
+  .step-btn{
+    width:30px; height:30px; border-radius:6px; border:1px solid var(--border-soft);
+    background:var(--bg-panel-alt); color:var(--text); cursor:pointer; font-size:1rem; line-height:1;
+  }
+  .step-btn:hover{ border-color:var(--accent-arcane); color:var(--accent-arcane); }
+
+  /* ---------- Atributos ---------- */
+  /* ---------- Status Vitais e Combate ---------- */
+  .vitals-grid{ display:grid; grid-template-columns:1.6fr 1fr; grid-auto-rows:1fr; gap:12px; }
+  .vital-card{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:14px 16px; display:flex; flex-direction:column; gap:12px;
+  }
+  .vital-top-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .vital-left{ display:flex; align-items:center; gap:10px; }
+  .vital-card-label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); white-space:nowrap; }
+  .vital-inputs{ display:flex; align-items:center; gap:4px; }
+  .vital-inputs input{ width:52px; text-align:center; font-family:var(--font-mono); font-size:0.95rem; padding:6px 4px; }
+  .vital-inputs .slash{ color:var(--text-faint); font-family:var(--font-mono); }
+  .vital-card.protecao-card .vital-card-label{ color:var(--accent-arcane); }
+  .dano-cura-row{ display:flex; align-items:center; gap:5px; }
+  .dano-cura-row input{ width:44px; text-align:center; font-family:var(--font-mono); font-size:0.78rem; padding:6px 4px; }
+  .dc-btn{
+    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
+    border-radius:6px; padding:6px 10px; font-size:0.74rem; cursor:pointer; white-space:nowrap;
+  }
+  .dc-btn.dano{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .dc-btn.dano:hover{ background:rgba(226,89,63,0.15); }
+  .dc-btn.cura{ border-color:#6fbf73; color:#6fbf73; }
+  .dc-btn.cura:hover{ background:rgba(111,191,115,0.12); }
+  .bar-track{ background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:8px; height:26px; overflow:hidden; }
+  .bar-fill{ height:100%; transition:width 0.2s ease; }
+  .bar-fill.vida{ background:linear-gradient(90deg, #3f9142, #6fbf73); }
+  .bar-fill.protecao{ background:repeating-linear-gradient(135deg, #3f9142, #3f9142 8px, #6fbf73 8px, #6fbf73 16px); }
+
+  .derived-card{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:16px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .derived-label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); margin-bottom:10px; }
+  .derived-card input{ width:88px; text-align:center; font-family:var(--font-display); font-size:1.4rem; font-weight:600; color:var(--accent-gold); padding:8px 6px; }
+
+  .attr-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; }
+
+  .attr-mode-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .mode-toggle-btn{
+    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text-dim);
+    border-radius:20px; padding:6px 14px; font-size:0.74rem; cursor:pointer; font-family:var(--font-body);
+  }
+  .mode-toggle-btn[data-modo="temporario"]{ border-color:var(--accent-arcane); color:var(--accent-arcane); background:rgba(155,107,242,0.1); }
+  .attr-clear-all{
+    background:none; border:none; color:var(--text-faint); font-size:0.72rem; cursor:pointer;
+    text-decoration:underline; font-family:var(--font-body);
+  }
+  .attr-clear-all:hover{ color:var(--accent-ember); }
+
+  /* ---------- Sistema de Abas (coluna esquerda) ---------- */
+  .tabbar{ display:flex; align-items:center; gap:18px; margin-bottom:16px; flex-wrap:wrap; }
+  .tab-btn{
+    background:transparent; border:1px solid transparent; color:var(--text-faint);
+    font-size:0.74rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;
+    padding:8px 14px; border-radius:6px; cursor:pointer; font-family:var(--font-body);
+    transition:color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .tab-btn:hover{ color:var(--text-dim); }
+  .tab-btn.active{ color:var(--text); border-color:var(--text); background:var(--bg-inset); }
+  .tab-content{ display:none; }
+  .tab-content.active{ display:block; }
+  .tab-placeholder{ color:var(--text-faint); font-size:0.86rem; padding:20px 0; text-align:center; }
+
+  /* ---------- Inventário ---------- */
+  .item-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .item-list{ display:flex; flex-direction:column; gap:10px; }
+  .item-card{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:12px 14px; display:flex; flex-direction:column;
+  }
+  .item-card.expandido{ grid-column:1 / -1; }
+
+  .item-header{ display:flex; align-items:baseline; gap:8px; cursor:pointer; user-select:none; }
+  .item-chevron{ color:var(--text-faint); font-size:0.7rem; width:12px; flex-shrink:0; }
+  .item-peso{ margin-left:auto; font-size:0.72rem; color:var(--text-faint); font-family:var(--font-mono); white-space:nowrap; }
+  .item-meta{ margin-left:auto; font-size:0.72rem; color:var(--text-faint); font-family:var(--font-mono); white-space:nowrap; }
+
+  .item-tipo-tag{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:600; margin-bottom:6px; }
+
+  .tipo-herdada{ color:#4d9eea; }
+  .tipo-extranatural{ color:#e5484d; }
+  .tipo-classe{ color:#f0c419; }
+
+  .tipo-talento{ color:#4fd57a; }
+  .tipo-aprimoramento{ color:#e5484d; }
+
+  .tipo-tecnica{ color:#4d9eea; }
+  .tipo-estilo{ color:#e5484d; }
+  .item-form-row{ display:flex; gap:8px; }
+
+  /* ---------- Atalhos ---------- */
+  .dado-row{ display:flex; gap:8px; align-items:center; }
+  .dado-row select{ flex:1.2; }
+  .dado-row input{ flex:1; }
+  .dado-row-remover{
+    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
+    border-radius:5px; width:26px; height:26px; font-size:0.8rem; cursor:pointer; flex-shrink:0; line-height:1;
+  }
+  .dado-row-remover:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .btn-add-dado{
+    background:none; border:1px dashed var(--border-soft); color:var(--text-dim);
+    border-radius:6px; padding:6px; font-size:0.76rem; cursor:pointer; font-family:var(--font-body);
+  }
+  .btn-add-dado:hover{ border-color:var(--accent-arcane); color:var(--text); }
+
+  .atalho-formula{ margin-left:auto; font-size:0.74rem; color:var(--text-faint); font-family:var(--font-mono); white-space:nowrap; }
+  .atalho-rolar-btn{
+    background:var(--accent-arcane-dim); border:1px solid var(--accent-arcane); color:var(--text);
+    border-radius:6px; padding:5px 12px; font-size:0.76rem; cursor:pointer; flex-shrink:0;
+  }
+  .atalho-rolar-btn:hover{ background:var(--accent-arcane); }
+  .item-form-row select{ flex:1.4; }
+  .item-form-row input{ flex:1; }
+  .item-nome{ font-family:var(--font-display); font-size:1rem; font-weight:600; }
+  .item-raridade-tag{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:600; margin-bottom:6px; }
+
+  .raridade-comum{ color:#e9e4f2; }
+  .raridade-incomum{ color:#4fd57a; }
+  .raridade-raro{ color:#4d9eea; }
+  .raridade-muitoraro{ color:#e5484d; }
+  .raridade-epico{ color:#a56bf2; }
+  .raridade-lendario{ color:#f0c419; }
+  .raridade-mitico{
+    background:linear-gradient(90deg, #e9e4f2, #4fd57a, #4d9eea, #e5484d, #a56bf2, #f0c419);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+
+  .item-body{ margin-top:10px; padding-top:10px; border-top:1px solid var(--border-soft); }
+  .item-desc-text{ font-size:0.84rem; color:var(--text-dim); font-style:italic; white-space:pre-wrap; line-height:1.5; }
+  .item-footer-actions{ display:flex; justify-content:space-between; margin-top:12px; }
+  .item-action{ background:none; border:none; font-size:0.78rem; cursor:pointer; padding:2px 4px; font-family:var(--font-body); }
+  .item-action.remover{ color:var(--accent-ember); }
+  .item-action.remover:hover{ text-decoration:underline; }
+  .item-action.editar{ color:#4fd57a; }
+  .item-action.editar:hover{ text-decoration:underline; }
+
+  .item-edit-form{ display:flex; flex-direction:column; gap:8px; }
+  .item-edit-form input, .item-edit-form select, .item-edit-form textarea{
+    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
+    border-radius:6px; padding:8px 10px; font-family:var(--font-body); font-size:0.86rem; resize:vertical;
+  }
+  .item-edit-form-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:2px; }
+
+  .item-add-card{
+    grid-column:1 / -1;
+    background:var(--bg-panel-alt); border:1px dashed var(--border-soft); border-radius:8px;
+    padding:16px; display:flex; align-items:center; justify-content:center; min-height:60px;
+    cursor:pointer; color:var(--text-dim); font-family:var(--font-display); font-size:1rem;
+  }
+  .item-add-card:hover{ border-color:var(--accent-arcane); color:var(--text); }
+
+  .item-add-form{ grid-column:1 / -1; background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; }
+  .item-add-form input, .item-add-form select, .item-add-form textarea{
+    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
+    border-radius:6px; padding:8px 10px; font-family:var(--font-body); font-size:0.86rem; resize:vertical;
+  }
+  .item-add-form-actions{ display:flex; justify-content:flex-end; gap:8px; }
+  .attr-card{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:8px 4px; text-align:center; position:relative; overflow:hidden;
+  }
+  .attr-card.fisica{ border-top:2px solid var(--accent-ember); }
+  .attr-card.mental{ border-top:2px solid var(--accent-arcane); }
+  .attr-name{ font-size:0.62rem; text-transform:uppercase; letter-spacing:0.03em; color:var(--text-dim); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .attr-value{ font-family:var(--font-display); font-size:1.25rem; font-weight:600; color:var(--text); line-height:1.1; white-space:nowrap; }
+  .attr-value .efetivo{ font-size:0.85em; }
+  .attr-value .efetivo.buff{ color:#4fd57a; }
+  .attr-value .efetivo.debuff{ color:var(--accent-ember); }
+  .attr-dice{ font-family:var(--font-mono); font-size:0.66rem; color:var(--text-faint); margin-top:1px; margin-bottom:6px; }
+  .attr-controls{ display:flex; justify-content:center; gap:4px; }
+  .attr-controls .step-btn{ width:22px; height:22px; font-size:0.85rem; padding:0; }
+
+  /* ---------- Perícias ---------- */
+  .pericia-cat{ margin-bottom:18px; }
+  .pericia-cat:last-child{ margin-bottom:0; }
+  .pericia-cat-label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-faint); margin:0 0 8px; border-bottom:1px solid var(--border-soft); padding-bottom:6px; }
+  .pericia-row{
+    display:grid; grid-template-columns:1fr auto auto auto auto auto; gap:10px; align-items:center;
+    padding:8px 6px; border-radius:6px; font-size:0.86rem;
+  }
+  .pericia-row:hover{ background:var(--bg-panel-alt); }
+  .pericia-nome{ display:flex; flex-direction:column; }
+  .pericia-nome span.attrtag{ font-size:0.66rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.04em; }
+  .toggle{
+    display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-dim); cursor:pointer; user-select:none;
+    white-space:nowrap;
+  }
+  .toggle input{ accent-color:var(--accent-arcane); width:14px; height:14px; }
+  .formula{
+    font-family:var(--font-mono); font-size:0.78rem; color:var(--accent-gold); white-space:nowrap; min-width:110px; text-align:right;
+  }
+  .roll-btn{
+    background:var(--accent-arcane-dim); border:1px solid var(--accent-arcane); color:var(--text);
+    border-radius:6px; padding:6px 12px; font-size:0.76rem; cursor:pointer; white-space:nowrap;
+  }
+  .roll-btn:hover{ background:var(--accent-arcane); }
+  .roll-btn.oficio{ background:var(--bg-inset); border-color:var(--accent-gold); color:var(--accent-gold); }
+
+  /* ---------- Roll result toast ---------- */
+  #roll-log{
+    position:fixed; bottom:20px; right:20px; max-width:320px; z-index:50;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .roll-toast{
+    background:var(--bg-panel); border:1px solid var(--accent-arcane); border-radius:8px;
+    padding:12px 14px; font-size:0.82rem; box-shadow:0 8px 24px rgba(0,0,0,0.45);
+    animation: fadein 0.2s ease-out;
+  }
+  .roll-toast .rt-title{ color:var(--accent-gold); font-weight:600; margin-bottom:4px; }
+  .roll-toast .rt-total{ font-family:var(--font-mono); font-size:1.3rem; color:var(--text); }
+  .roll-toast .rt-breakdown{ font-family:var(--font-mono); font-size:0.72rem; color:var(--text-faint); margin-top:3px; }
+  @keyframes fadein{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Actions bar ---------- */
+  .actions{
+    position:sticky; bottom:0; display:flex; gap:10px; justify-content:flex-end;
+    padding:14px 0 4px; margin-top:10px; flex-wrap:wrap;
+  }
+  .btn{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); color:var(--text);
+    padding:9px 16px; border-radius:7px; font-size:0.82rem; cursor:pointer; font-family:var(--font-body);
+  }
+  .btn:hover{ border-color:var(--accent-arcane); }
+  .btn.primary{ background:var(--accent-arcane-dim); border-color:var(--accent-arcane); }
+  .btn.danger:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .save-indicator{ font-size:0.72rem; color:var(--text-faint); align-self:center; margin-right:auto; }
+  #import-input{ display:none; }
+
+  @media (max-width:640px){
+    .id-grid, .id-grid.row2{ grid-template-columns:1fr; }
+    .attr-grid{ grid-template-columns:repeat(3, 1fr); }
+    .vitals-grid{ grid-template-columns:1fr; }
+    .pericia-row{ grid-template-columns:1fr; row-gap:6px; padding:12px 8px; border-bottom:1px solid var(--border-soft); }
+    .formula{ text-align:left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <div class="masthead-title">C.<span>A</span>.O.S</div>
+      <div class="masthead-sub">Ficha de Personagem — Módulo Identidade / Atributos / Perícias</div>
+    </div>
+    <div class="masthead-actions">
+      <button class="btn" id="btn-historico">Histórico</button>
+      <button class="btn" id="btn-personagens">Personagens</button>
+    </div>
+  </header>
+
+  <!-- ===================== MODAL: LISTA DE PERSONAGENS ===================== -->
+  <div class="modal-overlay" id="modal-personagens">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 class="panel-title" style="margin:0">Personagens</h2>
+        <button class="modal-close" id="btn-fechar-modal">×</button>
+      </div>
+      <div class="modal-body" id="lista-personagens"></div>
+      <div class="modal-footer">
+        <button class="btn primary" id="btn-novo-personagem">+ Novo personagem</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: HISTÓRICO DE ROLAGENS ===================== -->
+  <div class="modal-overlay" id="modal-historico">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 class="panel-title" style="margin:0">Histórico de Rolagens</h2>
+        <button class="modal-close" id="btn-fechar-historico">×</button>
+      </div>
+      <div class="modal-body" id="lista-historico"></div>
+      <div class="modal-footer">
+        <button class="btn" id="btn-limpar-historico">Limpar histórico</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: EDITAR FOTO (RECORTE) ===================== -->
+  <div class="modal-overlay" id="modal-editar-foto">
+    <div class="modal-panel crop-panel">
+      <div class="modal-header">
+        <h2 class="panel-title" style="margin:0">Editar Foto</h2>
+        <button class="modal-close" id="btn-fechar-crop">×</button>
+      </div>
+      <div class="modal-body crop-body">
+        <div class="crop-viewport" id="crop-viewport">
+          <img id="crop-image" alt="Prévia da foto" draggable="false">
+        </div>
+        <div class="crop-zoom-row">
+          <span class="crop-zoom-icon">−</span>
+          <input type="range" id="crop-zoom-slider" min="100" max="300" value="100">
+          <span class="crop-zoom-icon">+</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn primary" id="btn-aplicar-crop">Aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== LAYOUT PRINCIPAL: 2 COLUNAS ===================== -->
+  <div class="layout-grid">
+
+    <!-- ---- COLUNA ESQUERDA: ABAS (PERICIAS / INVENTARIO / HABILIDADES / TECNICAS / TALENTOS) ---- -->
+    <div class="layout-col">
+      <section class="panel">
+
+        <div class="tabbar" id="tabbar">
+          <button class="tab-btn active" data-tab="pericias">Perícias</button>
+          <button class="tab-btn" data-tab="inventario">Inventário</button>
+          <button class="tab-btn" data-tab="habilidades">Habilidades</button>
+          <button class="tab-btn" data-tab="tecnicas">Técnicas</button>
+          <button class="tab-btn" data-tab="talentos">Talentos</button>
+          <button class="tab-btn" data-tab="atalhos">Atalhos</button>
+        </div>
+
+        <div class="tab-content active" data-tab-content="pericias">
+          <div class="pericia-cat">
+            <div class="pericia-cat-label">Físicas</div>
+            <div id="pericias-fisicas"></div>
+          </div>
+          <div class="pericia-cat">
+            <div class="pericia-cat-label">Mentais</div>
+            <div id="pericias-mentais"></div>
+          </div>
+          <div class="pericia-cat">
+            <div class="pericia-cat-label">Ofício</div>
+            <div id="pericias-oficio"></div>
+          </div>
+        </div>
+
+        <div class="tab-content" data-tab-content="inventario">
+          <div class="item-grid" id="item-grid"></div>
+        </div>
+
+        <div class="tab-content" data-tab-content="habilidades">
+          <div class="item-grid" id="hab-grid"></div>
+        </div>
+
+        <div class="tab-content" data-tab-content="tecnicas">
+          <div class="item-list" id="tecnica-grid"></div>
+        </div>
+
+        <div class="tab-content" data-tab-content="talentos">
+          <div class="item-grid" id="talento-grid"></div>
+        </div>
+
+        <div class="tab-content" data-tab-content="atalhos">
+          <div class="item-list" id="atalho-grid"></div>
+        </div>
+
+      </section>
+    </div>
+
+    <!-- ---- COLUNA DIREITA: IDENTIDADE / STATUS VITAIS / ATRIBUTOS ---- -->
+    <div class="layout-col">
+
+      <!-- ===================== IDENTIDADE ===================== -->
+      <section class="panel">
+        <h2 class="panel-title">Identidade</h2>
+
+        <div class="id-grid">
+          <label class="field">Nome
+            <input type="text" id="f-nome" placeholder="Nome do personagem">
+          </label>
+          <label class="field">Classe
+            <select id="f-classe">
+              <option>Sicário</option>
+              <option>Mandrake</option>
+              <option>Baluarte</option>
+              <option>Valhacouto</option>
+            </select>
+          </label>
+          <label class="field">Subclasse
+            <select id="f-subclasse">
+              <option>Arcanista</option>
+              <option>Dizimador</option>
+              <option>Colosso</option>
+              <option>Protetor</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="identidade-corpo">
+
+          <div class="identidade-col identidade-col-avatar">
+            <div class="avatar-wrap">
+              <div class="avatar-circle" id="avatar-circle" title="Clique para escolher uma foto">
+                <img id="avatar-img" style="display:none" alt="Foto do personagem">
+                <span id="avatar-placeholder">+ Foto</span>
+              </div>
+              <input type="file" id="avatar-input" accept="image/*" style="display:none">
+              <button class="avatar-remove" id="avatar-remove" style="display:none">Remover</button>
+            </div>
+          </div>
+
+          <div class="identidade-col">
+            <label class="field">Antecedente
+              <input type="text" id="f-antecedente" placeholder="Ex: Nobre">
+            </label>
+            <label class="field">Ofício
+              <select id="f-oficio">
+                <option value="">— nenhum —</option>
+                <option>Alquimia</option><option>Arte da Guerra</option><option>Ferraria</option>
+                <option>Carpintaria</option><option>Culinária</option><option>Escultura</option>
+                <option>Herborismo</option><option>Lapidar</option><option>Metalurgia</option>
+                <option>Pintura</option><option>Relojoaria</option><option>Sapataria</option>
+                <option>Tecelagem</option><option>Engenharia</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="identidade-col">
+            <label class="field">Proficiência
+              <div class="nivel-stepper">
+                <button class="step-btn" data-prof-step="-1">–</button>
+                <input type="number" id="f-proficiencia" min="0" max="20" value="1">
+                <button class="step-btn" data-prof-step="1">+</button>
+              </div>
+            </label>
+            <label class="field">Nível
+              <div class="nivel-stepper">
+                <button class="step-btn" data-nivel-step="-1">–</button>
+                <input type="number" id="f-nivel" min="1" max="20" value="1">
+                <button class="step-btn" data-nivel-step="1">+</button>
+              </div>
+            </label>
+          </div>
+
+          <div class="identidade-col">
+            <label class="field">Cansaço
+              <div class="nivel-stepper">
+                <button class="step-btn" data-cansaco-step="-1">–</button>
+                <input type="number" id="f-cansaco" min="0" value="0">
+                <button class="step-btn" data-cansaco-step="1">+</button>
+              </div>
+            </label>
+            <label class="field">Exaustão
+              <div class="nivel-stepper">
+                <button class="step-btn" data-exaustao-step="-1">–</button>
+                <input type="number" id="f-exaustao" min="0" value="0">
+                <button class="step-btn" data-exaustao-step="1">+</button>
+              </div>
+            </label>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===================== STATUS VITAIS E COMBATE ===================== -->
+      <section class="panel">
+        <h2 class="panel-title">Status Vitais e Combate</h2>
+        <div class="vitals-grid">
+
+          <div class="vital-card">
+            <div class="vital-top-row">
+              <div class="vital-left">
+                <span class="vital-card-label">Vida</span>
+                <div class="vital-inputs">
+                  <input type="number" id="v-pv-atual" min="0">
+                  <span class="slash">/</span>
+                  <input type="number" id="v-pv-max" min="0">
+                </div>
+              </div>
+              <div class="dano-cura-row">
+                <input type="number" id="v-pv-delta" placeholder="Qtd">
+                <button class="dc-btn dano" data-vital="pv" data-sinal="-1">Dano</button>
+                <button class="dc-btn cura" data-vital="pv" data-sinal="1">Cura</button>
+              </div>
+            </div>
+            <div class="bar-track"><div class="bar-fill vida" id="v-pv-bar" style="width:100%"></div></div>
+          </div>
+
+          <div class="derived-card">
+            <span class="derived-label">DT</span>
+            <input type="text" id="v-dt">
+          </div>
+
+          <div class="vital-card protecao-card">
+            <div class="vital-top-row">
+              <div class="vital-left">
+                <span class="vital-card-label">Proteção</span>
+                <div class="vital-inputs">
+                  <input type="number" id="v-prot-atual" min="0">
+                  <span class="slash">/</span>
+                  <input type="number" id="v-prot-max" min="0">
+                </div>
+              </div>
+              <div class="dano-cura-row">
+                <input type="number" id="v-prot-delta" placeholder="Qtd">
+                <button class="dc-btn dano" data-vital="prot" data-sinal="-1">Dano</button>
+                <button class="dc-btn cura" data-vital="prot" data-sinal="1">Cura</button>
+              </div>
+            </div>
+            <div class="bar-track"><div class="bar-fill protecao" id="v-prot-bar" style="width:100%"></div></div>
+          </div>
+
+          <div class="derived-card">
+            <span class="derived-label">Deslocamento</span>
+            <input type="text" id="v-desloc-input">
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===================== ATRIBUTOS ===================== -->
+      <section class="panel">
+        <h2 class="panel-title">Atributos</h2>
+        <div class="attr-mode-bar">
+          <button class="mode-toggle-btn" id="btn-modo-atributo" data-modo="permanente">Modo: Permanente</button>
+          <button class="attr-clear-all" id="btn-limpar-temp" style="display:none">Limpar temporários</button>
+        </div>
+        <div class="attr-grid" id="attr-grid"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="actions">
+    <span class="save-indicator" id="save-indicator">salvo automaticamente</span>
+    <button class="btn" id="btn-reset">Resetar ficha</button>
+    <button class="btn" id="btn-import">Importar JSON</button>
+    <input type="file" id="import-input" accept="application/json">
+    <button class="btn primary" id="btn-export">Exportar JSON</button>
+  </div>
+
+</div>
+
+<div id="roll-log"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const LOCALSTORAGE_PREFIX = "caos_ficha_";      // + id do personagem => dados daquele personagem
+  const LAST_ACTIVE_KEY = "caos_ultimo_personagem_id"; // global (localStorage): último personagem salvo por qualquer aba
+  const SESSION_KEY = "personagem_ativo_id";      // por aba (sessionStorage): qual personagem esta aba está exibindo
+
+  const ATRIBUTOS_DEF = [
+    { chave:"forca",      nome:"Força",      categoria:"fisica" },
+    { chave:"agilidade",  nome:"Agilidade",  categoria:"fisica" },
+    { chave:"vigor",      nome:"Vigor",      categoria:"fisica" },
+    { chave:"instinto",   nome:"Instinto",   categoria:"mental" },
+    { chave:"influencia", nome:"Influência", categoria:"mental" },
+    { chave:"mente",      nome:"Mente",      categoria:"mental" },
+  ];
+
+  const PERICIAS_DEF = {
+    fisicas: [
+      { nome:"Atletismo",       atributoBase:"forca" },
+      { nome:"Acrobacia",       atributoBase:"agilidade" },
+      { nome:"Furtividade",     atributoBase:"agilidade" },
+      { nome:"Crime",           atributoBase:"agilidade" },
+      { nome:"Reflexos",        atributoBase:"agilidade" },
+      { nome:"Prestidigitação", atributoBase:"agilidade" },
+      { nome:"Pilotagem",       atributoBase:"agilidade" },
+      { nome:"Concentração",    atributoBase:"vigor" },
+      { nome:"Fortitude",       atributoBase:"vigor" },
+    ],
+    mentais: [
+      { nome:"Arcanismo",    atributoBase:"mente" },
+      { nome:"Medicina",     atributoBase:"mente" },
+      { nome:"História",     atributoBase:"mente" },
+      { nome:"Investigação", atributoBase:"mente" },
+      { nome:"Misticismo",   atributoBase:"mente" },
+      { nome:"Natureza",     atributoBase:"mente" },
+      { nome:"Táticas",      atributoBase:"mente" },
+      { nome:"Vontade",      atributoBase:"mente" },
+      { nome:"Religião",     atributoBase:"mente" },
+      { nome:"Avaliação",    atributoBase:"instinto" },
+      { nome:"Observar",     atributoBase:"instinto" },
+      { nome:"Ouvir",        atributoBase:"instinto" },
+      { nome:"Procurar",     atributoBase:"instinto" },
+      { nome:"Sentir",       atributoBase:"instinto" },
+      { nome:"Intuição",     atributoBase:"instinto" },
+      { nome:"Atuação",      atributoBase:"influencia" },
+      { nome:"Blefar",       atributoBase:"influencia" },
+      { nome:"Diplomacia",   atributoBase:"influencia" },
+      { nome:"Enganação",    atributoBase:"influencia" },
+      { nome:"Intimidação",  atributoBase:"influencia" },
+      { nome:"Persuasão",    atributoBase:"influencia" },
+      { nome:"Sedução",      atributoBase:"influencia" },
+      { nome:"Eloquência",   atributoBase:"influencia" },
+    ]
+  };
+
+  function estadoPadrao(){
+    const atributos = {};
+    ATRIBUTOS_DEF.forEach(a => atributos[a.chave] = { pontos: 1 });
+
+    const pericias = { fisicas:[], mentais:[], oficio:{ escolhido:"", isOficio:true } };
+    ["fisicas","mentais"].forEach(cat=>{
+      pericias[cat] = PERICIAS_DEF[cat].map(p => ({
+        nome:p.nome, atributoBase:p.atributoBase, treinado:false, expert:false
+      }));
+    });
+
+    return {
+      id: null, // preenchido na criação (gerarIdPersonagem) ou ao carregar/importar
+      atualizadoEm: null, // timestamp da última vez que este personagem foi salvo (usado para ordenar a lista)
+      identidade:{ nome:"", classe:"Sicário", subclasse:"Arcanista", antecedente:"", oficio:"", nivel:1, proficiencia:1, cansaco:0, exaustao:0, foto:null },
+      atributos,
+      pericias,
+      recursos:{
+        pvAtual: 10, pvMaximo: 10,
+        protAtual: 0, protMaximo: 0,
+        dt: "16",
+        deslocamento: "10m"
+      },
+      inventario: [],
+      habilidades: [],
+      talentos: [],
+      tecnicas: [],
+      atalhos: [],
+      historicoRolagens: []
+    };
+  }
+
+  function gerarIdPersonagem(){
+    // Date.now() como base (conforme pedido), + sufixo aleatório para evitar colisão entre abas abertas no mesmo milissegundo
+    return "p" + Date.now() + "_" + Math.floor(Math.random()*10000);
+  }
+
+  function carregarPersonagem(id){
+    try{
+      const raw = localStorage.getItem(LOCALSTORAGE_PREFIX + id);
+      if(!raw) return null;
+      const dados = JSON.parse(raw);
+      const padrao = estadoPadrao();
+      // mescla com os padrões: fichas salvas antes de um novo campo existir não ficam com valores undefined
+      return {
+        id:         dados.id || id,
+        atualizadoEm: dados.atualizadoEm || padrao.atualizadoEm,
+        identidade: mesclarIdentidade(padrao.identidade, dados.identidade),
+        atributos:  Object.assign({}, padrao.atributos, dados.atributos),
+        pericias:   dados.pericias || padrao.pericias,
+        recursos:   Object.assign({}, padrao.recursos, dados.recursos),
+        inventario: dados.inventario || padrao.inventario,
+        habilidades: dados.habilidades || padrao.habilidades,
+        talentos:   dados.talentos || padrao.talentos,
+        tecnicas:   dados.tecnicas || padrao.tecnicas,
+        atalhos:    dados.atalhos || padrao.atalhos,
+        historicoRolagens: dados.historicoRolagens || padrao.historicoRolagens
+      };
+    }catch(e){ return null; }
+  }
+
+  function inicializarEstado(){
+    // 1) esta aba já tem um personagem ativo? (sessionStorage é isolado por aba)
+    // 2) senão, cai para o último personagem salvo por qualquer aba (localStorage global)
+    const idCandidato = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(LAST_ACTIVE_KEY);
+    const carregado = idCandidato ? carregarPersonagem(idCandidato) : null;
+
+    if(carregado){
+      sessionStorage.setItem(SESSION_KEY, carregado.id);
+      return carregado;
+    }
+
+    // nenhum personagem existente ainda (ou id órfão) → cria um novo com ID único
+    const novo = estadoPadrao();
+    novo.id = gerarIdPersonagem();
+    sessionStorage.setItem(SESSION_KEY, novo.id);
+    return novo;
+  }
+
+  let estado = inicializarEstado();
+
+  // ---------- persistência ----------
+  function salvar(){
+    estado.atualizadoEm = Date.now();
+    localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado));
+    localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
+    sessionStorage.setItem(SESSION_KEY, estado.id); // garante que esta aba continue apontando pro mesmo id
+    const ind = document.getElementById("save-indicator");
+    ind.textContent = "salvo " + new Date().toLocaleTimeString("pt-BR");
+  }
+
+  // ---------- regras derivadas ----------
+  function mesclarIdentidade(padraoIdentidade, dadosIdentidade){
+    const identidade = Object.assign({}, padraoIdentidade, dadosIdentidade);
+    // migração: fichas salvas antes de a proficiência virar editável não tinham esse campo —
+    // nesse caso, semeia com o valor que a fórmula antiga (1 + nível/3) geraria, em vez de sempre cair pra 1.
+    if(dadosIdentidade && dadosIdentidade.proficiencia === undefined && typeof dadosIdentidade.nivel === "number"){
+      identidade.proficiencia = 1 + Math.floor(dadosIdentidade.nivel / 3);
+    }
+    return identidade;
+  }
+
+  function rolarPericia(pericia){
+    if(pericia.isOficio){
+      return { sucessoAutomatico:true, mensagem:`Sucesso Automático (Ofício: ${estado.identidade.oficio || "não definido"})` };
+    }
+    const quantidadeD20 = valorEfetivoAtributo(pericia.atributoBase); // valor base + modificador temporário ativo
+    const proficiencia = estado.identidade.proficiencia;
+
+    const rolagensD20 = Array.from({length: Math.max(quantidadeD20,0)}, () => 1 + Math.floor(Math.random()*20));
+
+    let rolagensD12 = [];
+    let bonusMaximizado = 0;
+    if(pericia.treinado){
+      if(pericia.expert){
+        // Expert maximiza os dados de proficiência em vez de rolar (ex: 2d12 vira +24, não são rolados)
+        bonusMaximizado = proficiencia * 12;
+      } else {
+        rolagensD12 = Array.from({length: Math.max(proficiencia,0)}, () => 1 + Math.floor(Math.random()*12));
+      }
+    }
+
+    const total = rolagensD20.reduce((a,b)=>a+b,0) + rolagensD12.reduce((a,b)=>a+b,0) + bonusMaximizado;
+
+    return {
+      sucessoAutomatico:false, total, rolagensD20, rolagensD12, bonusFixo:bonusMaximizado,
+      formula: formulaPericia(pericia)
+    };
+  }
+
+  function formulaPericia(pericia){
+    if(pericia.isOficio) return "Automático";
+    const qtd = valorEfetivoAtributo(pericia.atributoBase);
+    const prof = estado.identidade.proficiencia;
+    let f = `${qtd}d20`;
+    if(pericia.treinado){
+      f += pericia.expert ? ` + ${prof*12} (${prof}d12 máx)` : ` + ${prof}d12`;
+    }
+    return f;
+  }
+
+  // ---------- render ----------
+  function render(){
+    document.getElementById("f-nome").value = estado.identidade.nome;
+    document.getElementById("f-classe").value = estado.identidade.classe;
+    document.getElementById("f-subclasse").value = estado.identidade.subclasse;
+    document.getElementById("f-antecedente").value = estado.identidade.antecedente;
+    document.getElementById("f-oficio").value = estado.identidade.oficio;
+    document.getElementById("f-nivel").value = estado.identidade.nivel;
+
+    const avatarImg = document.getElementById("avatar-img");
+    const avatarPlaceholder = document.getElementById("avatar-placeholder");
+    const avatarRemove = document.getElementById("avatar-remove");
+    if(estado.identidade.foto){
+      avatarImg.src = estado.identidade.foto;
+      avatarImg.style.display = "block";
+      avatarPlaceholder.style.display = "none";
+      avatarRemove.style.display = "inline";
+    } else {
+      avatarImg.style.display = "none";
+      avatarImg.removeAttribute("src");
+      avatarPlaceholder.style.display = "block";
+      avatarRemove.style.display = "none";
+    }
+
+    const prof = estado.identidade.proficiencia;
+    document.getElementById("f-proficiencia").value = prof;
+    document.getElementById("f-cansaco").value = estado.identidade.cansaco;
+    document.getElementById("f-exaustao").value = estado.identidade.exaustao;
+
+    renderVitals();
+    renderAtributos();
+    renderPericias("fisicas", "pericias-fisicas");
+    renderPericias("mentais", "pericias-mentais");
+    renderOficio();
+    renderInventario();
+    renderHabilidades();
+    renderTalentos();
+    renderTecnicas();
+    renderAtalhos();
+  }
+
+  function renderVitals(){
+    const r = estado.recursos;
+
+    document.getElementById("v-pv-atual").value = r.pvAtual;
+    document.getElementById("v-pv-max").value = r.pvMaximo;
+    const pctPv = r.pvMaximo > 0 ? clamp((r.pvAtual / r.pvMaximo) * 100, 0, 100) : 0;
+    document.getElementById("v-pv-bar").style.width = pctPv + "%";
+
+    document.getElementById("v-prot-atual").value = r.protAtual;
+    document.getElementById("v-prot-max").value = r.protMaximo;
+    const pctProt = r.protMaximo > 0 ? clamp((r.protAtual / r.protMaximo) * 100, 0, 100) : 0;
+    document.getElementById("v-prot-bar").style.width = pctProt + "%";
+
+    document.getElementById("v-dt").value = r.dt;
+    document.getElementById("v-desloc-input").value = r.deslocamento;
+  }
+
+  let modoAtributoTemporario = false; // estado transiente de UI, não persiste no JSON
+
+  function valorEfetivoAtributo(chave){
+    const a = estado.atributos[chave];
+    return Math.max(0, a.pontos + (a.modTemp || 0));
+  }
+
+  function renderAtributos(){
+    const grid = document.getElementById("attr-grid");
+    grid.innerHTML = "";
+
+    const modoBtn = document.getElementById("btn-modo-atributo");
+    modoBtn.dataset.modo = modoAtributoTemporario ? "temporario" : "permanente";
+    modoBtn.textContent = modoAtributoTemporario ? "Modo: Temporário" : "Modo: Permanente";
+
+    const algumModificado = ATRIBUTOS_DEF.some(def => (estado.atributos[def.chave].modTemp || 0) !== 0);
+    document.getElementById("btn-limpar-temp").style.display = algumModificado ? "inline" : "none";
+
+    ATRIBUTOS_DEF.forEach(def => {
+      const base = estado.atributos[def.chave].pontos;
+      const modTemp = estado.atributos[def.chave].modTemp || 0;
+      const efetivo = valorEfetivoAtributo(def.chave);
+
+      const card = document.createElement("div");
+      card.className = `attr-card ${def.categoria}`;
+      card.innerHTML = `
+        <div class="attr-name">${def.nome}</div>
+        <div class="attr-value">${base}${modTemp !== 0 ? ` <span class="efetivo ${modTemp > 0 ? "buff" : "debuff"}">(${efetivo})</span>` : ""}</div>
+        <div class="attr-dice">${efetivo}d20</div>
+        <div class="attr-controls">
+          <button class="step-btn" data-attr="${def.chave}" data-step="-1">–</button>
+          <button class="step-btn" data-attr="${def.chave}" data-step="1">+</button>
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    grid.querySelectorAll("[data-attr]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const chave = btn.dataset.attr;
+        const step = parseInt(btn.dataset.step,10);
+        if(modoAtributoTemporario){
+          const atual = estado.atributos[chave].modTemp || 0;
+          estado.atributos[chave].modTemp = Math.max(-10, Math.min(10, atual + step));
+        } else {
+          const novo = estado.atributos[chave].pontos + step;
+          estado.atributos[chave].pontos = Math.max(0, Math.min(10, novo));
+        }
+        render(); salvar();
+      });
+    });
+  }
+
+  function renderPericias(categoria, containerId){
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    estado.pericias[categoria].forEach((pericia, idx) => {
+      const row = document.createElement("div");
+      row.className = "pericia-row";
+      row.innerHTML = `
+        <div class="pericia-nome">${pericia.nome}<span class="attrtag">${pericia.atributoBase}</span></div>
+        <label class="toggle"><input type="checkbox" data-cat="${categoria}" data-idx="${idx}" data-field="treinado" ${pericia.treinado?"checked":""}> Treinado</label>
+        <label class="toggle"><input type="checkbox" data-cat="${categoria}" data-idx="${idx}" data-field="expert" ${pericia.expert?"checked":""} ${!pericia.treinado?"disabled":""}> Expert</label>
+        <div class="formula">${formulaPericia(pericia)}</div>
+        <button class="roll-btn" data-cat="${categoria}" data-idx="${idx}">Rolar</button>
+        <span></span>`;
+      container.appendChild(row);
+    });
+    container.querySelectorAll('input[type=checkbox]').forEach(chk=>{
+      chk.addEventListener("change", ()=>{
+        const cat = chk.dataset.cat, idx = chk.dataset.idx, field = chk.dataset.field;
+        estado.pericias[cat][idx][field] = chk.checked;
+        if(field === "treinado" && !chk.checked) estado.pericias[cat][idx].expert = false;
+        render(); salvar();
+      });
+    });
+    container.querySelectorAll(".roll-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const cat = btn.dataset.cat, idx = btn.dataset.idx;
+        mostrarResultado(estado.pericias[cat][idx].nome, rolarPericia(estado.pericias[cat][idx]));
+      });
+    });
+  }
+
+  function renderOficio(){
+    const container = document.getElementById("pericias-oficio");
+    const nomeOficio = estado.identidade.oficio || "Nenhum ofício definido";
+    container.innerHTML = `
+      <div class="pericia-row">
+        <div class="pericia-nome">${nomeOficio}<span class="attrtag">sucesso automático</span></div>
+        <span></span><span></span>
+        <div class="formula">Automático</div>
+        <button class="roll-btn oficio" id="btn-testar-oficio" ${!estado.identidade.oficio ? "disabled" : ""}>Testar</button>
+        <span></span>
+      </div>`;
+    const btn = document.getElementById("btn-testar-oficio");
+    if(btn){
+      btn.addEventListener("click", ()=>{
+        mostrarResultado(nomeOficio, rolarPericia(estado.pericias.oficio));
+      });
+    }
+  }
+
+  // ---------- Inventário ----------
+  let inventarioFormAberto = false; // estado transiente de UI, não persiste no JSON
+
+  const RARIDADES = [
+    { valor:"comum",     label:"Comum" },
+    { valor:"incomum",   label:"Incomum" },
+    { valor:"raro",      label:"Raro" },
+    { valor:"muitoraro", label:"Muito Raro" },
+    { valor:"epico",     label:"Épico" },
+    { valor:"lendario",  label:"Lendário" },
+    { valor:"mitico",    label:"Mítico" },
+  ];
+  function labelRaridade(valor){
+    return (RARIDADES.find(r => r.valor === valor) || RARIDADES[0]).label;
+  }
+
+  function opcoesRaridadeHTML(selecionada){
+    return RARIDADES.map(r => `<option value="${r.valor}" ${r.valor===selecionada?"selected":""}>${r.label}</option>`).join("");
+  }
+
+  function renderInventario(){
+    const grid = document.getElementById("item-grid");
+    grid.innerHTML = "";
+
+    // ---- card / formulário de adicionar item (agora no topo) ----
+    if(inventarioFormAberto){
+      const form = document.createElement("div");
+      form.className = "item-add-form";
+      form.innerHTML = `
+        <input type="text" id="novo-item-nome" placeholder="Nome do item">
+        <div class="item-form-row">
+          <select id="novo-item-raridade">${opcoesRaridadeHTML("comum")}</select>
+          <input type="number" id="novo-item-peso" placeholder="Peso (kg)" min="0" step="0.1">
+        </div>
+        <textarea id="novo-item-descricao" rows="2" placeholder="Descrição (opcional)"></textarea>
+        <div class="item-add-form-actions">
+          <button class="btn" id="novo-item-cancelar">Cancelar</button>
+          <button class="btn primary" id="novo-item-salvar">Salvar</button>
+        </div>`;
+      grid.appendChild(form);
+
+      document.getElementById("novo-item-nome").focus();
+      document.getElementById("novo-item-cancelar").addEventListener("click", ()=>{
+        inventarioFormAberto = false; renderInventario();
+      });
+      document.getElementById("novo-item-salvar").addEventListener("click", ()=>{
+        const nome = document.getElementById("novo-item-nome").value.trim();
+        const raridade = document.getElementById("novo-item-raridade").value;
+        const peso = parseFloat(document.getElementById("novo-item-peso").value) || 0;
+        const descricao = document.getElementById("novo-item-descricao").value.trim();
+        if(!nome) return;
+        estado.inventario.push({ nome, descricao, raridade, peso, aberta:false, editando:false });
+        inventarioFormAberto = false;
+        renderInventario(); salvar();
+      });
+    } else {
+      const addCard = document.createElement("div");
+      addCard.className = "item-add-card";
+      addCard.textContent = "+ Adicionar item";
+      addCard.addEventListener("click", ()=>{
+        inventarioFormAberto = true; renderInventario();
+      });
+      grid.appendChild(addCard);
+    }
+
+    estado.inventario.forEach((item, idx) => {
+      const card = document.createElement("div");
+      card.className = "item-card" + (item.aberta ? " expandido" : "");
+
+      if(item.editando){
+        card.innerHTML = `
+          <div class="item-edit-form">
+            <input type="text" id="edit-nome-${idx}" value="${item.nome}" placeholder="Nome do item">
+            <div class="item-form-row">
+              <select id="edit-raridade-${idx}">${opcoesRaridadeHTML(item.raridade)}</select>
+              <input type="number" id="edit-peso-${idx}" value="${item.peso || 0}" placeholder="Peso (kg)" min="0" step="0.1">
+            </div>
+            <textarea id="edit-descricao-${idx}" rows="3" placeholder="Descrição (opcional)">${item.descricao || ""}</textarea>
+            <div class="item-edit-form-actions">
+              <button class="btn" data-idx="${idx}" data-acao="cancelar-edicao">Cancelar</button>
+              <button class="btn primary" data-idx="${idx}" data-acao="salvar-edicao">Salvar</button>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+        return;
+      }
+
+      card.innerHTML = `
+        <div class="item-header" data-idx="${idx}" data-acao="toggle">
+          <span class="item-chevron">${item.aberta ? "▾" : "▸"}</span>
+          <span class="item-nome raridade-${item.raridade}">${item.nome}</span>
+          <span class="item-peso">${item.peso || 0}kg</span>
+        </div>
+        ${item.aberta ? `
+          <div class="item-body">
+            <div class="item-raridade-tag raridade-${item.raridade}">${labelRaridade(item.raridade)}</div>
+            <div class="item-desc-text">${item.descricao ? item.descricao : "Sem descrição."}</div>
+            <div class="item-footer-actions">
+              <button class="item-action remover" data-idx="${idx}" data-acao="remover">Remover</button>
+              <button class="item-action editar" data-idx="${idx}" data-acao="editar">Editar</button>
+            </div>
+          </div>` : ""}
+      `;
+      grid.appendChild(card);
+    });
+
+    grid.querySelectorAll('[data-acao="toggle"]').forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const item = estado.inventario[el.dataset.idx];
+        item.aberta = !item.aberta;
+        renderInventario(); salvar();
+      });
+    });
+    grid.querySelectorAll('[data-acao="remover"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.inventario.splice(btn.dataset.idx, 1);
+        renderInventario(); salvar();
+      });
+    });
+    grid.querySelectorAll('[data-acao="editar"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.inventario[btn.dataset.idx].editando = true;
+        renderInventario();
+      });
+    });
+    grid.querySelectorAll('[data-acao="cancelar-edicao"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        estado.inventario[btn.dataset.idx].editando = false;
+        renderInventario();
+      });
+    });
+    grid.querySelectorAll('[data-acao="salvar-edicao"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = btn.dataset.idx;
+        const nome = document.getElementById(`edit-nome-${idx}`).value.trim();
+        if(!nome) return;
+        const item = estado.inventario[idx];
+        item.nome = nome;
+        item.raridade = document.getElementById(`edit-raridade-${idx}`).value;
+        item.peso = parseFloat(document.getElementById(`edit-peso-${idx}`).value) || 0;
+        item.descricao = document.getElementById(`edit-descricao-${idx}`).value.trim();
+        item.editando = false;
+        renderInventario(); salvar();
+      });
+    });
+  }
+
+  // ---------- Habilidades ----------
+  let habilidadeFormAberto = false; // estado transiente de UI, não persiste no JSON
+
+  // Ordem hierárquica decrescente: Herdada > Extranatural > Classe
+  const TIPOS_HABILIDADE = [
+    { valor:"herdada",      label:"Habilidade Herdada",      rank:1 },
+    { valor:"extranatural", label:"Habilidade Extranatural", rank:2 },
+    { valor:"classe",       label:"Habilidade de Classe",    rank:3 },
+  ];
+  function tipoHabilidadeInfo(valor){
+    return TIPOS_HABILIDADE.find(t => t.valor === valor) || TIPOS_HABILIDADE[2];
+  }
+  function opcoesTipoHabilidadeHTML(selecionado){
+    return TIPOS_HABILIDADE.map(t => `<option value="${t.valor}" ${t.valor===selecionado?"selected":""}>${t.label}</option>`).join("");
+  }
+
+  function renderHabilidades(){
+    const grid = document.getElementById("hab-grid");
+    if(!grid) return;
+    grid.innerHTML = "";
+
+    // ---- card / formulário de adicionar habilidade (no topo) ----
+    if(habilidadeFormAberto){
+      const form = document.createElement("div");
+      form.className = "item-add-form";
+      form.innerHTML = `
+        <input type="text" id="novo-hab-nome" placeholder="Nome da habilidade">
+        <div class="item-form-row">
+          <select id="novo-hab-tipo">${opcoesTipoHabilidadeHTML("classe")}</select>
+          <input type="number" id="novo-hab-nivel" placeholder="Nível" min="0" step="1">
+        </div>
+        <textarea id="novo-hab-descricao" rows="2" placeholder="Descrição (opcional)"></textarea>
+        <div class="item-add-form-actions">
+          <button class="btn" id="novo-hab-cancelar">Cancelar</button>
+          <button class="btn primary" id="novo-hab-salvar">Salvar</button>
+        </div>`;
+      grid.appendChild(form);
+
+      document.getElementById("novo-hab-nome").focus();
+      document.getElementById("novo-hab-cancelar").addEventListener("click", ()=>{
+        habilidadeFormAberto = false; renderHabilidades();
+      });
+      document.getElementById("novo-hab-salvar").addEventListener("click", ()=>{
+        const nome = document.getElementById("novo-hab-nome").value.trim();
+        const tipo = document.getElementById("novo-hab-tipo").value;
+        const nivel = parseInt(document.getElementById("novo-hab-nivel").value,10) || 0;
+        const descricao = document.getElementById("novo-hab-descricao").value.trim();
+        if(!nome) return;
+        estado.habilidades.push({ nome, descricao, tipo, nivel, aberta:false, editando:false });
+        habilidadeFormAberto = false;
+        renderHabilidades(); salvar();
+      });
+    } else {
+      const addCard = document.createElement("div");
+      addCard.className = "item-add-card";
+      addCard.textContent = "+ Adicionar habilidade";
+      addCard.addEventListener("click", ()=>{
+        habilidadeFormAberto = true; renderHabilidades();
+      });
+      grid.appendChild(addCard);
+    }
+
+    // Ordena por hierarquia (Herdada > Extranatural > Classe) mantendo o índice original do estado
+    const ordenadas = estado.habilidades
+      .map((hab, idx) => ({ hab, idx }))
+      .sort((a, b) => tipoHabilidadeInfo(a.hab.tipo).rank - tipoHabilidadeInfo(b.hab.tipo).rank);
+
+    ordenadas.forEach(({ hab, idx }) => {
+      const card = document.createElement("div");
+      card.className = "item-card" + (hab.aberta ? " expandido" : "");
+
+      if(hab.editando){
+        card.innerHTML = `
+          <div class="item-edit-form">
+            <input type="text" id="edit-hab-nome-${idx}" value="${hab.nome}" placeholder="Nome da habilidade">
+            <div class="item-form-row">
+              <select id="edit-hab-tipo-${idx}">${opcoesTipoHabilidadeHTML(hab.tipo)}</select>
+              <input type="number" id="edit-hab-nivel-${idx}" value="${hab.nivel || 0}" placeholder="Nível" min="0" step="1">
+            </div>
+            <textarea id="edit-hab-descricao-${idx}" rows="3" placeholder="Descrição (opcional)">${hab.descricao || ""}</textarea>
+            <div class="item-edit-form-actions">
+              <button class="btn" data-idx="${idx}" data-acao="cancelar-edicao-hab">Cancelar</button>
+              <button class="btn primary" data-idx="${idx}" data-acao="salvar-edicao-hab">Salvar</button>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+        return;
+      }
+
+      const tipoInfo = tipoHabilidadeInfo(hab.tipo);
+      card.innerHTML = `
+        <div class="item-header" data-idx="${idx}" data-acao="toggle-hab">
+          <span class="item-chevron">${hab.aberta ? "▾" : "▸"}</span>
+          <span class="item-nome tipo-${hab.tipo}">${hab.nome}</span>
+          <span class="item-meta">Nv. ${hab.nivel || 0}</span>
+        </div>
+        ${hab.aberta ? `
+          <div class="item-body">
+            <div class="item-tipo-tag tipo-${hab.tipo}">${tipoInfo.label}</div>
+            <div class="item-desc-text">${hab.descricao ? hab.descricao : "Sem descrição."}</div>
+            <div class="item-footer-actions">
+              <button class="item-action remover" data-idx="${idx}" data-acao="remover-hab">Remover</button>
+              <button class="item-action editar" data-idx="${idx}" data-acao="editar-hab">Editar</button>
+            </div>
+          </div>` : ""}
+      `;
+      grid.appendChild(card);
+    });
+
+    grid.querySelectorAll('[data-acao="toggle-hab"]').forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const hab = estado.habilidades[el.dataset.idx];
+        hab.aberta = !hab.aberta;
+        renderHabilidades(); salvar();
+      });
+    });
+    grid.querySelectorAll('[data-acao="remover-hab"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.habilidades.splice(btn.dataset.idx, 1);
+        renderHabilidades(); salvar();
+      });
+    });
+    grid.querySelectorAll('[data-acao="editar-hab"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.habilidades[btn.dataset.idx].editando = true;
+        renderHabilidades();
+      });
+    });
+    grid.querySelectorAll('[data-acao="cancelar-edicao-hab"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        estado.habilidades[btn.dataset.idx].editando = false;
+        renderHabilidades();
+      });
+    });
+    grid.querySelectorAll('[data-acao="salvar-edicao-hab"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = btn.dataset.idx;
+        const nome = document.getElementById(`edit-hab-nome-${idx}`).value.trim();
+        if(!nome) return;
+        const hab = estado.habilidades[idx];
+        hab.nome = nome;
+        hab.tipo = document.getElementById(`edit-hab-tipo-${idx}`).value;
+        hab.nivel = parseInt(document.getElementById(`edit-hab-nivel-${idx}`).value,10) || 0;
+        hab.descricao = document.getElementById(`edit-hab-descricao-${idx}`).value.trim();
+        hab.editando = false;
+        renderHabilidades(); salvar();
+      });
+    });
+  }
+
+  // ---------- Talentos ----------
+  let talentoFormAberto = false; // estado transiente de UI, não persiste no JSON
+
+  // Ordem hierárquica decrescente: Talento > Aprimoramento Extranatural
+  const TIPOS_TALENTO = [
+    { valor:"talento",       label:"Talento",                 rank:1 },
+    { valor:"aprimoramento", label:"Aprimoramento Extranatural", rank:2 },
+  ];
+  function tipoTalentoInfo(valor){
+    return TIPOS_TALENTO.find(t => t.valor === valor) || TIPOS_TALENTO[0];
+  }
+  function opcoesTipoTalentoHTML(selecionado){
+    return TIPOS_TALENTO.map(t => `<option value="${t.valor}" ${t.valor===selecionado?"selected":""}>${t.label}</option>`).join("");
+  }
+
+  function renderTalentos(){
+    const grid = document.getElementById("talento-grid");
+    if(!grid) return;
+    grid.innerHTML = "";
+
+    // ---- card / formulário de adicionar talento (no topo) ----
+    if(talentoFormAberto){
+      const form = document.createElement("div");
+      form.className = "item-add-form";
+      form.innerHTML = `
+        <input type="text" id="novo-talento-nome" placeholder="Nome do talento">
+        <select id="novo-talento-tipo">${opcoesTipoTalentoHTML("talento")}</select>
+        <textarea id="novo-talento-descricao" rows="2" placeholder="Descrição (opcional)"></textarea>
+        <div class="item-add-form-actions">
+          <button class="btn" id="novo-talento-cancelar">Cancelar</button>
+          <button class="btn primary" id="novo-talento-salvar">Salvar</button>
+        </div>`;
+      grid.appendChild(form);
+
+      document.getElementById("novo-talento-nome").focus();
+      document.getElementById("novo-talento-cancelar").addEventListener("click", ()=>{
+        talentoFormAberto = false; renderTalentos();
+      });
+      document.getElementById("novo-talento-salvar").addEventListener("click", ()=>{
+        const nome = document.getElementById("novo-talento-nome").value.trim();
+        const tipo = document.getElementById("novo-talento-tipo").value;
+        const descricao = document.getElementById("novo-talento-descricao").value.trim();
+        if(!nome) return;
+        estado.talentos.push({ nome, descricao, tipo, aberta:false, editando:false });
+        talentoFormAberto = false;
+        renderTalentos(); salvar();
+      });
+    } else {
+      const addCard = document.createElement("div");
+      addCard.className = "item-add-card";
+      addCard.textContent = "+ Adicionar talento";
+      addCard.addEventListener("click", ()=>{
+        talentoFormAberto = true; renderTalentos();
+      });
+      grid.appendChild(addCard);
+    }
+
+    // Ordena por hierarquia (Talento > Aprimoramento Extranatural) mantendo o índice original do estado
+    const talentosOrdenados = estado.talentos
+      .map((talento, idx) => ({ talento, idx }))
+      .sort((a, b) => tipoTalentoInfo(a.talento.tipo).rank - tipoTalentoInfo(b.talento.tipo).rank);
+
+    talentosOrdenados.forEach(({ talento, idx }) => {
+      const card = document.createElement("div");
+      card.className = "item-card" + (talento.aberta ? " expandido" : "");
+
+      if(talento.editando){
+        card.innerHTML = `
+          <div class="item-edit-form">
+            <input type="text" id="edit-talento-nome-${idx}" value="${talento.nome}" placeholder="Nome do talento">
+            <select id="edit-talento-tipo-${idx}">${opcoesTipoTalentoHTML(talento.tipo)}</select>
+            <textarea id="edit-talento-descricao-${idx}" rows="3" placeholder="Descrição (opcional)">${talento.descricao || ""}</textarea>
+            <div class="item-edit-form-actions">
+              <button class="btn" data-idx="${idx}" data-acao="cancelar-edicao-talento">Cancelar</button>
+              <button class="btn primary" data-idx="${idx}" data-acao="salvar-edicao-talento">Salvar</button>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+        return;
+      }
+
+      const tipoInfo = tipoTalentoInfo(talento.tipo);
+      card.innerHTML = `
+        <div class="item-header" data-idx="${idx}" data-acao="toggle-talento">
+          <span class="item-chevron">${talento.aberta ? "▾" : "▸"}</span>
+          <span class="item-nome tipo-${talento.tipo}">${talento.nome}</span>
+        </div>
+        ${talento.aberta ? `
+          <div class="item-body">
+            <div class="item-tipo-tag tipo-${talento.tipo}">${tipoInfo.label}</div>
+            <div class="item-desc-text">${talento.descricao ? talento.descricao : "Sem descrição."}</div>
+            <div class="item-footer-actions">
+              <button class="item-action remover" data-idx="${idx}" data-acao="remover-talento">Remover</button>
+              <button class="item-action editar" data-idx="${idx}" data-acao="editar-talento">Editar</button>
+            </div>
+          </div>` : ""}
+      `;
+      grid.appendChild(card);
+    });
+
+    grid.querySelectorAll('[data-acao="toggle-talento"]').forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const talento = estado.talentos[el.dataset.idx];
+        talento.aberta = !talento.aberta;
+        renderTalentos(); salvar();
+      });
+    });
+    grid.querySelectorAll('[data-acao="remover-talento"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.talentos.splice(btn.dataset.idx, 1);
+        renderTalentos(); salvar();
+      });
+    });
+    grid.querySelectorAll('[data-acao="editar-talento"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.talentos[btn.dataset.idx].editando = true;
+        renderTalentos();
+      });
+    });
+    grid.querySelectorAll('[data-acao="cancelar-edicao-talento"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        estado.talentos[btn.dataset.idx].editando = false;
+        renderTalentos();
+      });
+    });
+    grid.querySelectorAll('[data-acao="salvar-edicao-talento"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = btn.dataset.idx;
+        const nome = document.getElementById(`edit-talento-nome-${idx}`).value.trim();
+        if(!nome) return;
+        const talento = estado.talentos[idx];
+        talento.nome = nome;
+        talento.tipo = document.getElementById(`edit-talento-tipo-${idx}`).value;
+        talento.descricao = document.getElementById(`edit-talento-descricao-${idx}`).value.trim();
+        talento.editando = false;
+        renderTalentos(); salvar();
+      });
+    });
+  }
+
+  // ---------- Técnicas ----------
+  let tecnicaFormAberto = false; // estado transiente de UI, não persiste no JSON
+
+  // Ordem hierárquica decrescente: Técnica > Estilo de Luta
+  const TIPOS_TECNICA = [
+    { valor:"tecnica", label:"Técnica",        rank:1 },
+    { valor:"estilo",  label:"Estilo de Luta", rank:2 },
+  ];
+  function tipoTecnicaInfo(valor){
+    return TIPOS_TECNICA.find(t => t.valor === valor) || TIPOS_TECNICA[0];
+  }
+  function opcoesTipoTecnicaHTML(selecionado){
+    return TIPOS_TECNICA.map(t => `<option value="${t.valor}" ${t.valor===selecionado?"selected":""}>${t.label}</option>`).join("");
+  }
+
+  function renderTecnicas(){
+    const lista = document.getElementById("tecnica-grid");
+    if(!lista) return;
+    lista.innerHTML = "";
+
+    // ---- card / formulário de adicionar técnica (no topo) ----
+    if(tecnicaFormAberto){
+      const form = document.createElement("div");
+      form.className = "item-add-form";
+      form.innerHTML = `
+        <input type="text" id="novo-tecnica-nome" placeholder="Nome da técnica">
+        <div class="item-form-row">
+          <select id="novo-tecnica-tipo">${opcoesTipoTecnicaHTML("tecnica")}</select>
+          <input type="number" id="novo-tecnica-nivel" placeholder="Nível" min="0" step="1">
+        </div>
+        <textarea id="novo-tecnica-descricao" rows="2" placeholder="Descrição (opcional)"></textarea>
+        <div class="item-add-form-actions">
+          <button class="btn" id="novo-tecnica-cancelar">Cancelar</button>
+          <button class="btn primary" id="novo-tecnica-salvar">Salvar</button>
+        </div>`;
+      lista.appendChild(form);
+
+      document.getElementById("novo-tecnica-nome").focus();
+      document.getElementById("novo-tecnica-cancelar").addEventListener("click", ()=>{
+        tecnicaFormAberto = false; renderTecnicas();
+      });
+      document.getElementById("novo-tecnica-salvar").addEventListener("click", ()=>{
+        const nome = document.getElementById("novo-tecnica-nome").value.trim();
+        const tipo = document.getElementById("novo-tecnica-tipo").value;
+        const nivel = parseInt(document.getElementById("novo-tecnica-nivel").value,10) || 0;
+        const descricao = document.getElementById("novo-tecnica-descricao").value.trim();
+        if(!nome) return;
+        estado.tecnicas.push({ nome, descricao, tipo, nivel, aberta:false, editando:false });
+        tecnicaFormAberto = false;
+        renderTecnicas(); salvar();
+      });
+    } else {
+      const addCard = document.createElement("div");
+      addCard.className = "item-add-card";
+      addCard.textContent = "+ Adicionar técnica";
+      addCard.addEventListener("click", ()=>{
+        tecnicaFormAberto = true; renderTecnicas();
+      });
+      lista.appendChild(addCard);
+    }
+
+    // Ordena por hierarquia (Técnica > Estilo de Luta) mantendo o índice original do estado
+    const tecnicasOrdenadas = estado.tecnicas
+      .map((tecnica, idx) => ({ tecnica, idx }))
+      .sort((a, b) => tipoTecnicaInfo(a.tecnica.tipo).rank - tipoTecnicaInfo(b.tecnica.tipo).rank);
+
+    tecnicasOrdenadas.forEach(({ tecnica, idx }) => {
+      const card = document.createElement("div");
+      card.className = "item-card" + (tecnica.aberta ? " expandido" : "");
+
+      if(tecnica.editando){
+        card.innerHTML = `
+          <div class="item-edit-form">
+            <input type="text" id="edit-tecnica-nome-${idx}" value="${tecnica.nome}" placeholder="Nome da técnica">
+            <div class="item-form-row">
+              <select id="edit-tecnica-tipo-${idx}">${opcoesTipoTecnicaHTML(tecnica.tipo)}</select>
+              <input type="number" id="edit-tecnica-nivel-${idx}" value="${tecnica.nivel || 0}" placeholder="Nível" min="0" step="1">
+            </div>
+            <textarea id="edit-tecnica-descricao-${idx}" rows="3" placeholder="Descrição (opcional)">${tecnica.descricao || ""}</textarea>
+            <div class="item-edit-form-actions">
+              <button class="btn" data-idx="${idx}" data-acao="cancelar-edicao-tecnica">Cancelar</button>
+              <button class="btn primary" data-idx="${idx}" data-acao="salvar-edicao-tecnica">Salvar</button>
+            </div>
+          </div>`;
+        lista.appendChild(card);
+        return;
+      }
+
+      const tipoInfo = tipoTecnicaInfo(tecnica.tipo);
+      card.innerHTML = `
+        <div class="item-header" data-idx="${idx}" data-acao="toggle-tecnica">
+          <span class="item-chevron">${tecnica.aberta ? "▾" : "▸"}</span>
+          <span class="item-nome tipo-${tecnica.tipo}">${tecnica.nome}</span>
+          <span class="item-meta">Nv. ${tecnica.nivel || 0}</span>
+        </div>
+        ${tecnica.aberta ? `
+          <div class="item-body">
+            <div class="item-tipo-tag tipo-${tecnica.tipo}">${tipoInfo.label}</div>
+            <div class="item-desc-text">${tecnica.descricao ? tecnica.descricao : "Sem descrição."}</div>
+            <div class="item-footer-actions">
+              <button class="item-action remover" data-idx="${idx}" data-acao="remover-tecnica">Remover</button>
+              <button class="item-action editar" data-idx="${idx}" data-acao="editar-tecnica">Editar</button>
+            </div>
+          </div>` : ""}
+      `;
+      lista.appendChild(card);
+    });
+
+    lista.querySelectorAll('[data-acao="toggle-tecnica"]').forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const tecnica = estado.tecnicas[el.dataset.idx];
+        tecnica.aberta = !tecnica.aberta;
+        renderTecnicas(); salvar();
+      });
+    });
+    lista.querySelectorAll('[data-acao="remover-tecnica"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.tecnicas.splice(btn.dataset.idx, 1);
+        renderTecnicas(); salvar();
+      });
+    });
+    lista.querySelectorAll('[data-acao="editar-tecnica"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.tecnicas[btn.dataset.idx].editando = true;
+        renderTecnicas();
+      });
+    });
+    lista.querySelectorAll('[data-acao="cancelar-edicao-tecnica"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        estado.tecnicas[btn.dataset.idx].editando = false;
+        renderTecnicas();
+      });
+    });
+    lista.querySelectorAll('[data-acao="salvar-edicao-tecnica"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = btn.dataset.idx;
+        const nome = document.getElementById(`edit-tecnica-nome-${idx}`).value.trim();
+        if(!nome) return;
+        const tecnica = estado.tecnicas[idx];
+        tecnica.nome = nome;
+        tecnica.tipo = document.getElementById(`edit-tecnica-tipo-${idx}`).value;
+        tecnica.nivel = parseInt(document.getElementById(`edit-tecnica-nivel-${idx}`).value,10) || 0;
+        tecnica.descricao = document.getElementById(`edit-tecnica-descricao-${idx}`).value.trim();
+        tecnica.editando = false;
+        renderTecnicas(); salvar();
+      });
+    });
+  }
+
+  // ---------- Atalhos (rolagens personalizadas) ----------
+  let atalhoFormAberto = false; // estado transiente de UI, não persiste no JSON
+  const DADO_TIPOS = ["d4","d6","d8","d10","d12","d20"];
+
+  function opcoesDadoTipoHTML(selecionado){
+    return DADO_TIPOS.map(t => `<option value="${t}" ${t===selecionado?"selected":""}>${t}</option>`).join("");
+  }
+
+  function criarLinhaDadoNode(tipo, quantidade){
+    const row = document.createElement("div");
+    row.className = "dado-row";
+    row.innerHTML = `
+      <select class="dado-tipo-select">${opcoesDadoTipoHTML(tipo || "d20")}</select>
+      <input type="number" class="dado-qtd-input" value="${quantidade || 1}" min="1" step="1" placeholder="Qtd">
+      <button type="button" class="dado-row-remover">×</button>`;
+    row.querySelector(".dado-row-remover").addEventListener("click", ()=>{
+      const lista = row.parentElement;
+      if(lista.children.length > 1) row.remove(); // sempre mantém ao menos 1 linha de dado
+    });
+    return row;
+  }
+
+  function lerDadosDoContainer(container){
+    const resultado = [];
+    container.querySelectorAll(".dado-row").forEach(row=>{
+      const tipo = row.querySelector(".dado-tipo-select").value;
+      const quantidade = parseInt(row.querySelector(".dado-qtd-input").value,10) || 0;
+      if(quantidade > 0) resultado.push({ tipo, quantidade });
+    });
+    return resultado;
+  }
+
+  function formulaAtalho(atalho){
+    if(!atalho.dados || atalho.dados.length === 0) return "—";
+    let f = atalho.dados.map(d => `${d.quantidade}${d.tipo}`).join(" + ");
+    if(atalho.bonus){ f += atalho.bonus > 0 ? ` + ${atalho.bonus}` : ` - ${Math.abs(atalho.bonus)}`; }
+    return f;
+  }
+
+  function rolarAtalho(atalho){
+    let total = 0;
+    const partes = [];
+    atalho.dados.forEach(d=>{
+      const faces = parseInt(d.tipo.slice(1),10);
+      const rolagens = Array.from({length:d.quantidade}, ()=> 1 + Math.floor(Math.random()*faces));
+      total += rolagens.reduce((a,b)=>a+b,0);
+      partes.push(`${d.tipo}:[${rolagens.join(", ")}]`);
+    });
+    total += (atalho.bonus || 0);
+    let breakdown = "→ " + partes.join(" ");
+    if(atalho.bonus) breakdown += ` ${atalho.bonus > 0 ? "+" : ""}${atalho.bonus}`;
+    return { sucessoAutomatico:false, total, formula: formulaAtalho(atalho), breakdown };
+  }
+
+  function renderAtalhos(){
+    const lista = document.getElementById("atalho-grid");
+    if(!lista) return;
+    lista.innerHTML = "";
+
+    // ---- card / formulário de adicionar atalho (no topo) ----
+    if(atalhoFormAberto){
+      const form = document.createElement("div");
+      form.className = "item-add-form";
+      form.innerHTML = `
+        <input type="text" id="novo-atalho-nome" placeholder="Nome do atalho">
+        <div class="dados-lista" id="novo-atalho-dados-lista"></div>
+        <button type="button" class="btn-add-dado" id="novo-atalho-add-dado">+ Adicionar dado</button>
+        <input type="number" id="novo-atalho-bonus" placeholder="Bônus fixo (opcional, pode ser negativo)" step="1">
+        <div class="item-add-form-actions">
+          <button class="btn" id="novo-atalho-cancelar">Cancelar</button>
+          <button class="btn primary" id="novo-atalho-salvar">Salvar</button>
+        </div>`;
+      lista.appendChild(form);
+
+      const dadosListaEl = document.getElementById("novo-atalho-dados-lista");
+      dadosListaEl.appendChild(criarLinhaDadoNode("d20", 1));
+      document.getElementById("novo-atalho-add-dado").addEventListener("click", ()=>{
+        dadosListaEl.appendChild(criarLinhaDadoNode("d20", 1));
+      });
+
+      document.getElementById("novo-atalho-nome").focus();
+      document.getElementById("novo-atalho-cancelar").addEventListener("click", ()=>{
+        atalhoFormAberto = false; renderAtalhos();
+      });
+      document.getElementById("novo-atalho-salvar").addEventListener("click", ()=>{
+        const nome = document.getElementById("novo-atalho-nome").value.trim();
+        const dados = lerDadosDoContainer(dadosListaEl);
+        const bonus = parseInt(document.getElementById("novo-atalho-bonus").value,10) || 0;
+        if(!nome || dados.length === 0) return;
+        estado.atalhos.push({ nome, dados, bonus, aberta:false, editando:false });
+        atalhoFormAberto = false;
+        renderAtalhos(); salvar();
+      });
+    } else {
+      const addCard = document.createElement("div");
+      addCard.className = "item-add-card";
+      addCard.textContent = "+ Adicionar atalho";
+      addCard.addEventListener("click", ()=>{
+        atalhoFormAberto = true; renderAtalhos();
+      });
+      lista.appendChild(addCard);
+    }
+
+    estado.atalhos.forEach((atalho, idx) => {
+      const card = document.createElement("div");
+      card.className = "item-card" + (atalho.aberta ? " expandido" : "");
+
+      if(atalho.editando){
+        card.innerHTML = `
+          <div class="item-edit-form">
+            <input type="text" id="edit-atalho-nome-${idx}" value="${atalho.nome}" placeholder="Nome do atalho">
+            <div class="dados-lista" id="edit-atalho-dados-lista-${idx}"></div>
+            <button type="button" class="btn-add-dado" id="edit-atalho-add-dado-${idx}">+ Adicionar dado</button>
+            <input type="number" id="edit-atalho-bonus-${idx}" value="${atalho.bonus || 0}" placeholder="Bônus fixo" step="1">
+            <div class="item-edit-form-actions">
+              <button class="btn" data-idx="${idx}" data-acao="cancelar-edicao-atalho">Cancelar</button>
+              <button class="btn primary" data-idx="${idx}" data-acao="salvar-edicao-atalho">Salvar</button>
+            </div>
+          </div>`;
+        lista.appendChild(card);
+
+        const dadosListaEl = card.querySelector(`#edit-atalho-dados-lista-${idx}`);
+        atalho.dados.forEach(d => dadosListaEl.appendChild(criarLinhaDadoNode(d.tipo, d.quantidade)));
+        card.querySelector(`#edit-atalho-add-dado-${idx}`).addEventListener("click", ()=>{
+          dadosListaEl.appendChild(criarLinhaDadoNode("d20", 1));
+        });
+        return;
+      }
+
+      card.innerHTML = `
+        <div class="item-header" data-idx="${idx}" data-acao="toggle-atalho">
+          <span class="item-chevron">${atalho.aberta ? "▾" : "▸"}</span>
+          <span class="item-nome">${atalho.nome}</span>
+          <span class="atalho-formula">${formulaAtalho(atalho)}</span>
+          <button class="atalho-rolar-btn" data-idx="${idx}" data-acao="rolar-atalho">Rolar</button>
+        </div>
+        ${atalho.aberta ? `
+          <div class="item-body">
+            <div class="item-footer-actions">
+              <button class="item-action remover" data-idx="${idx}" data-acao="remover-atalho">Remover</button>
+              <button class="item-action editar" data-idx="${idx}" data-acao="editar-atalho">Editar</button>
+            </div>
+          </div>` : ""}
+      `;
+      lista.appendChild(card);
+    });
+
+    lista.querySelectorAll('[data-acao="toggle-atalho"]').forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const atalho = estado.atalhos[el.dataset.idx];
+        atalho.aberta = !atalho.aberta;
+        renderAtalhos(); salvar();
+      });
+    });
+    lista.querySelectorAll('[data-acao="rolar-atalho"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        const atalho = estado.atalhos[btn.dataset.idx];
+        mostrarResultado(atalho.nome, rolarAtalho(atalho));
+      });
+    });
+    lista.querySelectorAll('[data-acao="remover-atalho"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.atalhos.splice(btn.dataset.idx, 1);
+        renderAtalhos(); salvar();
+      });
+    });
+    lista.querySelectorAll('[data-acao="editar-atalho"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        estado.atalhos[btn.dataset.idx].editando = true;
+        renderAtalhos();
+      });
+    });
+    lista.querySelectorAll('[data-acao="cancelar-edicao-atalho"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        estado.atalhos[btn.dataset.idx].editando = false;
+        renderAtalhos();
+      });
+    });
+    lista.querySelectorAll('[data-acao="salvar-edicao-atalho"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = btn.dataset.idx;
+        const nome = document.getElementById(`edit-atalho-nome-${idx}`).value.trim();
+        const dados = lerDadosDoContainer(document.getElementById(`edit-atalho-dados-lista-${idx}`));
+        if(!nome || dados.length === 0) return;
+        const atalho = estado.atalhos[idx];
+        atalho.nome = nome;
+        atalho.dados = dados;
+        atalho.bonus = parseInt(document.getElementById(`edit-atalho-bonus-${idx}`).value,10) || 0;
+        atalho.editando = false;
+        renderAtalhos(); salvar();
+      });
+    });
+  }
+
+  function mostrarResultado(nome, resultado){
+    const log = document.getElementById("roll-log");
+    const toast = document.createElement("div");
+    toast.className = "roll-toast";
+    let detalhe = "";
+    if(resultado.sucessoAutomatico){
+      toast.innerHTML = `<div class="rt-title">${nome}</div><div class="rt-total">✓ Sucesso Automático</div>`;
+    } else {
+      detalhe = resultado.breakdown !== undefined
+        ? resultado.breakdown
+        : `→ d20:[${resultado.rolagensD20.join(", ")}] ${resultado.rolagensD12.length ? "d12:["+resultado.rolagensD12.join(", ")+"]" : ""} ${resultado.bonusFixo ? "+"+resultado.bonusFixo : ""}`;
+      toast.innerHTML = `
+        <div class="rt-title">${nome}</div>
+        <div class="rt-total">${resultado.total}</div>
+        <div class="rt-breakdown">${resultado.formula} ${detalhe}</div>`;
+    }
+    log.appendChild(toast);
+    setTimeout(()=> toast.remove(), 6000);
+
+    // registra no histórico persistente (perícias, ofício e atalhos passam todos por aqui)
+    estado.historicoRolagens.unshift({
+      nome,
+      sucessoAutomatico: !!resultado.sucessoAutomatico,
+      total: resultado.total,
+      formula: resultado.formula || "",
+      detalhe,
+      hora: new Date().toLocaleTimeString("pt-BR")
+    });
+    if(estado.historicoRolagens.length > 100) estado.historicoRolagens.length = 100;
+    salvar();
+
+    const modalHistorico = document.getElementById("modal-historico");
+    if(modalHistorico.classList.contains("aberto")) renderHistorico();
+  }
+
+  // ---------- eventos de identidade ----------
+  // ---------- avatar (foto do personagem) ----------
+  // Fluxo: seleciona arquivo -> abre modal de recorte (arrastar + zoom) -> "Aplicar" gera o recorte final em base64.
+  const CROP_VIEWPORT = 260; // tamanho (px) do círculo de recorte mostrado no modal
+  const CROP_OUTPUT = 360;   // resolução final salva no avatar (maior que o viewport pra manter nitidez)
+
+  let cropImg = null;      // elemento Image() com a foto original carregada
+  let cropScale = 1;       // escala atual aplicada (em px do viewport)
+  let cropMinScale = 1;    // escala mínima que garante que a imagem cubra todo o círculo
+  let cropOffsetX = 0;     // deslocamento (arrastar), em px do viewport
+  let cropOffsetY = 0;
+  let arrastando = false;
+  let arrastoInicio = { x:0, y:0, offX:0, offY:0 };
+
+  function aplicarTransformCrop(){
+    const img = document.getElementById("crop-image");
+    img.style.transform = `translate(-50%, -50%) translate(${cropOffsetX}px, ${cropOffsetY}px) scale(${cropScale})`;
+  }
+
+  function clampOffsetsCrop(){
+    if(!cropImg) return;
+    const scaledW = cropImg.naturalWidth * cropScale;
+    const scaledH = cropImg.naturalHeight * cropScale;
+    const maxX = Math.max(0, (scaledW - CROP_VIEWPORT) / 2);
+    const maxY = Math.max(0, (scaledH - CROP_VIEWPORT) / 2);
+    cropOffsetX = Math.max(-maxX, Math.min(maxX, cropOffsetX));
+    cropOffsetY = Math.max(-maxY, Math.min(maxY, cropOffsetY));
+  }
+
+  function abrirModalCrop(dataUrlOriginal){
+    const img = new Image();
+    img.onload = () => {
+      cropImg = img;
+      cropMinScale = Math.max(CROP_VIEWPORT / img.naturalWidth, CROP_VIEWPORT / img.naturalHeight);
+      cropScale = cropMinScale;
+      cropOffsetX = 0;
+      cropOffsetY = 0;
+
+      const cropImageEl = document.getElementById("crop-image");
+      cropImageEl.src = dataUrlOriginal;
+      cropImageEl.style.width = img.naturalWidth + "px";
+      cropImageEl.style.height = img.naturalHeight + "px";
+      document.getElementById("crop-zoom-slider").value = 100;
+      aplicarTransformCrop();
+
+      document.getElementById("modal-editar-foto").classList.add("aberto");
+    };
+    img.src = dataUrlOriginal;
+  }
+
+  function fecharModalCrop(){
+    document.getElementById("modal-editar-foto").classList.remove("aberto");
+    cropImg = null;
+  }
+
+  document.getElementById("avatar-circle").addEventListener("click", ()=>{
+    document.getElementById("avatar-input").click();
+  });
+  document.getElementById("avatar-input").addEventListener("change", e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    if(!file.type.startsWith("image/")){
+      alert("Selecione um arquivo de imagem.");
+      e.target.value = "";
+      return;
+    }
+    const leitor = new FileReader();
+    leitor.onload = evt => abrirModalCrop(evt.target.result);
+    leitor.readAsDataURL(file);
+    e.target.value = "";
+  });
+  document.getElementById("avatar-remove").addEventListener("click", (evt)=>{
+    evt.stopPropagation();
+    estado.identidade.foto = null;
+    render(); salvar();
+  });
+
+  // ---- interação do modal de recorte: arrastar para reposicionar ----
+  const cropViewportEl = document.getElementById("crop-viewport");
+  cropViewportEl.addEventListener("pointerdown", (e)=>{
+    if(!cropImg) return;
+    arrastando = true;
+    cropViewportEl.classList.add("arrastando");
+    cropViewportEl.setPointerCapture(e.pointerId);
+    arrastoInicio = { x:e.clientX, y:e.clientY, offX:cropOffsetX, offY:cropOffsetY };
+  });
+  cropViewportEl.addEventListener("pointermove", (e)=>{
+    if(!arrastando) return;
+    cropOffsetX = arrastoInicio.offX + (e.clientX - arrastoInicio.x);
+    cropOffsetY = arrastoInicio.offY + (e.clientY - arrastoInicio.y);
+    clampOffsetsCrop();
+    aplicarTransformCrop();
+  });
+  function finalizarArrastoCrop(){
+    arrastando = false;
+    cropViewportEl.classList.remove("arrastando");
+  }
+  cropViewportEl.addEventListener("pointerup", finalizarArrastoCrop);
+  cropViewportEl.addEventListener("pointercancel", finalizarArrastoCrop);
+
+  // ---- zoom ----
+  document.getElementById("crop-zoom-slider").addEventListener("input", (e)=>{
+    if(!cropImg) return;
+    cropScale = cropMinScale * (parseInt(e.target.value,10) / 100);
+    clampOffsetsCrop();
+    aplicarTransformCrop();
+  });
+
+  // ---- fechar sem salvar ----
+  document.getElementById("btn-fechar-crop").addEventListener("click", fecharModalCrop);
+  document.getElementById("modal-editar-foto").addEventListener("click", (e)=>{
+    if(e.target.id === "modal-editar-foto") fecharModalCrop();
+  });
+
+  // ---- aplicar recorte: desenha o círculo final num canvas e salva como base64 ----
+  document.getElementById("btn-aplicar-crop").addEventListener("click", ()=>{
+    if(!cropImg) return;
+    const razao = CROP_OUTPUT / CROP_VIEWPORT;
+    const canvas = document.createElement("canvas");
+    canvas.width = CROP_OUTPUT;
+    canvas.height = CROP_OUTPUT;
+    const ctx = canvas.getContext("2d");
+    ctx.translate(CROP_OUTPUT/2 + cropOffsetX*razao, CROP_OUTPUT/2 + cropOffsetY*razao);
+    ctx.scale(cropScale*razao, cropScale*razao);
+    ctx.drawImage(cropImg, -cropImg.naturalWidth/2, -cropImg.naturalHeight/2);
+
+    estado.identidade.foto = canvas.toDataURL("image/jpeg", 0.85);
+    fecharModalCrop();
+    render(); salvar();
+  });
+
+  document.getElementById("f-nome").addEventListener("input", e=>{ estado.identidade.nome = e.target.value; salvar(); });
+  document.getElementById("f-classe").addEventListener("change", e=>{ estado.identidade.classe = e.target.value; salvar(); });
+  document.getElementById("f-subclasse").addEventListener("change", e=>{ estado.identidade.subclasse = e.target.value; salvar(); });
+  document.getElementById("f-antecedente").addEventListener("input", e=>{ estado.identidade.antecedente = e.target.value; salvar(); });
+  document.getElementById("f-oficio").addEventListener("change", e=>{ estado.identidade.oficio = e.target.value; render(); salvar(); });
+  document.getElementById("f-nivel").addEventListener("change", e=>{
+    let v = parseInt(e.target.value,10) || 1;
+    v = Math.max(1, Math.min(20, v));
+    estado.identidade.nivel = v; render(); salvar();
+  });
+  document.querySelectorAll("[data-nivel-step]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const step = parseInt(btn.dataset.nivelStep,10);
+      estado.identidade.nivel = Math.max(1, Math.min(20, estado.identidade.nivel + step));
+      render(); salvar();
+    });
+  });
+
+  document.getElementById("f-proficiencia").addEventListener("change", e=>{
+    let v = parseInt(e.target.value,10);
+    if(isNaN(v)) v = 0;
+    v = Math.max(0, Math.min(20, v));
+    estado.identidade.proficiencia = v; render(); salvar();
+  });
+  document.querySelectorAll("[data-prof-step]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const step = parseInt(btn.dataset.profStep,10);
+      estado.identidade.proficiencia = Math.max(0, Math.min(20, estado.identidade.proficiencia + step));
+      render(); salvar();
+    });
+  });
+
+  document.getElementById("f-cansaco").addEventListener("change", e=>{
+    let v = parseInt(e.target.value,10);
+    if(isNaN(v)) v = 0;
+    estado.identidade.cansaco = Math.max(0, v); render(); salvar();
+  });
+  document.querySelectorAll("[data-cansaco-step]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const step = parseInt(btn.dataset.cansacoStep,10);
+      estado.identidade.cansaco = Math.max(0, estado.identidade.cansaco + step);
+      render(); salvar();
+    });
+  });
+
+  document.getElementById("f-exaustao").addEventListener("change", e=>{
+    let v = parseInt(e.target.value,10);
+    if(isNaN(v)) v = 0;
+    estado.identidade.exaustao = Math.max(0, v); render(); salvar();
+  });
+  document.querySelectorAll("[data-exaustao-step]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const step = parseInt(btn.dataset.exaustaoStep,10);
+      estado.identidade.exaustao = Math.max(0, estado.identidade.exaustao + step);
+      render(); salvar();
+    });
+  });
+
+  // ---------- eventos de status vitais e combate ----------
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  document.getElementById("v-pv-atual").addEventListener("change", e=>{
+    estado.recursos.pvAtual = clamp(parseInt(e.target.value,10) || 0, 0, estado.recursos.pvMaximo);
+    render(); salvar();
+  });
+  document.getElementById("v-pv-max").addEventListener("change", e=>{
+    const novoMax = Math.max(0, parseInt(e.target.value,10) || 0);
+    estado.recursos.pvMaximo = novoMax;
+    estado.recursos.pvAtual = Math.min(estado.recursos.pvAtual, novoMax);
+    render(); salvar();
+  });
+  document.getElementById("v-prot-atual").addEventListener("change", e=>{
+    estado.recursos.protAtual = clamp(parseInt(e.target.value,10) || 0, 0, estado.recursos.protMaximo);
+    render(); salvar();
+  });
+  document.getElementById("v-prot-max").addEventListener("change", e=>{
+    const novoMax = Math.max(0, parseInt(e.target.value,10) || 0);
+    estado.recursos.protMaximo = novoMax;
+    estado.recursos.protAtual = Math.min(estado.recursos.protAtual, novoMax);
+    render(); salvar();
+  });
+  document.getElementById("v-dt").addEventListener("input", e=>{
+    estado.recursos.dt = e.target.value; salvar();
+  });
+  document.getElementById("v-desloc-input").addEventListener("input", e=>{
+    estado.recursos.deslocamento = e.target.value; salvar();
+  });
+
+  document.querySelectorAll(".dc-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const vital = btn.dataset.vital; // "pv" ou "prot"
+      const sinal = parseInt(btn.dataset.sinal,10); // -1 (dano) ou 1 (cura)
+      const inputQtd = document.getElementById(vital === "pv" ? "v-pv-delta" : "v-prot-delta");
+      const qtd = Math.abs(parseInt(inputQtd.value,10) || 0);
+      if(vital === "pv"){
+        estado.recursos.pvAtual = clamp(estado.recursos.pvAtual + sinal*qtd, 0, estado.recursos.pvMaximo);
+      } else {
+        estado.recursos.protAtual = clamp(estado.recursos.protAtual + sinal*qtd, 0, estado.recursos.protMaximo);
+      }
+      inputQtd.value = "";
+      render(); salvar();
+    });
+  });
+
+  // ---------- export / import / reset ----------
+  document.getElementById("btn-export").addEventListener("click", ()=>{
+    const blob = new Blob([JSON.stringify(estado, null, 2)], { type:"application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ficha-caos-${(estado.identidade.nome || "personagem").toLowerCase().replace(/\s+/g,"-")}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("btn-import").addEventListener("click", ()=> document.getElementById("import-input").click());
+  document.getElementById("import-input").addEventListener("change", e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try{
+        const dados = JSON.parse(evt.target.result);
+        const padrao = estadoPadrao();
+        estado = {
+          id:         dados.id || gerarIdPersonagem(), // mantém o ID se o JSON já tiver um; senão gera um novo
+          atualizadoEm: dados.atualizadoEm || padrao.atualizadoEm,
+          identidade: mesclarIdentidade(padrao.identidade, dados.identidade),
+          atributos:  Object.assign({}, padrao.atributos, dados.atributos),
+          pericias:   dados.pericias || padrao.pericias,
+          recursos:   Object.assign({}, padrao.recursos, dados.recursos),
+          inventario: dados.inventario || padrao.inventario,
+          habilidades: dados.habilidades || padrao.habilidades,
+          talentos:   dados.talentos || padrao.talentos,
+          tecnicas:   dados.tecnicas || padrao.tecnicas,
+          atalhos:    dados.atalhos || padrao.atalhos,
+          historicoRolagens: dados.historicoRolagens || padrao.historicoRolagens
+        };
+        sessionStorage.setItem(SESSION_KEY, estado.id); // esta aba passa a exibir o personagem importado
+        render(); salvar();
+      }catch(err){
+        alert("Não foi possível ler o arquivo. Verifique se é um JSON exportado desta ficha.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("btn-reset").addEventListener("click", ()=>{
+    if(confirm("Isso vai apagar todos os dados da ficha atual. Continuar?")){
+      const idAtual = estado.id;
+      estado = estadoPadrao();
+      estado.id = idAtual; // mesmo personagem, dados zerados
+      render(); salvar();
+    }
+  });
+
+  document.getElementById("btn-modo-atributo").addEventListener("click", ()=>{
+    modoAtributoTemporario = !modoAtributoTemporario;
+    renderAtributos();
+  });
+
+  document.getElementById("btn-limpar-temp").addEventListener("click", ()=>{
+    ATRIBUTOS_DEF.forEach(def => { estado.atributos[def.chave].modTemp = 0; });
+    render(); salvar();
+  });
+
+  // ---------- lista de personagens (modal) ----------
+  function listarPersonagens(){
+    const lista = [];
+    for(let i=0; i<localStorage.length; i++){
+      const chave = localStorage.key(i);
+      if(!chave || !chave.startsWith(LOCALSTORAGE_PREFIX)) continue;
+      try{
+        const dados = JSON.parse(localStorage.getItem(chave));
+        lista.push({
+          id: dados.id || chave.slice(LOCALSTORAGE_PREFIX.length),
+          nome: (dados.identidade && dados.identidade.nome) || "Personagem sem nome",
+          classe: (dados.identidade && dados.identidade.classe) || "",
+          nivel: (dados.identidade && dados.identidade.nivel) || 1,
+          atualizadoEm: dados.atualizadoEm || 0
+        });
+      }catch(e){ /* ignora entradas corrompidas no localStorage */ }
+    }
+    lista.sort((a,b) => b.atualizadoEm - a.atualizadoEm); // mais recentemente editado primeiro
+    return lista;
+  }
+
+  function renderListaPersonagens(){
+    const container = document.getElementById("lista-personagens");
+    container.innerHTML = "";
+    const personagens = listarPersonagens();
+
+    if(personagens.length === 0){
+      container.innerHTML = `<div class="tab-placeholder">Nenhum personagem salvo ainda.</div>`;
+      return;
+    }
+
+    personagens.forEach(p => {
+      const ativo = p.id === estado.id;
+      const card = document.createElement("div");
+      card.className = "personagem-card" + (ativo ? " ativo" : "");
+      card.innerHTML = `
+        <div class="personagem-card-info" data-id="${p.id}" data-acao="selecionar-personagem">
+          <div class="personagem-card-nome">${p.nome}${ativo ? '<span class="personagem-card-tag">Atual</span>' : ""}</div>
+          <div class="personagem-card-meta">${p.classe ? p.classe + " · " : ""}Nível ${p.nivel}</div>
+        </div>
+        <button class="personagem-card-excluir" data-id="${p.id}" data-acao="excluir-personagem" title="Excluir personagem">×</button>
+      `;
+      container.appendChild(card);
+    });
+
+    container.querySelectorAll('[data-acao="selecionar-personagem"]').forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const id = el.dataset.id;
+        if(id === estado.id){ fecharModalPersonagens(); return; }
+        const carregado = carregarPersonagem(id);
+        if(!carregado) return;
+        estado = carregado;
+        sessionStorage.setItem(SESSION_KEY, estado.id);
+        localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
+        render();
+        fecharModalPersonagens();
+      });
+    });
+
+    container.querySelectorAll('[data-acao="excluir-personagem"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        if(!confirm("Excluir este personagem permanentemente? Essa ação não pode ser desfeita.")) return;
+
+        localStorage.removeItem(LOCALSTORAGE_PREFIX + id);
+
+        if(id === estado.id){
+          // o personagem que estava aberto nesta aba foi excluído: carrega outro, ou cria um novo se não sobrar nenhum
+          const restantes = listarPersonagens();
+          if(restantes.length > 0){
+            estado = carregarPersonagem(restantes[0].id) || estadoPadrao();
+          } else {
+            estado = estadoPadrao();
+            estado.id = gerarIdPersonagem();
+          }
+          sessionStorage.setItem(SESSION_KEY, estado.id);
+          localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
+          render(); salvar();
+        }
+        renderListaPersonagens();
+      });
+    });
+  }
+
+  function abrirModalPersonagens(){
+    renderListaPersonagens();
+    document.getElementById("modal-personagens").classList.add("aberto");
+  }
+  function fecharModalPersonagens(){
+    document.getElementById("modal-personagens").classList.remove("aberto");
+  }
+
+  document.getElementById("btn-personagens").addEventListener("click", abrirModalPersonagens);
+  document.getElementById("btn-fechar-modal").addEventListener("click", fecharModalPersonagens);
+  document.getElementById("modal-personagens").addEventListener("click", (e)=>{
+    if(e.target.id === "modal-personagens") fecharModalPersonagens(); // clique fora do painel fecha
+  });
+  document.getElementById("btn-novo-personagem").addEventListener("click", ()=>{
+    estado = estadoPadrao();
+    estado.id = gerarIdPersonagem();
+    sessionStorage.setItem(SESSION_KEY, estado.id);
+    localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
+    render(); salvar();
+    fecharModalPersonagens();
+  });
+
+  // ---------- histórico de rolagens (modal) ----------
+  function renderHistorico(){
+    const container = document.getElementById("lista-historico");
+    container.innerHTML = "";
+
+    if(estado.historicoRolagens.length === 0){
+      container.innerHTML = `<div class="tab-placeholder">Nenhuma rolagem registrada ainda.</div>`;
+      return;
+    }
+
+    estado.historicoRolagens.forEach(reg => {
+      const item = document.createElement("div");
+      item.className = "historico-item";
+      if(reg.sucessoAutomatico){
+        item.innerHTML = `
+          <div class="historico-info">
+            <div class="historico-nome">${reg.nome}</div>
+            <div class="historico-detalhe">Sucesso Automático</div>
+            <div class="historico-hora">${reg.hora}</div>
+          </div>
+          <div class="historico-total automatico">✓</div>`;
+      } else {
+        item.innerHTML = `
+          <div class="historico-info">
+            <div class="historico-nome">${reg.nome}</div>
+            <div class="historico-detalhe">${reg.formula} ${reg.detalhe}</div>
+            <div class="historico-hora">${reg.hora}</div>
+          </div>
+          <div class="historico-total">${reg.total}</div>`;
+      }
+      container.appendChild(item);
+    });
+  }
+
+  function abrirModalHistorico(){
+    renderHistorico();
+    document.getElementById("modal-historico").classList.add("aberto");
+  }
+  function fecharModalHistorico(){
+    document.getElementById("modal-historico").classList.remove("aberto");
+  }
+
+  document.getElementById("btn-historico").addEventListener("click", abrirModalHistorico);
+  document.getElementById("btn-fechar-historico").addEventListener("click", fecharModalHistorico);
+  document.getElementById("modal-historico").addEventListener("click", (e)=>{
+    if(e.target.id === "modal-historico") fecharModalHistorico();
+  });
+  document.getElementById("btn-limpar-historico").addEventListener("click", ()=>{
+    if(!confirm("Limpar todo o histórico de rolagens deste personagem?")) return;
+    estado.historicoRolagens = [];
+    salvar();
+    renderHistorico();
+  });
+
+  // ---------- sistema de abas (coluna esquerda) ----------
+  // Troca apenas o conteúdo da coluna esquerda; identidade/status/atributos (coluna direita) não são afetados.
+  document.querySelectorAll("#tabbar .tab-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const alvo = btn.dataset.tab;
+
+      document.querySelectorAll("#tabbar .tab-btn").forEach(b => b.classList.toggle("active", b === btn));
+      document.querySelectorAll(".tab-content").forEach(panel => {
+        panel.classList.toggle("active", panel.dataset.tabContent === alvo);
+      });
+    });
+  });
+
+  render();
+  salvar(); // garante que o personagem atual já exista no localStorage, mesmo antes da primeira edição
+})();
+</script>
+</body>
+</html>
