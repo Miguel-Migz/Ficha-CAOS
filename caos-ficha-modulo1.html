@@ -424,6 +424,15 @@
   .btn.primary{ background:var(--accent-arcane-dim); border-color:var(--accent-arcane); }
   .btn.danger:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
   .save-indicator{ font-size:0.72rem; color:var(--text-faint); align-self:center; margin-right:auto; }
+
+  .mesa-panel{ padding:14px 20px; display:flex; align-items:center; }
+  .mesa-form{ display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; width:100%; }
+  .mesa-input-wrap{ flex:1; min-width:180px; max-width:280px; }
+  .mesa-status{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap; width:100%;
+    font-size:0.86rem; color:var(--text-dim);
+  }
+  .mesa-status b{ color:var(--accent-gold); font-family:var(--font-mono); }
   .sync-indicator{ font-size:0.72rem; color:var(--text-faint); align-self:center; }
   #import-input{ display:none; }
 
@@ -435,6 +444,84 @@
     .formula{ text-align:left; }
   }
 </style>
+
+<!-- ===================== FIREBASE (COMPAT) — SISTEMA DE MESAS PRIVADAS ===================== -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDHbydGJAa1hb5S0w2zvqwM0Y6Y4AKspCQ",
+    authDomain: "caos-rpg.firebaseapp.com",
+    databaseURL: "https://caos-rpg-default-rtdb.firebaseio.com",
+    projectId: "caos-rpg",
+    storageBucket: "caos-rpg.firebasestorage.app",
+    messagingSenderId: "1056651562841",
+    appId: "1:1056651562841:web:c37def09772c89e797c648"
+  };
+
+  let firebaseOk = false;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    firebaseOk = true;
+  }catch(e){
+    console.warn("Firebase indisponível — o app segue funcionando só localmente:", e);
+  }
+
+  /**
+   * Gera um ID único de mesa e cria a rota /mesas/{idMesa} no Firebase.
+   * @param {string} nomeMesa - nome escolhido pelo Mestre (ex: "Campanha do Caos")
+   * @returns {Promise<string>} resolve com o idMesa gerado (ex: "MESA-8492")
+   */
+  function criarNovaMesa(nomeMesa){
+    const idMesa = "MESA-" + Math.floor(1000 + Math.random() * 9000);
+    const dadosMesa = { nome: nomeMesa, criadoEm: Date.now() };
+
+    return firebase.database()
+      .ref(`mesas/${idMesa}`)
+      .set(dadosMesa)
+      .then(() => idMesa)
+      .catch(erro => {
+        console.error("Erro ao criar mesa:", erro);
+        throw erro;
+      });
+  }
+
+  /**
+   * Salva/atualiza o personagem em /mesas/{idMesa}/jogadores/{idPersonagem}.
+   * @param {string} idMesa
+   * @param {object} dadosPersonagem - precisa ter dadosPersonagem.id preenchido
+   * @returns {Promise<void>}
+   */
+  function conectarJogadorMesa(idMesa, dadosPersonagem){
+    if(!idMesa || !dadosPersonagem || !dadosPersonagem.id){
+      return Promise.reject(new Error("idMesa e dadosPersonagem.id são obrigatórios."));
+    }
+    return firebase.database()
+      .ref(`mesas/${idMesa}/jogadores/${dadosPersonagem.id}`)
+      .set(dadosPersonagem)
+      .catch(erro => {
+        console.error("Erro ao conectar jogador na mesa:", erro);
+        throw erro;
+      });
+  }
+
+  /**
+   * Escuta em tempo real as alterações em /mesas/{idMesa}/jogadores.
+   * @param {string} idMesa
+   * @param {(jogadores: object|null) => void} callback - recebe { idPersonagem: dados, ... } ou null se vazio
+   * @returns {() => void} função pra cancelar a escuta
+   */
+  function escutarJogadoresDaMesa(idMesa, callback){
+    if(!idMesa) throw new Error("idMesa é obrigatório.");
+    const referencia = firebase.database().ref(`mesas/${idMesa}/jogadores`);
+    referencia.on("value",
+      (snapshot) => callback(snapshot.val()),
+      (erro) => console.error("Erro ao escutar jogadores da mesa:", erro)
+    );
+    return () => referencia.off("value");
+  }
+</script>
+
 </head>
 <body>
 <div class="wrap">
@@ -447,8 +534,23 @@
     <div class="masthead-actions">
       <button class="btn" id="btn-historico">Histórico</button>
       <button class="btn" id="btn-personagens">Personagens</button>
+      <a class="btn" id="btn-painel-mestre" href="./mestre.html" target="_blank" rel="noopener">Painel do Mestre</a>
     </div>
   </header>
+
+  <!-- ===================== MESA: ENTRAR / STATUS ===================== -->
+  <section class="panel mesa-panel">
+    <div class="mesa-form" id="mesa-form">
+      <label class="field mesa-input-wrap">ID da Mesa
+        <input type="text" id="f-id-mesa" placeholder="Ex: mesa-8492">
+      </label>
+      <button class="btn primary" id="btn-entrar-mesa">Entrar na Mesa</button>
+    </div>
+    <div class="mesa-status" id="mesa-status" style="display:none">
+      <span>Conectado à mesa <b id="mesa-status-id"></b></span>
+      <button class="btn" id="btn-sair-mesa">Sair da mesa</button>
+    </div>
+  </section>
 
   <!-- ===================== MODAL: LISTA DE PERSONAGENS ===================== -->
   <div class="modal-overlay" id="modal-personagens">
@@ -733,36 +835,10 @@
 <div id="roll-log"></div>
 
 <script>
-(async function(){
+(function(){
   "use strict";
 
-  // ---------- Firebase (sincronização em tempo real) ----------
-  const firebaseConfig = {
-    apiKey: "AIzaSyDHbydGJAa1hb5S0w2zvqwM0Y6Y4AKspCQ",
-    authDomain: "caos-rpg.firebaseapp.com",
-    databaseURL: "https://caos-rpg-default-rtdb.firebaseio.com",
-    projectId: "caos-rpg",
-    storageBucket: "caos-rpg.firebasestorage.app",
-    messagingSenderId: "1056651562841",
-    appId: "1:1056651562841:web:c37def09772c89e797c648"
-  };
-  let db = null, dbRef = null, dbSet = null, dbOnValue = null, dbUpdate = null, dbOnDisconnect = null, dbRemove = null;
-  let firebaseOk = false;
   let aplicandoAtualizacaoRemota = false; // trava pra não reenviar ao Firebase o que acabamos de receber dele
-
-  try{
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
-    const { getDatabase, ref, set, onValue, update, onDisconnect, remove } =
-      await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
-    const app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-    dbRef = ref; dbSet = set; dbOnValue = onValue; dbUpdate = update; dbOnDisconnect = onDisconnect; dbRemove = remove;
-    firebaseOk = true;
-  }catch(e){
-    console.warn("Firebase indisponível, a ficha continua funcionando só localmente:", e);
-  }
-
-  const SYNC_PATH = "personagens";
 
   const LOCALSTORAGE_PREFIX = "caos_ficha_";      // + id do personagem => dados daquele personagem
   const LAST_ACTIVE_KEY = "caos_ultimo_personagem_id"; // global (localStorage): último personagem salvo por qualquer aba
@@ -830,6 +906,7 @@
     return {
       id: null, // preenchido na criação (gerarIdPersonagem) ou ao carregar/importar
       atualizadoEm: null, // timestamp da última vez que este personagem foi salvo (usado para ordenar a lista)
+      idMesa: null, // código da mesa em que este personagem está publicado (null = modo local, não sincroniza)
       identidade:{ nome:"", classe:"Sicário", subclasse:"Arcanista", antecedente:"", oficio:"", nivel:1, proficiencia:1, cansaco:0, exaustao:0, foto:null },
       atributos,
       pericias,
@@ -859,6 +936,7 @@
     return {
       id:         dados.id || idFallback,
       atualizadoEm: dados.atualizadoEm || padrao.atualizadoEm,
+      idMesa:     dados.idMesa !== undefined ? dados.idMesa : padrao.idMesa,
       identidade: mesclarIdentidade(padrao.identidade, dados.identidade),
       atributos:  Object.assign({}, padrao.atributos, dados.atributos),
       pericias:   dados.pericias || padrao.pericias,
@@ -901,56 +979,85 @@
 
   let estado = inicializarEstado();
 
-  // ---------- sincronização em tempo real (Firebase) ----------
-  let pararEscutaRemota = null; // cancela o listener anterior ao trocar de personagem
+  // ---------- sincronização em tempo real por Mesa (usa as funções definidas no <head>) ----------
+  let pararEscutaMesa = null; // função de cleanup retornada por escutarJogadoresDaMesa (null = ninguém escutando)
+  let conectadoAoFirebase = firebaseOk; // atualizado pelo listener de .info/connected
 
-  function indicarStatusSync(texto){
+  function atualizarIndicadorConexao(extra){
     const el = document.getElementById("sync-indicator");
-    if(el) el.textContent = texto;
+    if(!el) return;
+    if(!firebaseOk){
+      el.textContent = "🔴 modo local (Firebase indisponível)";
+    } else if(!estado.idMesa){
+      el.textContent = "🔴 offline — sem mesa";
+    } else if(!conectadoAoFirebase){
+      el.textContent = "🔴 desconectado do Firebase";
+    } else {
+      el.textContent = "🟢 conectado na mesa " + estado.idMesa + (extra ? " — " + extra : "");
+    }
   }
 
-  function escutarPersonagemRemoto(id){
-    if(!firebaseOk) return;
-    if(pararEscutaRemota) pararEscutaRemota(); // encerra a escuta do personagem anterior, se houver
+  function pararEscutaRemota(){
+    if(pararEscutaMesa){ pararEscutaMesa(); pararEscutaMesa = null; }
+  }
 
-    const referencia = dbRef(db, `${SYNC_PATH}/${id}`);
-    pararEscutaRemota = dbOnValue(referencia, (snapshot)=>{
-      const dadosRemotos = snapshot.val();
+  // Escuta /mesas/{idMesa}/jogadores (todos os jogadores) e filtra só os dados do próprio personagem —
+  // assim reaproveita a mesma função genérica usada pelo Painel do Mestre.
+  function escutarPersonagemRemoto(){
+    pararEscutaRemota();
+    if(!firebaseOk || !estado.idMesa) { atualizarIndicadorConexao(); return; }
+
+    pararEscutaMesa = escutarJogadoresDaMesa(estado.idMesa, (jogadores)=>{
+      const dadosRemotos = jogadores && jogadores[estado.id];
       if(!dadosRemotos) return; // nada salvo remotamente ainda pra esse personagem
 
       // só aplica se o remoto for de fato mais novo (evita loop com nossa própria escrita e não atropela edição local em andamento)
       if((dadosRemotos.atualizadoEm || 0) > (estado.atualizadoEm || 0)){
         aplicandoAtualizacaoRemota = true;
-        estado = construirEstadoAPartirDeDados(dadosRemotos, id);
+        estado = construirEstadoAPartirDeDados(dadosRemotos, estado.id);
         localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado)); // espelha localmente, sem re-emitir pro Firebase
-        render();
-        indicarStatusSync("🔥 atualizado em tempo real " + new Date().toLocaleTimeString("pt-BR"));
+        render(); // repovoa todos os inputs da tela (vida, recursos, etc.) instantaneamente
+        atualizarIndicadorConexao("atualizado às " + new Date().toLocaleTimeString("pt-BR"));
         aplicandoAtualizacaoRemota = false;
       }
-    }, (erro)=>{
-      console.warn("Erro ao escutar personagem no Firebase:", erro);
-      indicarStatusSync("⚠️ sem conexão com o Firebase");
     });
+    atualizarIndicadorConexao();
   }
 
   function sincronizarFirebase(){
-    if(!firebaseOk || aplicandoAtualizacaoRemota) return;
-    dbSet(dbRef(db, `${SYNC_PATH}/${estado.id}`), estado)
-      .then(()=> indicarStatusSync("🔥 sincronizado " + new Date().toLocaleTimeString("pt-BR")))
-      .catch(erro => {
-        console.warn("Erro ao sincronizar com o Firebase:", erro);
-        indicarStatusSync("⚠️ falha ao sincronizar");
-      });
+    if(!firebaseOk || !estado.idMesa || aplicandoAtualizacaoRemota) return;
+    conectarJogadorMesa(estado.idMesa, estado)
+      .then(()=> atualizarIndicadorConexao("sincronizado às " + new Date().toLocaleTimeString("pt-BR")))
+      .catch(()=> atualizarIndicadorConexao("falha ao sincronizar"));
+  }
+
+  function entrarNaMesa(idMesaDigitado){
+    const idMesa = (idMesaDigitado || "").trim();
+    if(!idMesa) return;
+    estado.idMesa = idMesa;
+    escutarPersonagemRemoto();
+    render(); salvar(); // salvar() já chama sincronizarFirebase(), publicando o personagem na mesa
+  }
+
+  function sairDaMesa(){
+    if(estado.idMesa && firebaseOk){
+      firebase.database().ref(`mesas/${estado.idMesa}/jogadores/${estado.id}`).remove().catch(()=>{});
+    }
+    pararEscutaRemota();
+    estado.idMesa = null;
+    atualizarIndicadorConexao();
+    render(); salvar();
   }
 
   if(firebaseOk){
-    escutarPersonagemRemoto(estado.id);
+    escutarPersonagemRemoto();
     // aviso de conexão (a Realtime Database expõe esse caminho especial em todo projeto)
-    dbOnValue(dbRef(db, ".info/connected"), (snap)=>{
-      if(snap.val() === false) indicarStatusSync("⚠️ desconectado do Firebase");
+    firebase.database().ref(".info/connected").on("value", (snap)=>{
+      conectadoAoFirebase = snap.val() === true;
+      atualizarIndicadorConexao();
     });
   } else {
-    indicarStatusSync("modo local (sem Firebase)");
+    atualizarIndicadorConexao();
   }
 
   // ---------- persistência ----------
@@ -1016,6 +1123,17 @@
 
   // ---------- render ----------
   function render(){
+    const mesaForm = document.getElementById("mesa-form");
+    const mesaStatus = document.getElementById("mesa-status");
+    if(estado.idMesa){
+      mesaForm.style.display = "none";
+      mesaStatus.style.display = "flex";
+      document.getElementById("mesa-status-id").textContent = estado.idMesa;
+    } else {
+      mesaForm.style.display = "flex";
+      mesaStatus.style.display = "none";
+    }
+
     document.getElementById("f-nome").value = estado.identidade.nome;
     document.getElementById("f-classe").value = estado.identidade.classe;
     document.getElementById("f-subclasse").value = estado.identidade.subclasse;
@@ -2256,7 +2374,7 @@
         const dados = JSON.parse(evt.target.result);
         estado = construirEstadoAPartirDeDados(dados, dados.id || gerarIdPersonagem());
         sessionStorage.setItem(SESSION_KEY, estado.id); // esta aba passa a exibir o personagem importado
-        escutarPersonagemRemoto(estado.id);
+        escutarPersonagemRemoto();
         render(); salvar();
       }catch(err){
         alert("Não foi possível ler o arquivo. Verifique se é um JSON exportado desta ficha.");
@@ -2339,7 +2457,7 @@
         estado = carregado;
         sessionStorage.setItem(SESSION_KEY, estado.id);
         localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
-        escutarPersonagemRemoto(estado.id);
+        escutarPersonagemRemoto();
         render();
         fecharModalPersonagens();
       });
@@ -2351,8 +2469,15 @@
         const id = btn.dataset.id;
         if(!confirm("Excluir este personagem permanentemente? Essa ação não pode ser desfeita.")) return;
 
+        // descobre a mesa desse personagem (se houver) antes de apagar, pra também limpar no Firebase
+        let idMesaDoExcluido = null;
+        try{
+          const raw = localStorage.getItem(LOCALSTORAGE_PREFIX + id);
+          if(raw) idMesaDoExcluido = (JSON.parse(raw).idMesa) || null;
+        }catch(e){ /* ignora */ }
+
         localStorage.removeItem(LOCALSTORAGE_PREFIX + id);
-        if(firebaseOk) dbRemove(dbRef(db, `${SYNC_PATH}/${id}`)).catch(()=>{});
+        if(firebaseOk && idMesaDoExcluido) firebase.database().ref(`mesas/${idMesaDoExcluido}/jogadores/${id}`).remove().catch(()=>{});
 
         if(id === estado.id){
           // o personagem que estava aberto nesta aba foi excluído: carrega outro, ou cria um novo se não sobrar nenhum
@@ -2365,7 +2490,7 @@
           }
           sessionStorage.setItem(SESSION_KEY, estado.id);
           localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
-          escutarPersonagemRemoto(estado.id);
+          escutarPersonagemRemoto();
           render(); salvar();
         }
         renderListaPersonagens();
@@ -2391,7 +2516,7 @@
     estado.id = gerarIdPersonagem();
     sessionStorage.setItem(SESSION_KEY, estado.id);
     localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
-    escutarPersonagemRemoto(estado.id);
+    escutarPersonagemRemoto();
     render(); salvar();
     fecharModalPersonagens();
   });
@@ -2448,6 +2573,19 @@
     estado.historicoRolagens = [];
     salvar();
     renderHistorico();
+  });
+
+  // ---------- mesa (entrar / sair) ----------
+  document.getElementById("btn-entrar-mesa").addEventListener("click", ()=>{
+    const input = document.getElementById("f-id-mesa");
+    entrarNaMesa(input.value);
+    input.value = "";
+  });
+  document.getElementById("f-id-mesa").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") document.getElementById("btn-entrar-mesa").click();
+  });
+  document.getElementById("btn-sair-mesa").addEventListener("click", ()=>{
+    if(confirm("Sair da mesa atual? Seu personagem deixa de aparecer no Painel do Mestre.")) sairDaMesa();
   });
 
   // ---------- sistema de abas (coluna esquerda) ----------
