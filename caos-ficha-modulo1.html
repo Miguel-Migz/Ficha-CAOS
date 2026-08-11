@@ -534,7 +534,6 @@
     <div class="masthead-actions">
       <button class="btn" id="btn-historico">Histórico</button>
       <button class="btn" id="btn-personagens">Personagens</button>
-      <a class="btn" id="btn-painel-mestre" href="./mestre.html" target="_blank" rel="noopener">Painel do Mestre</a>
     </div>
   </header>
 
@@ -2114,6 +2113,20 @@
     if(estado.historicoRolagens.length > 100) estado.historicoRolagens.length = 100;
     salvar();
 
+    // publica a rolagem no log da mesa, visível só pelo Painel do Mestre (a ficha nunca lê esse caminho de volta)
+    if(firebaseOk && estado.idMesa){
+      firebase.database().ref(`mesas/${estado.idMesa}/rolagens`).push({
+        personagemId: estado.id,
+        personagemNome: estado.identidade.nome || "Personagem sem nome",
+        nomeTeste: nome,
+        sucessoAutomatico: !!resultado.sucessoAutomatico,
+        total: resultado.total ?? null,
+        formula: resultado.formula || "",
+        detalhe,
+        timestamp: Date.now()
+      }).catch(()=>{});
+    }
+
     const modalHistorico = document.getElementById("modal-historico");
     if(modalHistorico.classList.contains("aberto")) renderHistorico();
   }
@@ -2603,6 +2616,33 @@
 
   render();
   salvar(); // garante que o personagem atual já exista no localStorage, mesmo antes da primeira edição
+
+  // ---------- abertura direta a partir do Painel do Mestre (?mesa=...&personagem=...) ----------
+  (function abrirPersonagemViaLinkDoMestre(){
+    const params = new URLSearchParams(location.search);
+    const mesaParam = params.get("mesa");
+    const personagemParam = params.get("personagem");
+    if(!mesaParam || !personagemParam) return;
+    if(!firebaseOk){ alert("Não foi possível conectar ao Firebase pra carregar esse personagem."); return; }
+
+    firebase.database().ref(`mesas/${mesaParam}/jogadores/${personagemParam}`).once("value").then(snapshot => {
+      const dados = snapshot.val();
+      if(!dados){
+        alert("Não foi possível encontrar esse personagem nessa mesa.");
+        return;
+      }
+      estado = construirEstadoAPartirDeDados(dados, personagemParam);
+      estado.idMesa = mesaParam; // garante que essa aba continue conectada à mesma mesa
+      sessionStorage.setItem(SESSION_KEY, estado.id);
+      localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado));
+      localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
+      escutarPersonagemRemoto();
+      render();
+    }).catch(err => {
+      console.warn("Erro ao carregar personagem via link do mestre:", err);
+      alert("Erro ao carregar esse personagem. Tente novamente.");
+    });
+  })();
 })();
 </script>
 </body>
