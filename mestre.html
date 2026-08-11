@@ -109,15 +109,19 @@
     background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:18px;
     display:flex; flex-direction:column; gap:12px;
   }
-  .pcard-header{ display:flex; align-items:center; gap:12px; }
+  .pcard-header{ display:flex; align-items:center; gap:12px; cursor:pointer; user-select:none; }
   .pcard-avatar{
     width:52px; height:52px; border-radius:50%; background:var(--bg-inset); border:2px solid var(--border-soft);
     flex-shrink:0; overflow:hidden; display:flex; align-items:center; justify-content:center;
     font-family:var(--font-display); font-size:1rem; color:var(--text-faint);
   }
   .pcard-avatar img{ width:100%; height:100%; object-fit:cover; }
-  .pcard-nome{ font-family:var(--font-display); font-size:1.1rem; font-weight:600; }
-  .pcard-sub{ font-size:0.76rem; color:var(--text-dim); margin-top:2px; }
+  .pcard-nome{ font-family:var(--font-display); font-size:1.1rem; font-weight:600; flex:1; min-width:0; }
+  .pcard-chevron{ color:var(--text-faint); font-size:0.72rem; flex-shrink:0; }
+  .pcard-sub{ font-size:0.76rem; color:var(--text-dim); margin-bottom:10px; }
+
+  .pcard-detalhes{ display:none; }
+  .pcard-detalhes.aberto{ display:flex; flex-direction:column; gap:12px; padding-top:2px; border-top:1px solid var(--border-soft); }
 
   .pcard-atributos{ display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; }
   .attr-mini{
@@ -125,7 +129,10 @@
     padding:6px 2px; text-align:center;
   }
   .attr-mini-nome{ font-size:0.58rem; text-transform:uppercase; color:var(--text-faint); letter-spacing:0.02em; }
-  .attr-mini-valor{ font-family:var(--font-display); font-size:0.95rem; font-weight:600; margin-top:1px; }
+  .attr-mini-valor{ font-family:var(--font-display); font-size:0.95rem; font-weight:600; margin-top:1px; white-space:nowrap; }
+  .attr-mini-efetivo{ font-size:0.8em; }
+  .attr-mini-efetivo.buff{ color:#4fd57a; }
+  .attr-mini-efetivo.debuff{ color:var(--accent-ember); }
 
   .pcard-vitais{ display:flex; flex-direction:column; gap:8px; }
   .vital-linha{ display:flex; align-items:center; gap:8px; }
@@ -154,10 +161,127 @@
   .acao-btn.dano:hover{ background:rgba(226,89,63,0.15); }
   .acao-btn.cura{ border-color:#6fbf73; color:#6fbf73; }
   .acao-btn.cura:hover{ background:rgba(111,191,115,0.12); }
-  .acao-btn.remover{ flex:none; width:100%; border-color:var(--border-soft); color:var(--text-faint); }
+  .acao-btn.remover{ border-color:var(--border-soft); color:var(--text-faint); }
   .acao-btn.remover:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .acao-btn.abrir-ficha{ border-color:var(--border-soft); color:var(--text-faint); text-decoration:none; text-align:center; }
+  .acao-btn.abrir-ficha:hover{ border-color:var(--accent-arcane); color:var(--accent-arcane); }
 
   .pcard-footer{ display:flex; justify-content:space-between; align-items:center; font-size:0.66rem; color:var(--text-faint); }
+
+  /* ---------- Layout de 2 colunas do dashboard ---------- */
+  .dashboard-grid{ display:grid; grid-template-columns:1fr 2fr; grid-template-rows:minmax(60vh, auto); gap:20px; align-items:stretch; }
+  @media (max-width:1000px){ .dashboard-grid{ grid-template-columns:1fr; grid-template-rows:auto; } }
+  .coluna-ferramentas{ display:flex; flex-direction:column; }
+  .coluna-ferramentas .panel{ flex:1; display:flex; flex-direction:column; margin-bottom:0; }
+  .coluna-ferramentas .empty-state{ flex:1; display:flex; align-items:center; justify-content:center; margin:0; border-style:dashed; }
+
+  /* ---------- Modal genérico ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(8,6,12,0.7); z-index:100;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.aberto{ display:flex; }
+  .modal-panel{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:12px;
+    width:100%; max-width:480px; max-height:80vh; display:flex; flex-direction:column; overflow:hidden;
+  }
+  .modal-header{
+    display:flex; align-items:center; justify-content:space-between; padding:16px 20px;
+    border-bottom:1px solid var(--border-soft); flex-shrink:0;
+  }
+  .modal-close{
+    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
+    border-radius:6px; width:28px; height:28px; font-size:1rem; cursor:pointer; line-height:1;
+  }
+  .modal-close:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .modal-body{ padding:16px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+
+  /* ---------- Log de rolagens ---------- */
+  .log-rolagens .empty-state{ border:none; }
+  .rolagem-item{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:10px 12px; display:flex; align-items:center; gap:10px;
+  }
+  .rolagem-info{ flex:1; min-width:0; }
+  .rolagem-personagem{ font-family:var(--font-display); font-size:0.86rem; color:var(--accent-gold); }
+  .rolagem-teste{ font-size:0.8rem; color:var(--text); margin-top:2px; }
+  .rolagem-detalhe{ font-size:0.7rem; color:var(--text-faint); font-family:var(--font-mono); margin-top:2px; overflow-wrap:anywhere; }
+  .rolagem-hora{ font-size:0.64rem; color:var(--text-faint); margin-top:2px; }
+  .rolagem-total{
+    font-family:var(--font-display); font-size:1.3rem; font-weight:600; color:var(--text);
+    flex-shrink:0; min-width:36px; text-align:right;
+  }
+  .rolagem-total.automatico{ font-size:0.82rem; color:#4fd57a; }
+
+  /* ---------- Toasts de notificação de rolagem ---------- */
+  #toast-rolagens{ position:fixed; bottom:20px; right:20px; max-width:320px; z-index:50; display:flex; flex-direction:column; gap:8px; }
+  .rolagem-toast{
+    background:var(--bg-panel); border:1px solid var(--accent-arcane); border-radius:8px;
+    padding:12px 14px; font-size:0.82rem; box-shadow:0 8px 24px rgba(0,0,0,0.45);
+    animation: fadein 0.2s ease-out;
+  }
+  .rolagem-toast .rt-personagem{ color:var(--accent-gold); font-weight:600; margin-bottom:2px; font-family:var(--font-display); }
+  .rolagem-toast .rt-teste{ color:var(--text-dim); font-size:0.76rem; margin-bottom:4px; }
+  .rolagem-toast .rt-total{ font-family:var(--font-mono); font-size:1.3rem; color:var(--text); }
+  @keyframes fadein{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Anotações confidenciais ---------- */
+  .anotacoes-textarea{
+    width:100%; min-height:160px; background:var(--bg-inset); border:1px solid var(--border-soft);
+    border-radius:8px; padding:12px; color:var(--text); font-family:var(--font-body); font-size:0.86rem;
+    resize:vertical; line-height:1.5;
+  }
+  .anotacoes-textarea:focus{ outline:2px solid var(--accent-arcane); outline-offset:1px; border-color:var(--accent-arcane); }
+  .anotacoes-status{ font-size:0.66rem; color:var(--text-faint); margin-top:6px; text-align:right; }
+
+  /* ---------- Rastreador de iniciativa ---------- */
+  .form-linha-compacta{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
+  .form-linha-compacta input{ padding:7px 8px; font-size:0.82rem; }
+  .form-linha-compacta .campo-nome{ flex:1.4; min-width:100px; }
+  .form-linha-compacta .campo-curto{ width:56px; flex-shrink:0; }
+
+  .lista-combatentes{ display:flex; flex-direction:column; gap:6px; margin:12px 0; }
+  .combatente-row{
+    display:flex; align-items:center; gap:8px; background:var(--bg-panel-alt);
+    border:1px solid var(--border-soft); border-radius:8px; padding:7px 10px;
+  }
+  .combatente-row.ativo{ border-color:var(--accent-gold); box-shadow:0 0 0 1px var(--accent-gold) inset; }
+  .combatente-iniciativa input{
+    width:36px; text-align:center; padding:4px; font-size:0.78rem; font-family:var(--font-mono);
+  }
+  .combatente-tipo-tag{
+    font-size:0.58rem; text-transform:uppercase; padding:2px 5px; border-radius:4px;
+    border:1px solid var(--border-soft); color:var(--text-faint); flex-shrink:0; white-space:nowrap;
+  }
+  .combatente-tipo-tag.jogador{ color:#4d9eea; border-color:#4d9eea; }
+  .combatente-tipo-tag.inimigo{ color:var(--accent-ember); border-color:var(--accent-ember); }
+  .combatente-nome{ flex:1; font-size:0.82rem; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .combatente-vida{ font-family:var(--font-mono); font-size:0.74rem; color:var(--text-dim); flex-shrink:0; white-space:nowrap; }
+  .combatente-vida input{ width:44px; text-align:center; padding:3px; font-size:0.72rem; }
+  .combatente-acoes{ display:flex; gap:3px; flex-shrink:0; }
+  .combatente-acoes button{
+    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
+    border-radius:4px; width:20px; height:20px; font-size:0.68rem; cursor:pointer; line-height:1;
+  }
+  .combatente-acoes button:hover{ border-color:var(--accent-arcane); color:var(--text); }
+  .combatente-acoes button.remover-combatente:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .iniciativa-acoes{ display:flex; gap:8px; }
+
+  /* ---------- Escudo do Mestre (accordion) ---------- */
+  .accordion-item{ border:1px solid var(--border-soft); border-radius:8px; margin-bottom:8px; overflow:hidden; }
+  .accordion-item:last-child{ margin-bottom:0; }
+  .accordion-header{
+    padding:10px 14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+    background:var(--bg-panel-alt); font-size:0.84rem; color:var(--text);
+  }
+  .accordion-header:hover{ color:var(--accent-arcane); }
+  .accordion-seta{ color:var(--text-faint); font-size:0.7rem; transition:transform 0.15s ease; }
+  .accordion-item.aberto .accordion-seta{ transform:rotate(90deg); }
+  .accordion-body{ padding:0 14px; max-height:0; overflow:hidden; transition:max-height 0.2s ease; font-size:0.8rem; color:var(--text-dim); line-height:1.6; }
+  .accordion-item.aberto .accordion-body{ padding:12px 14px; max-height:600px; }
+  .accordion-body table{ width:100%; border-collapse:collapse; font-size:0.78rem; margin-top:6px; }
+  .accordion-body td, .accordion-body th{ padding:4px 6px; border-bottom:1px solid var(--border-soft); text-align:left; }
+  .accordion-body th{ color:var(--text-faint); font-weight:600; }
 </style>
 </head>
 <body>
@@ -311,11 +435,39 @@
     </div>
   </div>
 
-  <div id="conteudo">
-    <div class="empty-state">Carregando personagens…</div>
+  <div class="dashboard-grid">
+
+    <div class="coluna-jogadores">
+      <button class="btn" id="btn-historico-rolagens" style="width:100%; margin-bottom:14px;">Histórico de Rolagens</button>
+      <div id="conteudo">
+        <div class="empty-state">Carregando personagens…</div>
+      </div>
+    </div>
+
+    <div class="coluna-ferramentas">
+      <section class="panel">
+        <h2 class="panel-title">Ferramentas do Mestre</h2>
+        <div class="empty-state">Em desenvolvimento.<br>Anotações confidenciais, rastreador de iniciativa e escudo do mestre chegam aqui em breve.</div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: HISTÓRICO DE ROLAGENS ===================== -->
+  <div class="modal-overlay" id="modal-historico">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 class="panel-title" style="margin:0">Histórico de Rolagens</h2>
+        <button class="modal-close" id="btn-fechar-historico">×</button>
+      </div>
+      <div class="modal-body" id="log-rolagens">
+        <div class="empty-state">Nenhuma rolagem ainda nesta mesa.</div>
+      </div>
+    </div>
   </div>
 
 </div>
+
+<div id="toast-rolagens"></div>
 
 <script>
 (function(){
@@ -325,7 +477,9 @@
   const LS_MESA_ATIVA = "caos_mestre_mesa_ativa";
 
   let pararEscuta = null;
+  let pararEscutaRolagens = null;
   let mesaAtiva = null; // { id, nome }
+  const cardsExpandidos = new Set(); // ids de personagens com a guia de detalhes aberta
 
   // ---------- localStorage: mesas conhecidas por este navegador ----------
   function listarMesasSalvas(){
@@ -347,6 +501,7 @@
 
   function mostrarTelaInicial(){
     if(pararEscuta){ pararEscuta(); pararEscuta = null; }
+    if(pararEscutaRolagens){ pararEscutaRolagens(); pararEscutaRolagens = null; }
     mesaAtiva = null;
     localStorage.removeItem(LS_MESA_ATIVA);
     telaInicial.style.display = "block";
@@ -364,6 +519,9 @@
 
     if(pararEscuta) pararEscuta();
     pararEscuta = escutarJogadoresDaMesa(mesa.id, renderPersonagens);
+
+    if(pararEscutaRolagens) pararEscutaRolagens();
+    pararEscutaRolagens = escutarRolagensDaMesa(mesa.id);
   }
 
   function renderListaMesasSalvas(){
@@ -426,6 +584,17 @@
   });
 
   document.getElementById("btn-trocar-mesa").addEventListener("click", mostrarTelaInicial);
+
+  // ---------- modal: histórico de rolagens ----------
+  document.getElementById("btn-historico-rolagens").addEventListener("click", ()=>{
+    document.getElementById("modal-historico").classList.add("aberto");
+  });
+  document.getElementById("btn-fechar-historico").addEventListener("click", ()=>{
+    document.getElementById("modal-historico").classList.remove("aberto");
+  });
+  document.getElementById("modal-historico").addEventListener("click", (e)=>{
+    if(e.target.id === "modal-historico") e.currentTarget.classList.remove("aberto");
+  });
 
   document.getElementById("btn-copiar-codigo").addEventListener("click", ()=>{
     if(!mesaAtiva) return;
@@ -510,25 +679,33 @@
       const pctPv = pvMax > 0 ? clamp((pvAtual/pvMax)*100, 0, 100) : 0;
       const pctProt = protMax > 0 ? clamp((protAtual/protMax)*100, 0, 100) : 0;
 
-      const attrsHTML = ATRIBUTOS_ABREV.map(def => `
-        <div class="attr-mini">
-          <div class="attr-mini-nome">${def.label}</div>
-          <div class="attr-mini-valor">${(atrib[def.chave] && atrib[def.chave].pontos) ?? "—"}</div>
-        </div>
-      `).join("");
+      const attrsHTML = ATRIBUTOS_ABREV.map(def => {
+        const a = atrib[def.chave];
+        if(!a) return `
+          <div class="attr-mini">
+            <div class="attr-mini-nome">${def.label}</div>
+            <div class="attr-mini-valor">—</div>
+          </div>`;
+        const base = a.pontos ?? 0;
+        const modTemp = a.modTemp || 0;
+        const efetivo = Math.max(0, base + modTemp);
+        return `
+          <div class="attr-mini">
+            <div class="attr-mini-nome">${def.label}</div>
+            <div class="attr-mini-valor">${base}${modTemp !== 0 ? ` <span class="attr-mini-efetivo ${modTemp > 0 ? "buff" : "debuff"}">(${efetivo})</span>` : ""}</div>
+          </div>`;
+      }).join("");
+
+      const expandido = cardsExpandidos.has(id);
 
       const card = document.createElement("div");
       card.className = "pcard";
       card.innerHTML = `
-        <div class="pcard-header">
+        <div class="pcard-header" data-toggle="${id}">
           <div class="pcard-avatar">${ident.foto ? `<img src="${ident.foto}" alt="">` : iniciais(ident.nome)}</div>
-          <div>
-            <div class="pcard-nome">${ident.nome || "Personagem sem nome"}</div>
-            <div class="pcard-sub">${ident.classe || ""}${ident.subclasse ? " · "+ident.subclasse : ""} — Nível ${ident.nivel || 1}</div>
-          </div>
+          <div class="pcard-nome">${ident.nome || "Personagem sem nome"}</div>
+          <span class="pcard-chevron">${expandido ? "▾" : "▸"}</span>
         </div>
-
-        <div class="pcard-atributos">${attrsHTML}</div>
 
         <div class="pcard-vitais">
           <div class="vital-linha">
@@ -547,36 +724,48 @@
           </div>
         </div>
 
-        <div class="pcard-meta-row">
-          <span><b>DT</b>${rec.dt ?? "—"}</span>
-          <span><b>Desloc.</b>${rec.deslocamento ?? "—"}</span>
-          <span><b>Prof.</b>${ident.proficiencia ?? "—"}</span>
-          <span><b>Cansaço</b>${ident.cansaco ?? 0}</span>
-          <span><b>Exaustão</b>${ident.exaustao ?? 0}</span>
-        </div>
+        <div class="pcard-detalhes ${expandido ? "aberto" : ""}">
+          <div class="pcard-sub">${ident.classe || ""}${ident.subclasse ? " · "+ident.subclasse : ""} — Nível ${ident.nivel || 1}</div>
 
-        <div class="pcard-acoes">
-          <div class="acao-linha">
-            <span>Vida</span>
-            <input type="number" placeholder="Qtd" id="qtd-pv-${id}">
-            <button class="acao-btn dano" data-campo="pvAtual" data-sinal="-1">Dano</button>
-            <button class="acao-btn cura" data-campo="pvAtual" data-sinal="1">Cura</button>
-          </div>
-          <div class="acao-linha">
-            <span>Proteção</span>
-            <input type="number" placeholder="Qtd" id="qtd-prot-${id}">
-            <button class="acao-btn dano" data-campo="protAtual" data-sinal="-1">Dano</button>
-            <button class="acao-btn cura" data-campo="protAtual" data-sinal="1">Cura</button>
-          </div>
-          <div class="acao-linha">
-            <button class="acao-btn remover" id="remover-${id}">Remover Jogador da Mesa</button>
-          </div>
-        </div>
+          <div class="pcard-atributos">${attrsHTML}</div>
 
-        <div class="pcard-footer">
-          <span>Atualizado ${p.atualizadoEm ? new Date(p.atualizadoEm).toLocaleTimeString("pt-BR") : "—"}</span>
+          <div class="pcard-meta-row">
+            <span><b>DT</b>${rec.dt ?? "—"}</span>
+            <span><b>Desloc.</b>${rec.deslocamento ?? "—"}</span>
+            <span><b>Prof.</b>${ident.proficiencia ?? "—"}</span>
+            <span><b>Cansaço</b>${ident.cansaco ?? 0}</span>
+            <span><b>Exaustão</b>${ident.exaustao ?? 0}</span>
+          </div>
+
+          <div class="pcard-acoes">
+            <div class="acao-linha">
+              <span>Vida</span>
+              <input type="number" placeholder="Qtd" id="qtd-pv-${id}">
+              <button class="acao-btn dano" data-campo="pvAtual" data-sinal="-1">Dano</button>
+              <button class="acao-btn cura" data-campo="pvAtual" data-sinal="1">Cura</button>
+            </div>
+            <div class="acao-linha">
+              <span>Proteção</span>
+              <input type="number" placeholder="Qtd" id="qtd-prot-${id}">
+              <button class="acao-btn dano" data-campo="protAtual" data-sinal="-1">Dano</button>
+              <button class="acao-btn cura" data-campo="protAtual" data-sinal="1">Cura</button>
+            </div>
+            <div class="acao-linha">
+              <button class="acao-btn remover" id="remover-${id}">Remover Jogador da Mesa</button>
+              <button class="acao-btn abrir-ficha" id="abrir-ficha-${id}">Abrir ficha ↗</button>
+            </div>
+          </div>
+
+          <div class="pcard-footer">
+            <span>Atualizado ${p.atualizadoEm ? new Date(p.atualizadoEm).toLocaleTimeString("pt-BR") : "—"}</span>
+          </div>
         </div>
       `;
+
+      card.querySelector(`[data-toggle="${id}"]`).addEventListener("click", ()=>{
+        if(cardsExpandidos.has(id)) cardsExpandidos.delete(id); else cardsExpandidos.add(id);
+        renderPersonagens(dados);
+      });
 
       const inputPv = card.querySelector(`#qtd-pv-${id}`);
       const inputProt = card.querySelector(`#qtd-prot-${id}`);
@@ -587,12 +776,99 @@
         btn.addEventListener("click", ()=> aplicarDelta(id, "protAtual", protAtual, protMax, parseInt(btn.dataset.sinal,10), inputProt));
       });
       card.querySelector(`#remover-${id}`).addEventListener("click", ()=> removerJogador(id));
+      card.querySelector(`#abrir-ficha-${id}`).addEventListener("click", ()=>{
+        const url = `./caos-ficha-modulo1.html?mesa=${encodeURIComponent(mesaAtiva.id)}&personagem=${encodeURIComponent(id)}`;
+        window.open(url, "_blank", "noopener");
+      });
 
       grid.appendChild(card);
     });
 
     conteudo.innerHTML = "";
     conteudo.appendChild(grid);
+  }
+
+  // ---------- log de rolagens dos jogadores (visível só pelo Mestre) ----------
+  function mostrarToastRolagem(reg){
+    const container = document.getElementById("toast-rolagens");
+    const toast = document.createElement("div");
+    toast.className = "rolagem-toast";
+    const totalHTML = reg.sucessoAutomatico
+      ? `<div class="rt-total" style="color:#4fd57a; font-size:0.9rem;">✓ Sucesso Automático</div>`
+      : `<div class="rt-total">${reg.total}</div>`;
+    toast.innerHTML = `
+      <div class="rt-personagem">${reg.personagemNome}</div>
+      <div class="rt-teste">${reg.nomeTeste}</div>
+      ${totalHTML}
+    `;
+    container.appendChild(toast);
+    setTimeout(()=> toast.remove(), 6000);
+  }
+
+  function renderLogRolagens(lista){
+    const container = document.getElementById("log-rolagens");
+    if(!lista || lista.length === 0){
+      container.innerHTML = `<div class="empty-state">Nenhuma rolagem ainda nesta mesa.</div>`;
+      return;
+    }
+    container.innerHTML = "";
+    lista.forEach(reg => {
+      const item = document.createElement("div");
+      item.className = "rolagem-item";
+      const hora = reg.timestamp ? new Date(reg.timestamp).toLocaleTimeString("pt-BR") : "";
+      if(reg.sucessoAutomatico){
+        item.innerHTML = `
+          <div class="rolagem-info">
+            <div class="rolagem-personagem">${reg.personagemNome}</div>
+            <div class="rolagem-teste">${reg.nomeTeste}</div>
+            <div class="rolagem-hora">${hora}</div>
+          </div>
+          <div class="rolagem-total automatico">✓</div>`;
+      } else {
+        item.innerHTML = `
+          <div class="rolagem-info">
+            <div class="rolagem-personagem">${reg.personagemNome}</div>
+            <div class="rolagem-teste">${reg.nomeTeste}</div>
+            <div class="rolagem-detalhe">${reg.formula || ""} ${reg.detalhe || ""}</div>
+            <div class="rolagem-hora">${hora}</div>
+          </div>
+          <div class="rolagem-total">${reg.total}</div>`;
+      }
+      container.appendChild(item);
+    });
+  }
+
+  /**
+   * Escuta em tempo real as rolagens da mesa: carrega as últimas 50 já existentes
+   * (sem disparar toast pra elas) e depois notifica só as que chegarem daqui pra frente.
+   * @returns {() => void} função de cleanup
+   */
+  function escutarRolagensDaMesa(idMesa){
+    const refRolagens = firebase.database().ref(`mesas/${idMesa}/rolagens`);
+    let ultimaChaveConhecida = "";
+    const logAtual = []; // mais recente primeiro
+
+    refRolagens.orderByKey().limitToLast(50).once("value").then(snapshot => {
+      const dados = snapshot.val();
+      if(dados){
+        Object.keys(dados).sort().forEach(chave => {
+          logAtual.unshift(Object.assign({ chave }, dados[chave]));
+          ultimaChaveConhecida = chave;
+        });
+      }
+      renderLogRolagens(logAtual);
+
+      // só a partir daqui novas rolagens disparam toast — o histórico inicial não deve notificar
+      refRolagens.orderByKey().startAfter(ultimaChaveConhecida).on("child_added", (snap)=>{
+        const reg = Object.assign({ chave: snap.key }, snap.val());
+        logAtual.unshift(reg);
+        if(logAtual.length > 50) logAtual.length = 50;
+        renderLogRolagens(logAtual);
+        mostrarToastRolagem(reg);
+      });
+    });
+
+    return () => refRolagens.off("child_added");
   }
 
   // ---------- inicialização ----------
