@@ -1490,6 +1490,7 @@
 
     if(iniciativaState.elementos.length === 0){
       lista.innerHTML = `<div class="empty-state" style="border:none;">Nenhum elemento adicionado ainda.</div>`;
+      renderTrackerInimigos(); // sem early return sem atualizar o tracker — senão o último card removido ficaria "preso" na tela
       return;
     }
 
