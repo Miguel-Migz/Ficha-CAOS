@@ -1088,16 +1088,16 @@
     const quantidadeD20 = valorEfetivoAtributo(pericia.atributoBase); // valor base + modificador temporário ativo
     const proficiencia = estado.identidade.proficiencia;
 
-    const rolagensD20 = Array.from({length: Math.max(quantidadeD20,0)}, () => 1 + Math.floor(Math.random()*20));
+    const rolagensD20 = Array.from({length: Math.max(quantidadeD20,0)}, () => 1 + Math.floor(Math.random()*10));
 
     let rolagensD12 = [];
     let bonusMaximizado = 0;
     if(pericia.treinado){
       if(pericia.expert){
-        // Expert maximiza os dados de proficiência em vez de rolar (ex: 2d12 vira +24, não são rolados)
-        bonusMaximizado = proficiencia * 12;
+        // Expert maximiza os dados de proficiência em vez de rolar (ex: 2d6 vira +12, não são rolados)
+        bonusMaximizado = proficiencia * 6;
       } else {
-        rolagensD12 = Array.from({length: Math.max(proficiencia,0)}, () => 1 + Math.floor(Math.random()*12));
+        rolagensD12 = Array.from({length: Math.max(proficiencia,0)}, () => 1 + Math.floor(Math.random()*6));
       }
     }
 
@@ -1113,9 +1113,9 @@
     if(pericia.isOficio) return "Automático";
     const qtd = valorEfetivoAtributo(pericia.atributoBase);
     const prof = estado.identidade.proficiencia;
-    let f = `${qtd}d20`;
+    let f = `${qtd}d10`;
     if(pericia.treinado){
-      f += pericia.expert ? ` + ${prof*12} (${prof}d12 máx)` : ` + ${prof}d12`;
+      f += pericia.expert ? ` + ${prof*6} (${prof}d6 máx)` : ` + ${prof}d6`;
     }
     return f;
   }
@@ -1217,7 +1217,7 @@
       card.innerHTML = `
         <div class="attr-name">${def.nome}</div>
         <div class="attr-value">${base}${modTemp !== 0 ? ` <span class="efetivo ${modTemp > 0 ? "buff" : "debuff"}">(${efetivo})</span>` : ""}</div>
-        <div class="attr-dice">${efetivo}d20</div>
+        <div class="attr-dice">${efetivo}d10</div>
         <div class="attr-controls">
           <button class="step-btn" data-attr="${def.chave}" data-step="-1">–</button>
           <button class="step-btn" data-attr="${def.chave}" data-step="1">+</button>
@@ -2092,7 +2092,7 @@
     } else {
       detalhe = resultado.breakdown !== undefined
         ? resultado.breakdown
-        : `→ d20:[${resultado.rolagensD20.join(", ")}] ${resultado.rolagensD12.length ? "d12:["+resultado.rolagensD12.join(", ")+"]" : ""} ${resultado.bonusFixo ? "+"+resultado.bonusFixo : ""}`;
+        : `→ d10:[${resultado.rolagensD20.join(", ")}] ${resultado.rolagensD12.length ? "d6:["+resultado.rolagensD12.join(", ")+"]" : ""} ${resultado.bonusFixo ? "+"+resultado.bonusFixo : ""}`;
       toast.innerHTML = `
         <div class="rt-title">${nome}</div>
         <div class="rt-total">${resultado.total}</div>
