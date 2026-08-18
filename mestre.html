@@ -249,6 +249,11 @@
     width:52px; background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
     border-radius:6px; padding:5px 6px; font-family:var(--font-mono); font-size:0.76rem; text-align:center;
   }
+  .ic-alvo{
+    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
+    border-radius:6px; padding:5px 6px; font-family:var(--font-body); font-size:0.72rem; cursor:pointer;
+  }
+  .ic-alvo:focus{ outline:2px solid var(--accent-arcane); outline-offset:1px; border-color:var(--accent-arcane); }
   .ic-btn{
     background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
     border-radius:6px; padding:5px 10px; font-size:0.7rem; cursor:pointer;
@@ -1585,6 +1590,11 @@
         <div class="ic-barras">${barraVidaHTML}${barraProtHTML}</div>
         <div class="ic-controles">
           <input type="number" class="ic-qtd" placeholder="Qtd" min="0">
+          ${el.protecaoMaxima > 0 ? `
+          <select class="ic-alvo">
+            <option value="vida">Vida</option>
+            <option value="protecao">Proteção</option>
+          </select>` : ""}
           <button class="ic-btn dano">Dano</button>
           <button class="ic-btn cura">Cura</button>
         </div>
@@ -1592,24 +1602,27 @@
       `;
 
       const inputQtd = card.querySelector(".ic-qtd");
+      const selectAlvo = card.querySelector(".ic-alvo");
       card.querySelector(".ic-btn.dano").addEventListener("click", ()=>{
         const qtd = Math.abs(parseInt(inputQtd.value,10) || 0);
         if(qtd === 0) return;
-        // o dano consome a proteção primeiro; o excedente vai pra vida — só na instância da cena, nunca na ficha modelo
-        let restante = qtd;
-        if((el.protecaoAtual ?? 0) > 0){
-          const absorvido = Math.min(el.protecaoAtual, restante);
-          el.protecaoAtual -= absorvido;
-          restante -= absorvido;
+        // só na instância da cena, nunca na ficha modelo; o alvo é escolhido pelo mestre quando a proteção está ativa
+        if(selectAlvo && selectAlvo.value === "protecao"){
+          el.protecaoAtual = Math.max(0, (el.protecaoAtual ?? 0) - qtd);
+        } else {
+          el.vidaAtual = Math.max(0, (el.vidaAtual ?? 0) - qtd);
         }
-        el.vidaAtual = Math.max(0, (el.vidaAtual ?? 0) - restante);
         inputQtd.value = "";
         salvarIniciativa(); renderIniciativa();
       });
       card.querySelector(".ic-btn.cura").addEventListener("click", ()=>{
         const qtd = Math.abs(parseInt(inputQtd.value,10) || 0);
         if(qtd === 0) return;
-        el.vidaAtual = Math.min(el.vidaMaxima ?? 0, (el.vidaAtual ?? 0) + qtd);
+        if(selectAlvo && selectAlvo.value === "protecao"){
+          el.protecaoAtual = Math.min(el.protecaoMaxima ?? 0, (el.protecaoAtual ?? 0) + qtd);
+        } else {
+          el.vidaAtual = Math.min(el.vidaMaxima ?? 0, (el.vidaAtual ?? 0) + qtd);
+        }
         inputQtd.value = "";
         salvarIniciativa(); renderIniciativa();
       });
