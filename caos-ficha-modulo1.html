@@ -847,9 +847,9 @@
     { chave:"forca",      nome:"Força",      categoria:"fisica" },
     { chave:"agilidade",  nome:"Agilidade",  categoria:"fisica" },
     { chave:"vigor",      nome:"Vigor",      categoria:"fisica" },
-    { chave:"instinto",   nome:"Instinto",   categoria:"mental" },
+    { chave:"Mente",      nome:"Mente",   categoria:"mental" },
     { chave:"influencia", nome:"Influência", categoria:"mental" },
-    { chave:"mente",      nome:"Mente",      categoria:"mental" },
+    { chave:"instinto",   nome:"instinto",      categoria:"mental" },
   ];
 
   const PERICIAS_DEF = {
@@ -869,7 +869,6 @@
       { nome:"Medicina",     atributoBase:"mente" },
       { nome:"História",     atributoBase:"mente" },
       { nome:"Investigação", atributoBase:"mente" },
-      { nome:"Misticismo",   atributoBase:"mente" },
       { nome:"Natureza",     atributoBase:"mente" },
       { nome:"Táticas",      atributoBase:"mente" },
       { nome:"Vontade",      atributoBase:"mente" },
@@ -881,9 +880,6 @@
       { nome:"Sentir",       atributoBase:"instinto" },
       { nome:"Intuição",     atributoBase:"instinto" },
       { nome:"Atuação",      atributoBase:"influencia" },
-      { nome:"Blefar",       atributoBase:"influencia" },
-      { nome:"Diplomacia",   atributoBase:"influencia" },
-      { nome:"Enganação",    atributoBase:"influencia" },
       { nome:"Intimidação",  atributoBase:"influencia" },
       { nome:"Persuasão",    atributoBase:"influencia" },
       { nome:"Sedução",      atributoBase:"influencia" },
@@ -929,6 +925,26 @@
     return "p" + Date.now() + "_" + Math.floor(Math.random()*10000);
   }
 
+  function mesclarPericias(padraoPericias, dadosPericias){
+    if(!dadosPericias) return padraoPericias;
+    const resultado = { oficio: dadosPericias.oficio || padraoPericias.oficio };
+    ["fisicas","mentais"].forEach(cat=>{
+      const salvas = dadosPericias[cat] || [];
+      // reconstrói a partir da lista atual de PERICIAS_DEF: perícias removidas do sistema somem,
+      // perícias novas aparecem zeradas, e o estado treinado/expert das que continuam existindo é preservado.
+      resultado[cat] = PERICIAS_DEF[cat].map(def=>{
+        const existente = salvas.find(p => p.nome === def.nome);
+        return {
+          nome: def.nome,
+          atributoBase: def.atributoBase,
+          treinado: existente ? !!existente.treinado : false,
+          expert: existente ? !!existente.expert : false
+        };
+      });
+    });
+    return resultado;
+  }
+
   function construirEstadoAPartirDeDados(dados, idFallback){
     const padrao = estadoPadrao();
     // mescla com os padrões: fichas salvas/recebidas antes de um novo campo existir não ficam com valores undefined
@@ -938,7 +954,7 @@
       idMesa:     dados.idMesa !== undefined ? dados.idMesa : padrao.idMesa,
       identidade: mesclarIdentidade(padrao.identidade, dados.identidade),
       atributos:  Object.assign({}, padrao.atributos, dados.atributos),
-      pericias:   dados.pericias || padrao.pericias,
+      pericias:   mesclarPericias(padrao.pericias, dados.pericias),
       recursos:   Object.assign({}, padrao.recursos, dados.recursos),
       inventario: dados.inventario || padrao.inventario,
       habilidades: dados.habilidades || padrao.habilidades,
