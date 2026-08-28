@@ -264,6 +264,43 @@
   /* ---------- Inventário ---------- */
   .item-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .item-list{ display:flex; flex-direction:column; gap:10px; }
+
+  /* ---------- Aba Anotações ---------- */
+  .anotacoes-grid{ display:grid; grid-template-columns:1fr 1.6fr; gap:14px; height:460px; }
+  @media (max-width:640px){ .anotacoes-grid{ grid-template-columns:1fr; height:auto; } }
+  .anotacoes-col{
+    display:flex; flex-direction:column; min-height:0;
+    background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:8px; padding:12px;
+  }
+  .anotacoes-col-editor{ padding:0; overflow:hidden; }
+  .anotacoes-col-titulo{
+    font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint);
+    margin-bottom:10px; text-align:center; flex-shrink:0;
+  }
+  .anotacoes-lista{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; }
+  .anotacao-item{
+    display:flex; align-items:center; gap:6px; background:var(--bg-panel-alt); border:1px solid var(--border-soft);
+    border-radius:7px; padding:8px 10px; cursor:pointer;
+  }
+  .anotacao-item:hover{ border-color:var(--accent-arcane); }
+  .anotacao-item.selecionada{ border-color:var(--accent-arcane); background:var(--bg-inset); }
+  .anotacao-item-titulo{ flex:1; font-size:0.82rem; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anotacao-item-remover{
+    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
+    border-radius:4px; width:20px; height:20px; font-size:0.66rem; cursor:pointer; flex-shrink:0; line-height:1;
+  }
+  .anotacao-item-remover:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
+  .anotacao-titulo-input{
+    background:transparent; border:none; border-bottom:1px solid var(--border-soft); color:var(--text);
+    font-family:var(--font-display); font-size:1.05rem; font-weight:600; padding:14px 16px 10px; flex-shrink:0;
+    width:100%;
+  }
+  .anotacao-titulo-input:focus{ outline:none; border-color:var(--accent-arcane); }
+  .anotacao-conteudo-input{
+    flex:1; background:transparent; border:none; color:var(--text); font-family:var(--font-body);
+    font-size:0.86rem; line-height:1.6; padding:12px 16px; resize:none; width:100%;
+  }
+  .anotacao-conteudo-input:focus{ outline:none; }
   .item-card{
     background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
     padding:12px 14px; display:flex; flex-direction:column;
@@ -422,6 +459,7 @@
   }
   .btn:hover{ border-color:var(--accent-arcane); }
   .btn.primary{ background:var(--accent-arcane-dim); border-color:var(--accent-arcane); }
+  .btn.small{ padding:6px 12px; font-size:0.76rem; }
   .btn.danger:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
   .save-indicator{ font-size:0.72rem; color:var(--text-faint); align-self:center; margin-right:auto; }
 
@@ -616,6 +654,7 @@
           <button class="tab-btn" data-tab="tecnicas">Técnicas</button>
           <button class="tab-btn" data-tab="talentos">Talentos</button>
           <button class="tab-btn" data-tab="atalhos">Atalhos</button>
+          <button class="tab-btn" data-tab="anotacoes">Anotações</button>
         </div>
 
         <div class="tab-content active" data-tab-content="pericias">
@@ -651,6 +690,24 @@
 
         <div class="tab-content" data-tab-content="atalhos">
           <div class="item-list" id="atalho-grid"></div>
+        </div>
+
+        <div class="tab-content" data-tab-content="anotacoes">
+          <div class="anotacoes-grid">
+
+            <div class="anotacoes-col">
+              <div class="anotacoes-col-titulo">Blocos de nota salvos</div>
+              <button class="btn small primary" id="btn-nova-anotacao" style="width:100%; margin-bottom:10px;">+ Nova nota</button>
+              <div class="anotacoes-lista" id="anotacoes-lista"></div>
+            </div>
+
+            <div class="anotacoes-col anotacoes-col-editor">
+              <input type="text" id="anotacao-titulo-input" class="anotacao-titulo-input" placeholder="Título da nota" style="display:none;">
+              <textarea id="anotacao-conteudo-input" class="anotacao-conteudo-input" placeholder="Escreva aqui..." style="display:none;"></textarea>
+              <div class="tab-placeholder" id="anotacao-vazio" style="flex:1; display:flex; align-items:center; justify-content:center;">Selecione uma nota ao lado, ou crie uma nova.</div>
+            </div>
+
+          </div>
         </div>
 
       </section>
@@ -916,7 +973,8 @@
       talentos: [],
       tecnicas: [],
       atalhos: [],
-      historicoRolagens: []
+      historicoRolagens: [],
+      anotacoes: []
     };
   }
 
@@ -961,7 +1019,8 @@
       talentos:   dados.talentos || padrao.talentos,
       tecnicas:   dados.tecnicas || padrao.tecnicas,
       atalhos:    dados.atalhos || padrao.atalhos,
-      historicoRolagens: dados.historicoRolagens || padrao.historicoRolagens
+      historicoRolagens: dados.historicoRolagens || padrao.historicoRolagens,
+      anotacoes: dados.anotacoes || padrao.anotacoes
     };
   }
 
@@ -1186,6 +1245,7 @@
     renderTalentos();
     renderTecnicas();
     renderAtalhos();
+    renderAnotacoes();
   }
 
   function renderVitals(){
@@ -2097,6 +2157,89 @@
       });
     });
   }
+
+  // ---------- Aba Anotações ----------
+  let anotacaoSelecionadaId = estado.anotacoes.length ? estado.anotacoes[0].id : null;
+
+  function novaAnotacao(){
+    const nota = { id: "nota_" + Date.now() + "_" + Math.floor(Math.random()*10000), titulo: "Nova nota", conteudo: "" };
+    estado.anotacoes.unshift(nota);
+    anotacaoSelecionadaId = nota.id;
+    salvar();
+    renderAnotacoes();
+    document.getElementById("anotacao-titulo-input").focus();
+    document.getElementById("anotacao-titulo-input").select();
+  }
+
+  function removerAnotacao(id){
+    estado.anotacoes = estado.anotacoes.filter(n => n.id !== id);
+    if(anotacaoSelecionadaId === id){
+      anotacaoSelecionadaId = estado.anotacoes.length ? estado.anotacoes[0].id : null;
+    }
+    salvar();
+    renderAnotacoes();
+  }
+
+  function renderAnotacoes(){
+    const lista = document.getElementById("anotacoes-lista");
+    if(!lista) return;
+
+    if(estado.anotacoes.length === 0){
+      lista.innerHTML = `<div class="tab-placeholder">Nenhuma nota salva ainda.</div>`;
+    } else {
+      lista.innerHTML = "";
+      estado.anotacoes.forEach(nota => {
+        const item = document.createElement("div");
+        item.className = "anotacao-item" + (nota.id === anotacaoSelecionadaId ? " selecionada" : "");
+        item.innerHTML = `
+          <span class="anotacao-item-titulo">${nota.titulo || "(sem título)"}</span>
+          <button class="anotacao-item-remover" title="Remover nota">×</button>
+        `;
+        item.addEventListener("click", ()=>{
+          anotacaoSelecionadaId = nota.id;
+          renderAnotacoes();
+        });
+        item.querySelector(".anotacao-item-remover").addEventListener("click", (e)=>{
+          e.stopPropagation();
+          if(confirm(`Remover a nota "${nota.titulo || "(sem título)"}"?`)) removerAnotacao(nota.id);
+        });
+        lista.appendChild(item);
+      });
+    }
+
+    const tituloInput = document.getElementById("anotacao-titulo-input");
+    const conteudoInput = document.getElementById("anotacao-conteudo-input");
+    const vazio = document.getElementById("anotacao-vazio");
+    const notaAtiva = estado.anotacoes.find(n => n.id === anotacaoSelecionadaId);
+
+    if(notaAtiva){
+      tituloInput.style.display = "block";
+      conteudoInput.style.display = "block";
+      vazio.style.display = "none";
+      if(document.activeElement !== tituloInput) tituloInput.value = notaAtiva.titulo;
+      if(document.activeElement !== conteudoInput) conteudoInput.value = notaAtiva.conteudo;
+    } else {
+      tituloInput.style.display = "none";
+      conteudoInput.style.display = "none";
+      vazio.style.display = "flex";
+    }
+  }
+
+  document.getElementById("btn-nova-anotacao").addEventListener("click", novaAnotacao);
+  document.getElementById("anotacao-titulo-input").addEventListener("input", (e)=>{
+    const nota = estado.anotacoes.find(n => n.id === anotacaoSelecionadaId);
+    if(!nota) return;
+    nota.titulo = e.target.value;
+    salvar();
+    const itemAtivo = document.querySelector(".anotacao-item.selecionada .anotacao-item-titulo");
+    if(itemAtivo) itemAtivo.textContent = nota.titulo || "(sem título)";
+  });
+  document.getElementById("anotacao-conteudo-input").addEventListener("input", (e)=>{
+    const nota = estado.anotacoes.find(n => n.id === anotacaoSelecionadaId);
+    if(!nota) return;
+    nota.conteudo = e.target.value;
+    salvar();
+  });
 
   function mostrarResultado(nome, resultado){
     const log = document.getElementById("roll-log");
