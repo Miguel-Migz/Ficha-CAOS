@@ -20,7 +20,7 @@
   .avatar-circle{
     width:160px; height:160px; border-radius:50%; background:var(--bg-inset);
     border:2px solid var(--border-soft); display:flex; align-items:center; justify-content:center;
-    cursor:pointer; overflow:hidden;
+    cursor:pointer; overflow:hidden; position:relative;
   }
   .avatar-circle:hover{ border-color:var(--accent-arcane); }
   .avatar-circle img{ width:100%; height:100%; object-fit:cover; display:block; }
@@ -447,10 +447,31 @@
     };
   }
 
+  function mesclarEstado(dados, idPadrao){
+    const padrao = estadoPadrao();
+    if(!dados) return padrao;
+    return {
+      id: dados.id || idPadrao || padrao.id,
+      atualizadoEm: dados.atualizadoEm || padrao.atualizadoEm,
+      idMesa: dados.idMesa !== undefined ? dados.idMesa : padrao.idMesa,
+      identidade: Object.assign({}, padrao.identidade, dados.identidade || {}),
+      atributos: Object.assign({}, padrao.atributos, dados.atributos || {}),
+      pericias: Object.assign({}, padrao.pericias, dados.pericias || {}),
+      recursos: Object.assign({}, padrao.recursos, dados.recursos || {}),
+      inventario: dados.inventario || [],
+      habilidades: dados.habilidades || [],
+      talentos: dados.talentos || [],
+      tecnicas: dados.tecnicas || [],
+      atalhos: dados.atalhos || [],
+      historicoRolagens: dados.historicoRolagens || [],
+      anotacoes: dados.anotacoes || []
+    };
+  }
+
   function carregarPersonagem(id){
     try{
       const raw = localStorage.getItem(LOCALSTORAGE_PREFIX + id);
-      return raw ? JSON.parse(raw) : null;
+      return raw ? mesclarEstado(JSON.parse(raw), id) : null;
     }catch(e){ return null; }
   }
 
@@ -494,7 +515,7 @@
       if(!remoto) return;
       if((remoto.atualizadoEm || 0) > (estado.atualizadoEm || 0)){
         aplicandoAtualizacaoRemota = true;
-        estado = remoto;
+        estado = mesclarEstado(remoto, estado.id);
         try {
           localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado));
         } catch(e){}
@@ -1144,7 +1165,7 @@
       if(k && k.startsWith(LOCALSTORAGE_PREFIX)){
         try{
           const d = JSON.parse(localStorage.getItem(k));
-          lista.push(d);
+          lista.push(mesclarEstado(d, k.replace(LOCALSTORAGE_PREFIX, "")));
         }catch(e){}
       }
     }
@@ -1165,9 +1186,12 @@
         </div>
         <button class="personagem-card-excluir">×</button>`;
       card.querySelector(".personagem-card-info").onclick = ()=>{
-        estado = p; sessionStorage.setItem(SESSION_KEY, p.id);
+        estado = mesclarEstado(p, p.id); 
+        sessionStorage.setItem(SESSION_KEY, p.id);
         document.getElementById("modal-personagens").classList.remove("aberto");
-        escutarPersonagemRemoto(); render(); salvar();
+        escutarPersonagemRemoto(); 
+        render(); 
+        salvar();
       };
       card.querySelector(".personagem-card-excluir").onclick = (e)=>{
         e.stopPropagation();
@@ -1273,10 +1297,11 @@
     ctx.scale(cropScale*ratio, cropScale*ratio);
     ctx.drawImage(cropImg, -cropImg.naturalWidth/2, -cropImg.naturalHeight/2);
     
-    // Compressão leve para avatar (~15kb)
+    // Converte e atualiza
     estado.identidade.foto = canvas.toDataURL("image/jpeg", 0.7);
     document.getElementById("modal-editar-foto").classList.remove("aberto");
-    render(); salvar();
+    render(); 
+    salvar();
   };
 
   document.getElementById("avatar-circle").onclick = ()=> document.getElementById("avatar-input").click();
@@ -1286,12 +1311,14 @@
       const r = new FileReader();
       r.onload = (evt)=> abrirModalCrop(evt.target.result);
       r.readAsDataURL(f);
+      e.target.value = "";
     }
   };
   document.getElementById("avatar-remove").onclick = (e)=>{
     e.stopPropagation();
     estado.identidade.foto = null;
-    render(); salvar();
+    render(); 
+    salvar();
   };
 
   // --- RENDER GERAL ---
@@ -1315,14 +1342,20 @@
     document.getElementById("f-cansaco").value = estado.identidade.cansaco || 0;
     document.getElementById("f-exaustao").value = estado.identidade.exaustao || 0;
 
+    // Renderização do Avatar
     const img = document.getElementById("avatar-img");
     const ph = document.getElementById("avatar-placeholder");
     const rm = document.getElementById("avatar-remove");
-    if(estado.identidade.foto){
-      img.src = estado.identidade.foto; img.style.display = "block";
-      ph.style.display = "none"; rm.style.display = "inline";
+    if(estado.identidade && estado.identidade.foto){
+      img.src = estado.identidade.foto; 
+      img.style.display = "block";
+      ph.style.display = "none"; 
+      rm.style.display = "inline";
     } else {
-      img.style.display = "none"; ph.style.display = "block"; rm.style.display = "none";
+      img.style.display = "none"; 
+      img.removeAttribute("src");
+      ph.style.display = "block"; 
+      rm.style.display = "none";
     }
 
     const r = estado.recursos || { pvAtual:10, pvMaximo:10, protAtual:0, protMaximo:0, dt:"16", deslocamento:"10m" };
@@ -1348,9 +1381,11 @@
     atualizarIndicadorConexao();
   }
 
+  // Eventos seguros para não apagar outros campos da identidade
   ["f-nome","f-classe","f-subclasse","f-antecedente","f-oficio","f-nivel","f-proficiencia","f-cansaco","f-exaustao"].forEach(id=>{
     document.getElementById(id).addEventListener("input", (e)=>{
-      estado.identidade[id.replace("f-","")] = e.target.value;
+      const campo = id.replace("f-","");
+      estado.identidade[campo] = e.target.value;
       salvar();
     });
   });
@@ -1453,7 +1488,8 @@
     const reader = new FileReader();
     reader.onload = (evt)=>{
       try {
-        estado = JSON.parse(evt.target.result);
+        const dados = JSON.parse(evt.target.result);
+        estado = mesclarEstado(dados, dados.id);
         render(); salvar();
       } catch(err){ alert("Erro ao importar JSON."); }
     };
