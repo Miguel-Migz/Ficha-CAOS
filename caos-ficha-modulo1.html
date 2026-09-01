@@ -113,7 +113,7 @@
   .item-body{ margin-top:10px; padding-top:10px; border-top:1px solid var(--border-soft); }
   .item-desc-text{ font-size:0.84rem; color:var(--text-dim); font-style:italic; white-space:pre-wrap; }
   .item-footer-actions{ display:flex; justify-content:space-between; margin-top:12px; }
-  .item-action{ background:none; border:none; font-size:0.78rem; cursor:pointer; padding:2px 4px; font-family:var(--font-body); }
+  .item-action{ background:none; border:none; font-size:0.78rem; cursor:pointer; padding:2px 4px; }
   .item-action.remover{ color:var(--accent-ember); }
   .item-action.editar{ color:#4fd57a; }
   .item-add-card{ grid-column:1 / -1; background:var(--bg-panel-alt); border:1px dashed var(--border-soft); border-radius:8px; padding:16px; display:flex; align-items:center; justify-content:center; min-height:60px; cursor:pointer; color:var(--text-dim); }
@@ -465,10 +465,15 @@
 
   function salvar(){
     estado.atualizadoEm = Date.now();
-    localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado));
-    localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
-    sessionStorage.setItem(SESSION_KEY, estado.id);
-    document.getElementById("save-indicator").textContent = "salvo " + new Date().toLocaleTimeString("pt-BR");
+    try {
+      localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado));
+      localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
+      sessionStorage.setItem(SESSION_KEY, estado.id);
+      document.getElementById("save-indicator").textContent = "salvo " + new Date().toLocaleTimeString("pt-BR");
+    } catch (e) {
+      console.warn("Aviso: Quota do LocalStorage atingida.", e);
+      document.getElementById("save-indicator").textContent = "salvo (memória/nuvem)";
+    }
     sincronizarFirebase();
   }
 
@@ -490,7 +495,9 @@
       if((remoto.atualizadoEm || 0) > (estado.atualizadoEm || 0)){
         aplicandoAtualizacaoRemota = true;
         estado = remoto;
-        localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado));
+        try {
+          localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado));
+        } catch(e){}
         render();
         aplicandoAtualizacaoRemota = false;
       }
@@ -1207,7 +1214,7 @@
     salvar();
   };
 
-  // --- AVATAR & CROP ---
+  // --- AVATAR & CROP OTIMIZADO ---
   let cropImg = null, cropScale = 1, cropMinScale = 1, cropOffX = 0, cropOffY = 0, arrastando = false, arrStart = {x:0, y:0, ox:0, oy:0};
   const CROP_VIEWPORT = 260;
 
@@ -1257,14 +1264,17 @@
   document.getElementById("btn-fechar-crop").onclick = ()=> document.getElementById("modal-editar-foto").classList.remove("aberto");
   document.getElementById("btn-aplicar-crop").onclick = ()=>{
     if(!cropImg) return;
+    const OUTPUT_SIZE = 160;
     const canvas = document.createElement("canvas");
-    canvas.width = 360; canvas.height = 360;
+    canvas.width = OUTPUT_SIZE; canvas.height = OUTPUT_SIZE;
     const ctx = canvas.getContext("2d");
-    const ratio = 360 / CROP_VIEWPORT;
-    ctx.translate(180 + cropOffX*ratio, 180 + cropOffY*ratio);
+    const ratio = OUTPUT_SIZE / CROP_VIEWPORT;
+    ctx.translate(OUTPUT_SIZE/2 + cropOffX*ratio, OUTPUT_SIZE/2 + cropOffY*ratio);
     ctx.scale(cropScale*ratio, cropScale*ratio);
     ctx.drawImage(cropImg, -cropImg.naturalWidth/2, -cropImg.naturalHeight/2);
-    estado.identidade.foto = canvas.toDataURL("image/jpeg", 0.85);
+    
+    // Compressão leve para avatar (~15kb)
+    estado.identidade.foto = canvas.toDataURL("image/jpeg", 0.7);
     document.getElementById("modal-editar-foto").classList.remove("aberto");
     render(); salvar();
   };
@@ -1394,8 +1404,9 @@
     const id = document.getElementById("f-id-mesa").value.trim();
     if(!id) return;
     estado.idMesa = id;
+    salvar();
     escutarPersonagemRemoto();
-    render(); salvar();
+    render();
   };
 
   document.getElementById("btn-sair-mesa").onclick = ()=>{
@@ -1449,13 +1460,13 @@
     reader.readAsText(file);
   };
 
-document.getElementById("btn-entrar-mesa").onclick = ()=>{
-    const id = document.getElementById("f-id-mesa").value.trim();
-    if(!id) return;
-    estado.idMesa = id;
-    salvar(); // Salva localmente e dispara o conectarJogadorMesa com todos os dados
-    escutarPersonagemRemoto();
-    render();
+  document.getElementById("btn-reset").onclick = ()=>{
+    if(confirm("Zerar todos os dados do personagem atual?")){
+      const id = estado.id;
+      estado = estadoPadrao();
+      estado.id = id;
+      render(); salvar();
+    }
   };
 
   render();
