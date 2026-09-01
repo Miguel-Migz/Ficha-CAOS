@@ -1449,13 +1449,13 @@
     reader.readAsText(file);
   };
 
-  document.getElementById("btn-reset").onclick = ()=>{
-    if(confirm("Zerar todos os dados do personagem atual?")){
-      const id = estado.id;
-      estado = estadoPadrao();
-      estado.id = id;
-      render(); salvar();
-    }
+document.getElementById("btn-entrar-mesa").onclick = ()=>{
+    const id = document.getElementById("f-id-mesa").value.trim();
+    if(!id) return;
+    estado.idMesa = id;
+    salvar(); // Salva localmente e dispara o conectarJogadorMesa com todos os dados
+    escutarPersonagemRemoto();
+    render();
   };
 
   render();
