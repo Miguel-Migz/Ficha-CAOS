@@ -113,7 +113,7 @@
   .item-body{ margin-top:10px; padding-top:10px; border-top:1px solid var(--border-soft); }
   .item-desc-text{ font-size:0.84rem; color:var(--text-dim); font-style:italic; white-space:pre-wrap; }
   .item-footer-actions{ display:flex; justify-content:space-between; margin-top:12px; }
-  .item-action{ background:none; border:none; font-size:0.78rem; cursor:pointer; padding:2px 4px; }
+  .item-action{ background:none; border:none; font-size:0.78rem; cursor:pointer; padding:2px 4px; font-family:var(--font-body); }
   .item-action.remover{ color:var(--accent-ember); }
   .item-action.editar{ color:#4fd57a; }
   .item-add-card{ grid-column:1 / -1; background:var(--bg-panel-alt); border:1px dashed var(--border-soft); border-radius:8px; padding:16px; display:flex; align-items:center; justify-content:center; min-height:60px; cursor:pointer; color:var(--text-dim); }
@@ -192,7 +192,7 @@
     </div>
   </section>
 
-  <!-- Modal: Personagens -->
+  <!-- Modais -->
   <div class="modal-overlay" id="modal-personagens">
     <div class="modal-panel">
       <div class="modal-header"><h2 class="panel-title" style="margin:0">Personagens</h2><button class="modal-close" id="btn-fechar-modal">×</button></div>
@@ -201,7 +201,6 @@
     </div>
   </div>
 
-  <!-- Modal: Histórico de Rolagens -->
   <div class="modal-overlay" id="modal-historico">
     <div class="modal-panel">
       <div class="modal-header"><h2 class="panel-title" style="margin:0">Histórico de Rolagens</h2><button class="modal-close" id="btn-fechar-historico">×</button></div>
@@ -210,7 +209,6 @@
     </div>
   </div>
 
-  <!-- Modal: Recorte de Foto -->
   <div class="modal-overlay" id="modal-editar-foto">
     <div class="modal-panel crop-panel">
       <div class="modal-header"><h2 class="panel-title" style="margin:0">Editar Foto</h2><button class="modal-close" id="btn-fechar-crop">×</button></div>
@@ -506,23 +504,22 @@
   }
 
   function valorEfetivoAtributo(chave){
-    const a = estado.atributos[chave] || { pontos:1 };
-    return Math.max(0, (a.pontos || 1) + (a.modTemp || 0));
+    const a = estado.atributos[chave] || { pontos: 1 };
+    const base = a.pontos !== undefined ? a.pontos : 1;
+    return Math.max(0, base + (a.modTemp || 0));
   }
 
-function formulaPericia(p){
+  function formulaPericia(p){
     if(p.isOficio) return "Automático";
     const qtd = valorEfetivoAtributo(p.atributoBase);
     const prof = estado.identidade.proficiencia;
     
-    // Quando o atributo for 0, roda em Desvantagem (rola 1d10 duas vezes e pega o menor)
     let f = qtd === 0 ? "1d10 [Desvantagem]" : `${qtd}d10`;
     if(p.treinado) f += p.expert ? ` + ${prof*6} (${prof}d6 máx)` : ` + ${prof}d6`;
     return f;
   }
 
   function rolarInstanciaPericia(qtd, p, prof){
-    // Se o atributo for 0, rola 1d10 base para o teste em desvantagem
     const dadosQtd = qtd === 0 ? 1 : qtd;
     const d10s = Array.from({length: dadosQtd}, () => 1 + Math.floor(Math.random()*10));
     let d6s = [], bonus = 0;
@@ -565,7 +562,7 @@ function formulaPericia(p){
     }
   }
 
-function renderAtributos(){
+  function renderAtributos(){
     const grid = document.getElementById("attr-grid");
     grid.innerHTML = "";
     ATRIBUTOS_DEF.forEach(def => {
@@ -594,7 +591,6 @@ function renderAtributos(){
         if(modoAtributoTemporario){
           estado.atributos[chave].modTemp = Math.max(-10, Math.min(10, (estado.atributos[chave].modTemp || 0) + step));
         } else {
-          // Permite reduzir até 0
           estado.atributos[chave].pontos = Math.max(0, Math.min(20, (estado.atributos[chave].pontos !== undefined ? estado.atributos[chave].pontos : 1) + step));
         }
         render(); salvar();
@@ -602,7 +598,7 @@ function renderAtributos(){
     });
   }
 
-function renderPericias(cat, containerId){
+  function renderPericias(cat, containerId){
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     (estado.pericias[cat] || []).forEach((p, idx)=>{
@@ -633,7 +629,6 @@ function renderPericias(cat, containerId){
         const prof = estado.identidade.proficiencia;
 
         if(qtd === 0){
-          // Rola duas vezes e escolhe a pior
           const rollA = rolarInstanciaPericia(0, p, prof);
           const rollB = rolarInstanciaPericia(0, p, prof);
           const pior = rollA.total <= rollB.total ? rollA : rollB;
@@ -645,7 +640,6 @@ function renderPericias(cat, containerId){
             breakdown: detalheDesvantagem
           });
         } else {
-          // Rolagem regular com atributo >= 1
           const roll = rolarInstanciaPericia(qtd, p, prof);
           mostrarResultado(p.nome, {
             total: roll.total,
@@ -677,6 +671,7 @@ function renderPericias(cat, containerId){
 
   let invForm = false, habForm = false, tecForm = false, talForm = false, ataForm = false;
 
+  // --- INVENTÁRIO ---
   function renderInventario(){
     const grid = document.getElementById("item-grid");
     grid.innerHTML = "";
@@ -700,7 +695,7 @@ function renderPericias(cat, containerId){
         estado.inventario.push({
           nome, raridade: document.getElementById("novo-item-raridade").value,
           peso: parseFloat(document.getElementById("novo-item-peso").value) || 0,
-          descricao: document.getElementById("novo-item-desc").value.trim(), aberta: false
+          descricao: document.getElementById("novo-item-desc").value.trim(), aberta: false, editando: false
         });
         invForm = false; renderInventario(); salvar();
       };
@@ -714,20 +709,65 @@ function renderPericias(cat, containerId){
     estado.inventario.forEach((item, idx)=>{
       const card = document.createElement("div");
       card.className = "item-card" + (item.aberta ? " expandido" : "");
+      
+      if(item.editando){
+        card.innerHTML = `
+          <div class="item-edit-form">
+            <input type="text" id="edit-inv-nome-${idx}" value="${item.nome}">
+            <div class="item-form-row">
+              <select id="edit-inv-rar-${idx}">
+                <option value="comum" ${item.raridade==="comum"?"selected":""}>Comum</option>
+                <option value="incomum" ${item.raridade==="incomum"?"selected":""}>Incomum</option>
+                <option value="raro" ${item.raridade==="raro"?"selected":""}>Raro</option>
+                <option value="muitoraro" ${item.raridade==="muitoraro"?"selected":""}>Muito Raro</option>
+                <option value="epico" ${item.raridade==="epico"?"selected":""}>Épico</option>
+                <option value="lendario" ${item.raridade==="lendario"?"selected":""}>Lendário</option>
+              </select>
+              <input type="number" id="edit-inv-peso-${idx}" value="${item.peso||0}" step="0.1">
+            </div>
+            <textarea id="edit-inv-desc-${idx}">${item.descricao||""}</textarea>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+              <button class="btn" id="canc-edit-inv-${idx}">Cancelar</button>
+              <button class="btn primary" id="salv-edit-inv-${idx}">Salvar</button>
+            </div>
+          </div>`;
+        card.querySelector(`#canc-edit-inv-${idx}`).onclick = ()=>{ item.editando = false; renderInventario(); };
+        card.querySelector(`#salv-edit-inv-${idx}`).onclick = ()=>{
+          item.nome = document.getElementById(`edit-inv-nome-${idx}`).value.trim() || item.nome;
+          item.raridade = document.getElementById(`edit-inv-rar-${idx}`).value;
+          item.peso = parseFloat(document.getElementById(`edit-inv-peso-${idx}`).value) || 0;
+          item.descricao = document.getElementById(`edit-inv-desc-${idx}`).value.trim();
+          item.editando = false; renderInventario(); salvar();
+        };
+        grid.appendChild(card);
+        return;
+      }
+
       card.innerHTML = `
         <div class="item-header">
           <span class="item-chevron">${item.aberta ? "▾" : "▸"}</span>
           <span class="item-nome raridade-${item.raridade}">${item.nome}</span>
           <span class="item-peso">${item.peso}kg</span>
         </div>
-        ${item.aberta ? `<div class="item-body"><div class="item-raridade-tag raridade-${item.raridade}">${item.raridade}</div><div class="item-desc-text">${item.descricao||"Sem descrição."}</div><div class="item-footer-actions"><button class="item-action remover" data-del="${idx}">Remover</button></div></div>` : ""}`;
+        ${item.aberta ? `
+          <div class="item-body">
+            <div class="item-raridade-tag raridade-${item.raridade}">${item.raridade}</div>
+            <div class="item-desc-text">${item.descricao||"Sem descrição."}</div>
+            <div class="item-footer-actions">
+              <button class="item-action remover" data-del="${idx}">Remover</button>
+              <button class="item-action editar" data-edit="${idx}">Editar</button>
+            </div>
+          </div>` : ""}`;
       card.querySelector(".item-header").onclick = ()=>{ item.aberta = !item.aberta; renderInventario(); };
       const del = card.querySelector("[data-del]");
       if(del) del.onclick = (e)=>{ e.stopPropagation(); estado.inventario.splice(idx,1); renderInventario(); salvar(); };
+      const edit = card.querySelector("[data-edit]");
+      if(edit) edit.onclick = (e)=>{ e.stopPropagation(); item.editando = true; renderInventario(); };
       grid.appendChild(card);
     });
   }
 
+  // --- HABILIDADES ---
   function renderHabilidades(){
     const grid = document.getElementById("hab-grid");
     grid.innerHTML = "";
@@ -751,7 +791,7 @@ function renderPericias(cat, containerId){
         estado.habilidades.push({
           nome, tipo: document.getElementById("novo-hab-tipo").value,
           nivel: parseInt(document.getElementById("novo-hab-nv").value,10) || 1,
-          descricao: document.getElementById("novo-hab-desc").value.trim(), aberta: false
+          descricao: document.getElementById("novo-hab-desc").value.trim(), aberta: false, editando: false
         });
         habForm = false; renderHabilidades(); salvar();
       };
@@ -765,20 +805,62 @@ function renderPericias(cat, containerId){
     estado.habilidades.forEach((hab, idx)=>{
       const card = document.createElement("div");
       card.className = "item-card" + (hab.aberta ? " expandido" : "");
+
+      if(hab.editando){
+        card.innerHTML = `
+          <div class="item-edit-form">
+            <input type="text" id="edit-hab-nome-${idx}" value="${hab.nome}">
+            <div class="item-form-row">
+              <select id="edit-hab-tipo-${idx}">
+                <option value="classe" ${hab.tipo==="classe"?"selected":""}>Classe</option>
+                <option value="extranatural" ${hab.tipo==="extranatural"?"selected":""}>Extranatural</option>
+                <option value="herdada" ${hab.tipo==="herdada"?"selected":""}>Herdada</option>
+              </select>
+              <input type="number" id="edit-hab-nv-${idx}" value="${hab.nivel||1}">
+            </div>
+            <textarea id="edit-hab-desc-${idx}">${hab.descricao||""}</textarea>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+              <button class="btn" id="canc-edit-hab-${idx}">Cancelar</button>
+              <button class="btn primary" id="salv-edit-hab-${idx}">Salvar</button>
+            </div>
+          </div>`;
+        card.querySelector(`#canc-edit-hab-${idx}`).onclick = ()=>{ hab.editando = false; renderHabilidades(); };
+        card.querySelector(`#salv-edit-hab-${idx}`).onclick = ()=>{
+          hab.nome = document.getElementById(`edit-hab-nome-${idx}`).value.trim() || hab.nome;
+          hab.tipo = document.getElementById(`edit-hab-tipo-${idx}`).value;
+          hab.nivel = parseInt(document.getElementById(`edit-hab-nv-${idx}`).value,10) || 1;
+          hab.descricao = document.getElementById(`edit-hab-desc-${idx}`).value.trim();
+          hab.editando = false; renderHabilidades(); salvar();
+        };
+        grid.appendChild(card);
+        return;
+      }
+
       card.innerHTML = `
         <div class="item-header">
           <span class="item-chevron">${hab.aberta ? "▾" : "▸"}</span>
           <span class="item-nome tipo-${hab.tipo}">${hab.nome}</span>
           <span class="item-meta">Nv. ${hab.nivel}</span>
         </div>
-        ${hab.aberta ? `<div class="item-body"><div class="item-tipo-tag tipo-${hab.tipo}">${hab.tipo}</div><div class="item-desc-text">${hab.descricao||"Sem descrição."}</div><div class="item-footer-actions"><button class="item-action remover" data-del="${idx}">Remover</button></div></div>` : ""}`;
+        ${hab.aberta ? `
+          <div class="item-body">
+            <div class="item-tipo-tag tipo-${hab.tipo}">${hab.tipo}</div>
+            <div class="item-desc-text">${hab.descricao||"Sem descrição."}</div>
+            <div class="item-footer-actions">
+              <button class="item-action remover" data-del="${idx}">Remover</button>
+              <button class="item-action editar" data-edit="${idx}">Editar</button>
+            </div>
+          </div>` : ""}`;
       card.querySelector(".item-header").onclick = ()=>{ hab.aberta = !hab.aberta; renderHabilidades(); };
       const del = card.querySelector("[data-del]");
       if(del) del.onclick = (e)=>{ e.stopPropagation(); estado.habilidades.splice(idx,1); renderHabilidades(); salvar(); };
+      const edit = card.querySelector("[data-edit]");
+      if(edit) edit.onclick = (e)=>{ e.stopPropagation(); hab.editando = true; renderHabilidades(); };
       grid.appendChild(card);
     });
   }
 
+  // --- TÉCNICAS ---
   function renderTecnicas(){
     const list = document.getElementById("tecnica-grid");
     list.innerHTML = "";
@@ -798,7 +880,7 @@ function renderPericias(cat, containerId){
         if(!nome) return;
         estado.tecnicas.push({
           nome, tipo: document.getElementById("novo-tec-tipo").value,
-          descricao: document.getElementById("novo-tec-desc").value.trim(), aberta: false
+          descricao: document.getElementById("novo-tec-desc").value.trim(), aberta: false, editando: false
         });
         tecForm = false; renderTecnicas(); salvar();
       };
@@ -812,19 +894,55 @@ function renderPericias(cat, containerId){
     estado.tecnicas.forEach((tec, idx)=>{
       const card = document.createElement("div");
       card.className = "item-card";
+
+      if(tec.editando){
+        card.innerHTML = `
+          <div class="item-edit-form">
+            <input type="text" id="edit-tec-nome-${idx}" value="${tec.nome}">
+            <select id="edit-tec-tipo-${idx}">
+              <option value="tecnica" ${tec.tipo==="tecnica"?"selected":""}>Técnica</option>
+              <option value="estilo" ${tec.tipo==="estilo"?"selected":""}>Estilo de Luta</option>
+            </select>
+            <textarea id="edit-tec-desc-${idx}">${tec.descricao||""}</textarea>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+              <button class="btn" id="canc-edit-tec-${idx}">Cancelar</button>
+              <button class="btn primary" id="salv-edit-tec-${idx}">Salvar</button>
+            </div>
+          </div>`;
+        card.querySelector(`#canc-edit-tec-${idx}`).onclick = ()=>{ tec.editando = false; renderTecnicas(); };
+        card.querySelector(`#salv-edit-tec-${idx}`).onclick = ()=>{
+          tec.nome = document.getElementById(`edit-tec-nome-${idx}`).value.trim() || tec.nome;
+          tec.tipo = document.getElementById(`edit-tec-tipo-${idx}`).value;
+          tec.descricao = document.getElementById(`edit-tec-desc-${idx}`).value.trim();
+          tec.editando = false; renderTecnicas(); salvar();
+        };
+        list.appendChild(card);
+        return;
+      }
+
       card.innerHTML = `
         <div class="item-header">
           <span class="item-chevron">${tec.aberta ? "▾" : "▸"}</span>
           <span class="item-nome tipo-${tec.tipo}">${tec.nome}</span>
         </div>
-        ${tec.aberta ? `<div class="item-body"><div class="item-desc-text">${tec.descricao||"Sem descrição."}</div><div class="item-footer-actions"><button class="item-action remover" data-del="${idx}">Remover</button></div></div>` : ""}`;
+        ${tec.aberta ? `
+          <div class="item-body">
+            <div class="item-desc-text">${tec.descricao||"Sem descrição."}</div>
+            <div class="item-footer-actions">
+              <button class="item-action remover" data-del="${idx}">Remover</button>
+              <button class="item-action editar" data-edit="${idx}">Editar</button>
+            </div>
+          </div>` : ""}`;
       card.querySelector(".item-header").onclick = ()=>{ tec.aberta = !tec.aberta; renderTecnicas(); };
       const del = card.querySelector("[data-del]");
       if(del) del.onclick = (e)=>{ e.stopPropagation(); estado.tecnicas.splice(idx,1); renderTecnicas(); salvar(); };
+      const edit = card.querySelector("[data-edit]");
+      if(edit) edit.onclick = (e)=>{ e.stopPropagation(); tec.editando = true; renderTecnicas(); };
       list.appendChild(card);
     });
   }
 
+  // --- TALENTOS ---
   function renderTalentos(){
     const grid = document.getElementById("talento-grid");
     grid.innerHTML = "";
@@ -844,7 +962,7 @@ function renderPericias(cat, containerId){
         if(!nome) return;
         estado.talentos.push({
           nome, tipo: document.getElementById("novo-tal-tipo").value,
-          descricao: document.getElementById("novo-tal-desc").value.trim(), aberta: false
+          descricao: document.getElementById("novo-tal-desc").value.trim(), aberta: false, editando: false
         });
         talForm = false; renderTalentos(); salvar();
       };
@@ -858,19 +976,56 @@ function renderPericias(cat, containerId){
     estado.talentos.forEach((tal, idx)=>{
       const card = document.createElement("div");
       card.className = "item-card" + (tal.aberta ? " expandido" : "");
+
+      if(tal.editando){
+        card.innerHTML = `
+          <div class="item-edit-form">
+            <input type="text" id="edit-tal-nome-${idx}" value="${tal.nome}">
+            <select id="edit-tal-tipo-${idx}">
+              <option value="talento" ${tal.tipo==="talento"?"selected":""}>Talento</option>
+              <option value="aprimoramento" ${tal.tipo==="aprimoramento"?"selected":""}>Aprimoramento Extranatural</option>
+            </select>
+            <textarea id="edit-tal-desc-${idx}">${tal.descricao||""}</textarea>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+              <button class="btn" id="canc-edit-tal-${idx}">Cancelar</button>
+              <button class="btn primary" id="salv-edit-tal-${idx}">Salvar</button>
+            </div>
+          </div>`;
+        card.querySelector(`#canc-edit-tal-${idx}`).onclick = ()=>{ tal.editando = false; renderTalentos(); };
+        card.querySelector(`#salv-edit-tal-${idx}`).onclick = ()=>{
+          tal.nome = document.getElementById(`edit-tal-nome-${idx}`).value.trim() || tal.nome;
+          tal.tipo = document.getElementById(`edit-tal-tipo-${idx}`).value;
+          tal.descricao = document.getElementById(`edit-tal-desc-${idx}`).value.trim();
+          tal.editando = false; renderTalentos(); salvar();
+        };
+        grid.appendChild(card);
+        return;
+      }
+
       card.innerHTML = `
         <div class="item-header">
           <span class="item-chevron">${tal.aberta ? "▾" : "▸"}</span>
           <span class="item-nome tipo-${tal.tipo}">${tal.nome}</span>
         </div>
-        ${tal.aberta ? `<div class="item-body"><div class="item-desc-text">${tal.descricao||"Sem descrição."}</div><div class="item-footer-actions"><button class="item-action remover" data-del="${idx}">Remover</button></div></div>` : ""}`;
+        ${tal.aberta ? `
+          <div class="item-body">
+            <div class="item-tipo-tag tipo-${tal.tipo}">${tal.tipo}</div>
+            <div class="item-desc-text">${tal.descricao||"Sem descrição."}</div>
+            <div class="item-footer-actions">
+              <button class="item-action remover" data-del="${idx}">Remover</button>
+              <button class="item-action editar" data-edit="${idx}">Editar</button>
+            </div>
+          </div>` : ""}`;
       card.querySelector(".item-header").onclick = ()=>{ tal.aberta = !tal.aberta; renderTalentos(); };
       const del = card.querySelector("[data-del]");
       if(del) del.onclick = (e)=>{ e.stopPropagation(); estado.talentos.splice(idx,1); renderTalentos(); salvar(); };
+      const edit = card.querySelector("[data-edit]");
+      if(edit) edit.onclick = (e)=>{ e.stopPropagation(); tal.editando = true; renderTalentos(); };
       grid.appendChild(card);
     });
   }
 
+  // --- ATALHOS ---
   function renderAtalhos(){
     const list = document.getElementById("atalho-grid");
     list.innerHTML = "";
@@ -926,6 +1081,7 @@ function renderPericias(cat, containerId){
     });
   }
 
+  // --- ANOTAÇÕES ---
   let notaAtivaId = null;
   function renderAnotacoes(){
     const list = document.getElementById("anotacoes-lista");
@@ -973,7 +1129,7 @@ function renderPericias(cat, containerId){
     if(n){ n.conteudo = e.target.value; salvar(); }
   };
 
-  // Modais de Personagens e Histórico
+  // --- MODAIS ---
   function listarPersonagens(){
     const lista = [];
     for(let i=0; i<localStorage.length; i++){
@@ -1051,7 +1207,7 @@ function renderPericias(cat, containerId){
     salvar();
   };
 
-  // Foto / Avatar com Crop
+  // --- AVATAR & CROP ---
   let cropImg = null, cropScale = 1, cropMinScale = 1, cropOffX = 0, cropOffY = 0, arrastando = false, arrStart = {x:0, y:0, ox:0, oy:0};
   const CROP_VIEWPORT = 260;
 
@@ -1128,7 +1284,7 @@ function renderPericias(cat, containerId){
     render(); salvar();
   };
 
-  // Render Geral
+  // --- RENDER GERAL ---
   function render(){
     if(estado.idMesa){
       document.getElementById("mesa-form").style.display = "none";
