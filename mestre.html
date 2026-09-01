@@ -90,7 +90,6 @@
   .acao-btn.remover:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
   .acao-btn.abrir-ficha{ border-color:var(--border-soft); color:var(--text-faint); text-decoration:none; text-align:center; }
   .acao-btn.abrir-ficha:hover{ border-color:var(--accent-arcane); color:var(--accent-arcane); }
-  .pcard-footer{ display:flex; justify-content:space-between; align-items:center; font-size:0.66rem; color:var(--text-faint); }
 
   .dashboard-grid{ display:grid; grid-template-columns:1fr 2fr; gap:20px; align-items:stretch; }
   @media (max-width:1000px){ .dashboard-grid{ grid-template-columns:1fr; } }
@@ -499,6 +498,24 @@
   let inimigoEditandoId = null;
   let inimigoAcoesTemp = [];
 
+  // --- Status de Conexão com Firebase no Topo ---
+  const statusPill = document.getElementById("status-pill");
+  const statusTexto = document.getElementById("status-texto");
+  if(firebaseOk){
+    firebase.database().ref(".info/connected").on("value", (snap)=>{
+      const online = snap.val() === true;
+      if(statusPill && statusTexto){
+        statusPill.className = "status-pill " + (online ? "online" : "offline");
+        statusTexto.textContent = online ? "Conectado" : "Desconectado";
+      }
+    });
+  } else {
+    if(statusPill && statusTexto){
+      statusPill.className = "status-pill offline";
+      statusTexto.textContent = "Offline";
+    }
+  }
+
   function listarMesasSalvas(){
     try{ return JSON.parse(localStorage.getItem(LS_MESAS)) || []; }catch(e){ return []; }
   }
@@ -618,8 +635,8 @@
   function renderPersonagens(dados){
     ultimosJogadoresMesa = dados;
     const conteudo = document.getElementById("conteudo");
-    if(!dados){
-      conteudo.innerHTML = `<div class="empty-state">Nenhum jogador conectado nesta mesa.<br>Código: <b>${mesaAtiva.id}</b></div>`;
+    if(!dados || Object.keys(dados).length === 0){
+      conteudo.innerHTML = `<div class="empty-state">Nenhum jogador conectado nesta mesa.<br>Código de convite: <b>${mesaAtiva ? mesaAtiva.id : ''}</b></div>`;
       return;
     }
 
@@ -638,16 +655,20 @@
     lista.forEach(p => {
       const id = p.id;
       const ident = p.identidade || {};
-      const rec = p.recursos || {};
+      const rec = p.recursos || { pvAtual: 10, pvMaximo: 10, protAtual: 0, protMaximo: 0 };
       const atrib = p.atributos || {};
-      const pvAtual = rec.pvAtual || 0, pvMax = rec.pvMaximo || 0;
-      const protAtual = rec.protAtual || 0, protMax = rec.protMaximo || 0;
-      const pctPv = pvMax > 0 ? Math.max(0, Math.min(100, (pvAtual/pvMax)*100)) : 0;
-      const pctProt = protMax > 0 ? Math.max(0, Math.min(100, (protAtual/protMax)*100)) : 0;
+      
+      const pvAtual = parseInt(rec.pvAtual, 10) || 0;
+      const pvMax = parseInt(rec.pvMaximo, 10) || 10;
+      const protAtual = parseInt(rec.protAtual, 10) || 0;
+      const protMax = parseInt(rec.protMaximo, 10) || 0;
+      
+      const pctPv = pvMax > 0 ? Math.max(0, Math.min(100, (pvAtual / pvMax) * 100)) : 0;
+      const pctProt = protMax > 0 ? Math.max(0, Math.min(100, (protAtual / protMax) * 100)) : 0;
 
       const attrsHTML = ATRIBUTOS_ABREV.map(def => {
-        const a = atrib[def.chave] || { pontos:1 };
-        const base = a.pontos || 0;
+        const a = atrib[def.chave] || { pontos: 1 };
+        const base = a.pontos !== undefined ? a.pontos : 1;
         const modTemp = a.modTemp || 0;
         const efetivo = Math.max(0, base + modTemp);
         return `
@@ -663,7 +684,7 @@
       card.innerHTML = `
         <div class="pcard-header" data-toggle="${id}">
           <div class="pcard-avatar">${ident.foto ? `<img src="${ident.foto}" alt="">` : (ident.nome ? ident.nome.slice(0,2).toUpperCase() : "?")}</div>
-          <div class="pcard-nome">${ident.nome || "Sem Nome"}</div>
+          <div class="pcard-nome">${ident.nome || "Personagem sem nome"}</div>
           <span class="pcard-chevron">${expandido ? "▾" : "▸"}</span>
         </div>
 
@@ -685,12 +706,12 @@
         </div>
 
         <div class="pcard-detalhes ${expandido ? "aberto" : ""}">
-          <div class="pcard-sub">${ident.classe || ""}${ident.subclasse ? " · "+ident.subclasse : ""} — Nível ${ident.nivel || 1}</div>
+          <div class="pcard-sub">${ident.classe || "Sicário"}${ident.subclasse ? " · " + ident.subclasse : ""} — Nível ${ident.nivel || 1}</div>
           <div class="pcard-atributos">${attrsHTML}</div>
           <div class="pcard-meta-row">
-            <span><b>DT</b>${rec.dt ?? "—"}</span>
-            <span><b>Desloc.</b>${rec.deslocamento ?? "—"}</span>
-            <span><b>Prof.</b>${ident.proficiencia ?? "—"}</span>
+            <span><b>DT</b>${rec.dt ?? "16"}</span>
+            <span><b>Desloc.</b>${rec.deslocamento ?? "10m"}</span>
+            <span><b>Prof.</b>${ident.proficiencia ?? "1"}</span>
             <span><b>Cansaço</b>${ident.cansaco ?? 0}</span>
             <span><b>Exaustão</b>${ident.exaustao ?? 0}</span>
           </div>
@@ -758,7 +779,7 @@
     conteudo.appendChild(grid);
   }
 
-  // Turnos, Iniciativa & Tracker
+  // --- Turnos, Iniciativa & Tracker ---
   function chaveIniciativa(idMesa){ return `caos_mestre_iniciativa_${idMesa}`; }
   function carregarIniciativa(idMesa){
     try{
@@ -998,7 +1019,7 @@
     salvarIniciativa(); renderIniciativa();
   };
 
-  // Fichas de Inimigos
+  // --- Fichas de Inimigos ---
   function chaveInimigosMestre(idMesa){ return `caos_mestre_inimigos_${idMesa}`; }
   function carregarInimigosMestre(idMesa){
     try{
@@ -1143,7 +1164,7 @@
     document.getElementById("modal-inimigo").classList.remove("aberto");
   };
 
-  // Atalhos do Mestre
+  // --- Atalhos do Mestre ---
   function chaveAtalhosMestre(idMesa){ return `caos_mestre_atalhos_${idMesa}`; }
   function carregarAtalhosMestre(idMesa){
     try{
@@ -1222,7 +1243,7 @@
     setTimeout(()=> toast.remove(), 6000);
   }
 
-  // Anotações do Mestre
+  // --- Anotações do Mestre ---
   function chaveAnotacoesMestre(idMesa){ return `caos_mestre_anotacoes_${idMesa}`; }
   function carregarAnotacoesMestre(idMesa){
     try{
@@ -1283,7 +1304,7 @@
     if(n){ n.conteudo = e.target.value; salvarAnotacoesMestre(); }
   };
 
-  // Histórico e Escuta de Rolagens dos Jogadores
+  // --- Histórico e Escuta de Rolagens dos Jogadores ---
   function escutarRolagensDaMesa(idMesa){
     const ref = firebase.database().ref(`mesas/${idMesa}/rolagens`);
     const log = [];
@@ -1320,7 +1341,7 @@
   document.getElementById("btn-historico-rolagens").onclick = ()=> document.getElementById("modal-historico").classList.add("aberto");
   document.getElementById("btn-fechar-historico").onclick = ()=> document.getElementById("modal-historico").classList.remove("aberto");
 
-  // Alternar Abas do Painel
+  // --- Alternar Abas do Painel ---
   document.querySelectorAll(".ferramentas-tab-btn").forEach(btn=>{
     btn.onclick = ()=>{
       const alvo = btn.dataset.ftab;
