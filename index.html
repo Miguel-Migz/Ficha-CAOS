@@ -4,130 +4,70 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>C.A.O.S — Projeto da Ficha de Personagem</title>
+<link rel="stylesheet" href="./style.css">
 <style>
-  :root{
-    --bg: #131019;
-    --bg-panel: #1b1724;
-    --bg-panel-alt: #221d2e;
-    --bg-inset: #0f0c15;
-    --border: #34293f;
-    --border-soft: #2a2233;
-    --text: #ece6f5;
-    --text-dim: #9c8fb3;
-    --text-faint: #6c6180;
-    --accent-arcane: #9b6bf2;
-    --accent-gold: #d3a24d;
-    --font-display: Iowan Old Style, "Palatino Linotype", Georgia, serif;
-    --font-body: -apple-system, "Segoe UI", Inter, sans-serif;
-    --font-mono: "SF Mono", "Cascadia Code", Consolas, monospace;
-  }
-  *{ box-sizing:border-box; }
-  body{
-    margin:0; background:var(--bg); color:var(--text);
-    font-family:var(--font-body); line-height:1.5;
-    background-image:
-      radial-gradient(ellipse at top left, rgba(155,107,242,0.08), transparent 55%),
-      radial-gradient(ellipse at bottom right, rgba(226,89,63,0.06), transparent 55%);
-    min-height:100vh;
-  }
-  .wrap{ max-width:720px; width:100%; }
-
-  header{ margin-bottom:28px; border-bottom:1px solid var(--border); padding-bottom:16px; }
-  .title{ font-family:var(--font-display); font-size:2rem; letter-spacing:0.06em; font-weight:600; }
-  .title span{ color:var(--accent-arcane); }
-  .subtitle{ font-size:0.8rem; color:var(--text-faint); letter-spacing:0.06em; text-transform:uppercase; margin-top:6px; }
-
-  .status-badge{
-    display:inline-flex; align-items:center; gap:8px; margin:16px 8px 0 0;
-    background:var(--bg-inset); border:1px solid var(--accent-gold); border-radius:20px;
-    padding:6px 14px; font-family:var(--font-mono); font-size:0.78rem; color:var(--accent-gold);
-  }
-  .firebase-badge{ border-color:var(--border-soft); color:var(--text-dim); }
-
-  .cards{ display:flex; flex-direction:column; gap:14px; margin-top:24px; }
-  a.card{
+  #landing { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+  .cards { display:flex; flex-direction:column; gap:14px; margin-top:24px; }
+  a.card {
     display:flex; align-items:center; justify-content:space-between; gap:16px;
     background:var(--bg-panel); border:1px solid var(--border); border-radius:10px;
     padding:20px 22px; text-decoration:none; color:var(--text);
     transition:border-color 0.15s ease, background 0.15s ease;
   }
-  a.card:hover{ border-color:var(--accent-arcane); background:var(--bg-panel-alt); }
-  .card-text .card-title{ font-family:var(--font-display); font-size:1.15rem; color:var(--accent-gold); margin-bottom:4px; }
-  .card-text .card-desc{ font-size:0.84rem; color:var(--text-dim); }
-  .card-arrow{ font-size:1.3rem; color:var(--text-faint); flex-shrink:0; }
-  a.card:hover .card-arrow{ color:var(--accent-arcane); }
-
-  footer{ margin-top:32px; font-size:0.72rem; color:var(--text-faint); text-align:center; }
-
-  /* ---------- Visualização embutida da ficha ---------- */
-  #landing{ display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
-  #ficha-view{ display:none; flex-direction:column; height:100vh; }
-  body.mostrando-ficha #landing{ display:none; }
-  body.mostrando-ficha #ficha-view{ display:flex; }
-
-  .ficha-topbar{
-    display:flex; align-items:center; gap:12px; padding:10px 16px;
-    background:var(--bg-panel); border-bottom:1px solid var(--border); flex-shrink:0;
-  }
-  .btn-voltar{
-    background:var(--bg-panel-alt); border:1px solid var(--border-soft); color:var(--text);
-    padding:7px 14px; border-radius:7px; font-size:0.82rem; cursor:pointer; font-family:var(--font-body);
-    display:flex; align-items:center; gap:6px;
-  }
-  .btn-voltar:hover{ border-color:var(--accent-arcane); }
-  .ficha-topbar .titulo-mini{ font-family:var(--font-display); font-size:0.95rem; color:var(--text-dim); }
-  #ficha-frame{ flex:1; width:100%; border:none; background:var(--bg); }
+  a.card:hover { border-color:var(--accent-arcane); background:var(--bg-panel-alt); }
+  .card-title { font-family:var(--font-display); font-size:1.15rem; color:var(--accent-gold); margin-bottom:4px; }
+  .card-desc { font-size:0.84rem; color:var(--text-dim); }
+  .card-arrow { font-size:1.3rem; color:var(--text-faint); }
+  #ficha-view { display:none; flex-direction:column; height:100vh; }
+  body.mostrando-ficha #landing { display:none; }
+  body.mostrando-ficha #ficha-view { display:flex; }
+  .ficha-topbar { display:flex; align-items:center; gap:12px; padding:10px 16px; background:var(--bg-panel); border-bottom:1px solid var(--border); }
+  #ficha-frame { flex:1; width:100%; border:none; background:var(--bg); }
 </style>
+
+<!-- Scripts Firebase Compat compartilhados -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="./firebase-config.js"></script>
 </head>
 <body>
 
 <div id="landing">
-<div class="wrap">
-
-  <header>
-    <div class="title">C.<span>A</span>.O.S</div>
-    <div class="subtitle">Ficha de Personagem Automatizada — Projeto</div>
-    <div class="status-badge">● Em desenvolvimento — Módulo atual: Identidade / Status Vitais / Atributos / Perícias</div>
-    <div class="status-badge firebase-badge" id="firebase-badge">🔥 conectando ao Firebase…</div>
+<div class="wrap-estreito">
+  <header style="margin-bottom:28px; border-bottom:1px solid var(--border); padding-bottom:16px;">
+    <div class="masthead-title" style="font-size:2rem;">C.<span>A</span>.O.S</div>
+    <div class="masthead-sub">Ficha de Personagem Automatizada — Hub do Projeto</div>
+    <div class="status-pill online" style="margin-top:14px;" id="firebase-badge">🔥 Firebase Conectado</div>
   </header>
 
   <div class="cards">
     <a class="card" href="#" id="btn-abrir-ficha">
-      <div class="card-text">
+      <div>
         <div class="card-title">Abrir Ficha de Personagem</div>
-        <div class="card-desc">Identidade, Status Vitais e Combate, Atributos e Perícias — com rolagem funcional e salvamento automático.</div>
+        <div class="card-desc">Identidade, Status Vitais, Atributos, Perícias, Habilidades e Inventário.</div>
       </div>
       <div class="card-arrow">→</div>
     </a>
 
-    <a class="card" href="./mestre.html" target="_blank" rel="noopener">
-      <div class="card-text">
+    <a class="card" href="./mestre.html">
+      <div>
         <div class="card-title">Painel do Mestre</div>
-        <div class="card-desc">Visão em tempo real de todos os personagens sincronizados, com ações rápidas de dano e cura.</div>
-      </div>
-      <div class="card-arrow">→</div>
-    </a>
-
-    <a class="card" href="./index.md">
-      <div class="card-text">
-        <div class="card-title">Documentação do Projeto</div>
-        <div class="card-desc">Modelo de dados, regras já implementadas e pendências conhecidas.</div>
+        <div class="card-desc">Visão em tempo real das mesas ativas, rastreador de turnos e combate.</div>
       </div>
       <div class="card-arrow">→</div>
     </a>
   </div>
 
-  <footer>Sistema autoral C.A.O.S — ficha construída em HTML, CSS e JavaScript puro.</footer>
-
+  <p style="margin-top:32px; font-size:0.72rem; color:var(--text-faint); text-align:center;">Sistema autoral C.A.O.S</p>
 </div>
 </div>
 
 <div id="ficha-view">
   <div class="ficha-topbar">
-    <button class="btn-voltar" id="btn-voltar">← Voltar</button>
-    <span class="titulo-mini">C.A.O.S — Ficha de Personagem</span>
+    <button class="btn small" id="btn-voltar">← Voltar</button>
+    <span style="font-family:var(--font-display); font-size:0.95rem; color:var(--text-dim);">C.A.O.S — Ficha de Personagem</span>
   </div>
-  <iframe id="ficha-frame" title="Ficha de Personagem C.A.O.S"></iframe>
+  <iframe id="ficha-frame" title="Ficha de Personagem"></iframe>
 </div>
 
 <script>
@@ -147,37 +87,6 @@
   document.getElementById("btn-voltar").addEventListener("click", () => {
     body.classList.remove("mostrando-ficha");
   });
-</script>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDHbydGJAa1hb5S0w2zvqwM0Y6Y4AKspCQ",
-    authDomain: "caos-rpg.firebaseapp.com",
-    databaseURL: "https://caos-rpg-default-rtdb.firebaseio.com",
-    projectId: "caos-rpg",
-    storageBucket: "caos-rpg.firebasestorage.app",
-    messagingSenderId: "1056651562841",
-    appId: "1:1056651562841:web:c37def09772c89e797c648"
-  };
-
-  try{
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const badge = document.getElementById("firebase-badge");
-
-    onValue(ref(db, "personagens"), (snapshot) => {
-      const dados = snapshot.val();
-      const total = dados ? Object.keys(dados).length : 0;
-      badge.textContent = `🔥 ${total} personagem${total === 1 ? "" : "s"} sincronizado${total === 1 ? "" : "s"} agora`;
-    }, () => {
-      badge.textContent = "⚠️ sem conexão com o Firebase";
-    });
-  }catch(e){
-    document.getElementById("firebase-badge").textContent = "⚠️ Firebase indisponível";
-  }
 </script>
 </body>
 </html>
