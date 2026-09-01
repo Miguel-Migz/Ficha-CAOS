@@ -510,13 +510,30 @@
     return Math.max(0, (a.pontos || 1) + (a.modTemp || 0));
   }
 
-  function formulaPericia(p){
+function formulaPericia(p){
     if(p.isOficio) return "Automático";
     const qtd = valorEfetivoAtributo(p.atributoBase);
     const prof = estado.identidade.proficiencia;
-    let f = `${qtd}d10`;
+    
+    // Quando o atributo for 0, roda em Desvantagem (rola 1d10 duas vezes e pega o menor)
+    let f = qtd === 0 ? "1d10 [Desvantagem]" : `${qtd}d10`;
     if(p.treinado) f += p.expert ? ` + ${prof*6} (${prof}d6 máx)` : ` + ${prof}d6`;
     return f;
+  }
+
+  function rolarInstanciaPericia(qtd, p, prof){
+    // Se o atributo for 0, rola 1d10 base para o teste em desvantagem
+    const dadosQtd = qtd === 0 ? 1 : qtd;
+    const d10s = Array.from({length: dadosQtd}, () => 1 + Math.floor(Math.random()*10));
+    let d6s = [], bonus = 0;
+    
+    if(p.treinado){
+      if(p.expert) bonus = prof * 6;
+      else d6s = Array.from({length: Math.max(prof,0)}, () => 1 + Math.floor(Math.random()*6));
+    }
+    
+    const total = d10s.reduce((a,b)=>a+b,0) + d6s.reduce((a,b)=>a+b,0) + bonus;
+    return { total, d10s, d6s, bonus };
   }
 
   function mostrarResultado(nome, resultado){
@@ -548,12 +565,12 @@
     }
   }
 
-  function renderAtributos(){
+function renderAtributos(){
     const grid = document.getElementById("attr-grid");
     grid.innerHTML = "";
     ATRIBUTOS_DEF.forEach(def => {
-      const a = estado.atributos[def.chave] || { pontos:1 };
-      const base = a.pontos || 1;
+      const a = estado.atributos[def.chave] || { pontos: 1 };
+      const base = a.pontos !== undefined ? a.pontos : 1;
       const modTemp = a.modTemp || 0;
       const efetivo = valorEfetivoAtributo(def.chave);
       const card = document.createElement("div");
@@ -561,7 +578,7 @@
       card.innerHTML = `
         <div class="attr-name">${def.nome}</div>
         <div class="attr-value">${base}${modTemp !== 0 ? ` <span class="efetivo ${modTemp > 0 ? "buff" : "debuff"}">(${efetivo})</span>` : ""}</div>
-        <div class="attr-dice">${efetivo}d10</div>
+        <div class="attr-dice">${efetivo === 0 ? "0 (Desvantagem)" : efetivo + "d10"}</div>
         <div class="attr-controls">
           <button class="step-btn" data-attr="${def.chave}" data-step="-1">–</button>
           <button class="step-btn" data-attr="${def.chave}" data-step="1">+</button>
@@ -572,19 +589,20 @@
     grid.querySelectorAll("[data-attr]").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         const chave = btn.dataset.attr;
-        const step = parseInt(btn.dataset.step,10);
-        if(!estado.atributos[chave]) estado.atributos[chave] = { pontos:1 };
+        const step = parseInt(btn.dataset.step, 10);
+        if(!estado.atributos[chave]) estado.atributos[chave] = { pontos: 1 };
         if(modoAtributoTemporario){
           estado.atributos[chave].modTemp = Math.max(-10, Math.min(10, (estado.atributos[chave].modTemp || 0) + step));
         } else {
-          estado.atributos[chave].pontos = Math.max(0, Math.min(20, (estado.atributos[chave].pontos || 1) + step));
+          // Permite reduzir até 0
+          estado.atributos[chave].pontos = Math.max(0, Math.min(20, (estado.atributos[chave].pontos !== undefined ? estado.atributos[chave].pontos : 1) + step));
         }
         render(); salvar();
       });
     });
   }
 
-  function renderPericias(cat, containerId){
+function renderPericias(cat, containerId){
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     (estado.pericias[cat] || []).forEach((p, idx)=>{
@@ -613,14 +631,30 @@
         const p = estado.pericias[btn.dataset.cat][btn.dataset.idx];
         const qtd = valorEfetivoAtributo(p.atributoBase);
         const prof = estado.identidade.proficiencia;
-        const d10s = Array.from({length: Math.max(qtd,0)}, () => 1 + Math.floor(Math.random()*10));
-        let d6s = [], bonus = 0;
-        if(p.treinado){
-          if(p.expert) bonus = prof * 6;
-          else d6s = Array.from({length: Math.max(prof,0)}, () => 1 + Math.floor(Math.random()*6));
+
+        if(qtd === 0){
+          // Rola duas vezes e escolhe a pior
+          const rollA = rolarInstanciaPericia(0, p, prof);
+          const rollB = rolarInstanciaPericia(0, p, prof);
+          const pior = rollA.total <= rollB.total ? rollA : rollB;
+          const detalheDesvantagem = `[Desvantagem] A:[${rollA.total}] vs B:[${rollB.total}] → Pior: ${pior.total} (d10:[${pior.d10s.join(", ")}]${pior.d6s.length ? " d6:["+pior.d6s.join(", ")+"]" : ""}${pior.bonus ? " +"+pior.bonus : ""})`;
+
+          mostrarResultado(p.nome, {
+            total: pior.total,
+            formula: formulaPericia(p),
+            breakdown: detalheDesvantagem
+          });
+        } else {
+          // Rolagem regular com atributo >= 1
+          const roll = rolarInstanciaPericia(qtd, p, prof);
+          mostrarResultado(p.nome, {
+            total: roll.total,
+            formula: formulaPericia(p),
+            d10s: roll.d10s,
+            d6s: roll.d6s,
+            bonus: roll.bonus
+          });
         }
-        const total = d10s.reduce((a,b)=>a+b,0) + d6s.reduce((a,b)=>a+b,0) + bonus;
-        mostrarResultado(p.nome, { total, formula: formulaPericia(p), d10s, d6s, bonus });
       });
     });
   }
