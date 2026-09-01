@@ -4,78 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>C.A.O.S — Painel do Mestre</title>
+<link rel="stylesheet" href="./style.css">
 <style>
-  :root{
-    --bg: #131019;
-    --bg-panel: #1b1724;
-    --bg-panel-alt: #221d2e;
-    --bg-inset: #0f0c15;
-    --border: #34293f;
-    --border-soft: #2a2233;
-    --text: #ece6f5;
-    --text-dim: #9c8fb3;
-    --text-faint: #6c6180;
-    --accent-arcane: #9b6bf2;
-    --accent-arcane-dim: #5b4a7a;
-    --accent-ember: #e2593f;
-    --accent-gold: #d3a24d;
-    --font-display: Iowan Old Style, "Palatino Linotype", Georgia, serif;
-    --font-body: -apple-system, "Segoe UI", Inter, sans-serif;
-    --font-mono: "SF Mono", "Cascadia Code", Consolas, monospace;
-  }
-  *{ box-sizing:border-box; }
-  body{
-    margin:0; background:var(--bg); color:var(--text);
-    font-family:var(--font-body); line-height:1.4;
-    background-image:
-      radial-gradient(ellipse at top left, rgba(155,107,242,0.08), transparent 55%),
-      radial-gradient(ellipse at bottom right, rgba(226,89,63,0.06), transparent 55%);
-    min-height:100vh;
-  }
   .wrap{ max-width:1440px; margin:0 auto; padding:28px 24px 80px; }
   .wrap-estreito{ max-width:640px; margin:0 auto; padding:48px 24px 80px; }
 
-  header.masthead{
-    display:flex; align-items:center; justify-content:space-between;
-    border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:22px; flex-wrap:wrap; gap:10px;
-  }
-  .masthead-title{ font-family:var(--font-display); font-size:1.5rem; letter-spacing:0.06em; font-weight:600; }
-  .masthead-title span{ color:var(--accent-arcane); }
-  .masthead-sub{ font-size:0.75rem; color:var(--text-faint); letter-spacing:0.08em; text-transform:uppercase; margin-top:4px; }
-  .masthead-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .status-pill{
-    display:inline-flex; align-items:center; gap:6px; font-size:0.74rem; color:var(--text-dim);
-    background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:20px; padding:6px 14px;
-  }
-  .status-dot{ width:7px; height:7px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
-  .status-pill.online .status-dot{ background:#4fd57a; box-shadow:0 0 6px #4fd57a; }
-  .status-pill.offline .status-dot{ background:var(--accent-ember); }
-  .link-discreto{
-    font-size:0.76rem; color:var(--text-faint); text-decoration:none; border-bottom:1px dotted var(--border-soft);
-  }
-  .link-discreto:hover{ color:var(--accent-arcane); border-color:var(--accent-arcane); }
-
-  .panel{ background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:18px; }
-  .panel-title{ font-family:var(--font-display); font-size:1.05rem; color:var(--accent-gold); margin:0 0 16px; }
-
-  label.field{ display:flex; flex-direction:column; gap:5px; font-size:0.72rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; }
-  input[type=text], input[type=number], textarea, select{
-    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
-    border-radius:6px; padding:9px 10px; font-family:var(--font-body); font-size:0.92rem;
-  }
-  textarea{ resize:vertical; line-height:1.5; }
-  input:focus, textarea:focus, select:focus{ outline:2px solid var(--accent-arcane); outline-offset:1px; border-color:var(--accent-arcane); }
-  .checkbox-linha{ display:flex; align-items:center; gap:8px; font-size:0.82rem; color:var(--text-dim); text-transform:none; letter-spacing:normal; }
-  .checkbox-linha input[type=checkbox]{ width:16px; height:16px; accent-color:var(--accent-arcane); }
-  .btn{
-    background:var(--bg-panel-alt); border:1px solid var(--border-soft); color:var(--text);
-    padding:9px 16px; border-radius:7px; font-size:0.82rem; cursor:pointer; font-family:var(--font-body);
-  }
-  .btn:hover{ border-color:var(--accent-arcane); }
-  .btn.primary{ background:var(--accent-arcane-dim); border-color:var(--accent-arcane); }
-  .btn.small{ padding:6px 12px; font-size:0.76rem; }
-
-  /* ---------- Tela inicial ---------- */
   .mesa-item{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
@@ -92,7 +25,6 @@
   .form-linha{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
   .form-linha .field{ flex:1; min-width:180px; }
 
-  /* ---------- Barra da mesa ativa ---------- */
   .mesa-ativa-bar{
     display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
     background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:20px;
@@ -107,7 +39,6 @@
   }
 
   .personagens-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(310px, 1fr)); gap:16px; }
-
   .pcard{
     background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:18px;
     display:flex; flex-direction:column; gap:12px;
@@ -127,24 +58,15 @@
   .pcard-detalhes.aberto{ display:flex; flex-direction:column; gap:12px; padding-top:2px; border-top:1px solid var(--border-soft); }
 
   .pcard-atributos{ display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; }
-  .attr-mini{
-    background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:6px;
-    padding:6px 2px; text-align:center;
-  }
-  .attr-mini-nome{ font-size:0.58rem; text-transform:uppercase; color:var(--text-faint); letter-spacing:0.02em; }
+  .attr-mini{ background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:6px; padding:6px 2px; text-align:center; }
+  .attr-mini-nome{ font-size:0.58rem; text-transform:uppercase; color:var(--text-faint); }
   .attr-mini-valor{ font-family:var(--font-display); font-size:0.95rem; font-weight:600; margin-top:1px; white-space:nowrap; }
-  .attr-mini-efetivo{ font-size:0.8em; }
   .attr-mini-efetivo.buff{ color:#4fd57a; }
   .attr-mini-efetivo.debuff{ color:var(--accent-ember); }
 
   .pcard-vitais{ display:flex; flex-direction:column; gap:8px; }
   .vital-linha{ display:flex; align-items:center; gap:8px; }
   .vital-label{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); width:60px; flex-shrink:0; }
-  .vital-bar-track{ flex:1; background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:6px; height:18px; overflow:hidden; position:relative; }
-  .vital-bar-fill{ height:100%; transition:width 0.2s ease; }
-  .vital-bar-fill.vida{ background:linear-gradient(90deg, #3f9142, #6fbf73); }
-  .vital-bar-fill.protecao{ background:repeating-linear-gradient(135deg, #4d9eea, #4d9eea 6px, #3b7fc4 6px, #3b7fc4 12px); }
-  .vital-numeros{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-family:var(--font-mono); color:var(--text); text-shadow:0 1px 2px rgba(0,0,0,0.6); }
 
   .pcard-meta-row{ display:flex; gap:14px; flex-wrap:wrap; font-size:0.72rem; color:var(--text-dim); font-family:var(--font-mono); }
   .pcard-meta-row b{ color:var(--text-faint); font-family:var(--font-body); font-weight:600; margin-right:3px; }
@@ -168,18 +90,13 @@
   .acao-btn.remover:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
   .acao-btn.abrir-ficha{ border-color:var(--border-soft); color:var(--text-faint); text-decoration:none; text-align:center; }
   .acao-btn.abrir-ficha:hover{ border-color:var(--accent-arcane); color:var(--accent-arcane); }
-
   .pcard-footer{ display:flex; justify-content:space-between; align-items:center; font-size:0.66rem; color:var(--text-faint); }
 
-  /* ---------- Layout de 2 colunas do dashboard ---------- */
-  .dashboard-grid{ display:grid; grid-template-columns:1fr 2fr; grid-template-rows:minmax(60vh, auto); gap:20px; align-items:stretch; }
-  @media (max-width:1000px){ .dashboard-grid{ grid-template-columns:1fr; grid-template-rows:auto; } }
+  .dashboard-grid{ display:grid; grid-template-columns:1fr 2fr; gap:20px; align-items:stretch; }
+  @media (max-width:1000px){ .dashboard-grid{ grid-template-columns:1fr; } }
   .coluna-ferramentas{ display:flex; flex-direction:column; }
   .coluna-ferramentas .panel{ flex:1; display:flex; flex-direction:column; margin-bottom:0; }
-  .coluna-ferramentas .empty-state{ flex:1; display:flex; align-items:center; justify-content:center; margin:0; border-style:dashed; }
 
-  /* ---------- Ferramentas do Mestre: abas ---------- */
-  .ferramentas-panel{ min-height:0; }
   .ferramentas-tabbar{ display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--border-soft); padding-bottom:12px; flex-wrap:wrap; flex-shrink:0; }
   .ferramentas-tab-btn{
     background:transparent; border:1px solid transparent; color:var(--text-faint);
@@ -191,16 +108,9 @@
   .ferramentas-tab-content{ display:none; flex:1; flex-direction:column; min-height:0; }
   .ferramentas-tab-content.active{ display:flex; }
 
-  /* ---------- Aba Turnos ---------- */
   .turnos-grid{ display:grid; grid-template-columns:1fr 1fr auto; gap:14px; flex:1; min-height:0; }
-  .turnos-col{
-    display:flex; flex-direction:column; min-height:0;
-    background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:8px; padding:12px;
-  }
-  .turnos-col-titulo{
-    font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint);
-    margin-bottom:10px; text-align:center; flex-shrink:0;
-  }
+  .turnos-col{ display:flex; flex-direction:column; min-height:0; background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:8px; padding:12px; }
+  .turnos-col-titulo{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint); margin-bottom:10px; text-align:center; flex-shrink:0; }
   .turnos-col-contador{ width:118px; flex-shrink:0; align-items:center; text-align:center; justify-content:space-between; }
   .contador-label{ font-size:0.64rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); line-height:1.3; }
   .contador-valor{ font-family:var(--font-display); font-size:2.6rem; font-weight:700; color:var(--accent-gold); line-height:1; }
@@ -209,10 +119,7 @@
 
   .iniciativa-add-row{ display:flex; gap:6px; margin-bottom:10px; flex-shrink:0; }
   .iniciativa-add-row input{ flex:1; padding:7px 8px; font-size:0.82rem; }
-  .iniciativa-add-row select{
-    flex:1; min-width:0; background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
-    border-radius:6px; padding:7px 8px; font-size:0.82rem; font-family:var(--font-body);
-  }
+  .iniciativa-add-row select{ flex:1; min-width:0; background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text); border-radius:6px; padding:7px 8px; font-size:0.82rem; font-family:var(--font-body); }
   .iniciativa-add-row input[type=number]{ flex:0 0 52px; text-align:center; }
   .iniciativa-lista{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
   .iniciativa-item{
@@ -223,49 +130,29 @@
   .iniciativa-item.turno-ativo{ border-color:#4fd57a; box-shadow:0 0 0 1px #4fd57a, 0 0 10px rgba(79,213,122,0.45); }
   .iniciativa-item-handle{ color:var(--text-faint); font-size:0.9rem; flex-shrink:0; user-select:none; }
   .iniciativa-item-nome{ flex:1; font-size:0.84rem; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .iniciativa-item-tipo{
-    font-size:0.56rem; text-transform:uppercase; padding:2px 5px; border-radius:4px;
-    border:1px solid var(--border-soft); color:var(--text-faint); flex-shrink:0; white-space:nowrap;
-  }
+  .iniciativa-item-tipo{ font-size:0.56rem; text-transform:uppercase; padding:2px 5px; border-radius:4px; border:1px solid var(--border-soft); flex-shrink:0; }
   .iniciativa-item-tipo.jogador{ color:#4d9eea; border-color:#4d9eea; }
   .iniciativa-item-tipo.inimigo{ color:var(--accent-ember); border-color:var(--accent-ember); }
-  .iniciativa-item-vida{ font-family:var(--font-mono); font-size:0.7rem; color:var(--text-dim); flex-shrink:0; white-space:nowrap; }
 
-  /* ---------- Inimigo em combate (dentro da iniciativa) ---------- */
   .iniciativa-item.inimigo-combate{ flex-direction:column; align-items:stretch; cursor:default; }
   .iniciativa-item.morto{ opacity:0.45; }
   .iniciativa-item.morto .iniciativa-item-nome{ text-decoration:line-through; }
   .ic-topo{ display:flex; align-items:center; gap:8px; }
-  .ic-ver-ficha{
-    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
-    border-radius:5px; padding:3px 9px; font-size:0.68rem; cursor:pointer; flex-shrink:0;
-  }
+  .ic-ver-ficha{ background:none; border:1px solid var(--border-soft); color:var(--text-faint); border-radius:5px; padding:3px 9px; font-size:0.68rem; cursor:pointer; flex-shrink:0; }
   .ic-ver-ficha:hover{ border-color:var(--accent-arcane); color:var(--text); }
   .ic-barras{ display:flex; flex-direction:column; gap:4px; margin-top:7px; }
   .ic-bar-track{ flex:none; height:13px; border-radius:5px; }
   .ic-bar-track .vital-numeros{ font-size:0.6rem; }
   .ic-controles{ display:flex; gap:6px; align-items:center; margin-top:8px; }
-  .ic-controles input{
-    width:52px; background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
-    border-radius:6px; padding:5px 6px; font-family:var(--font-mono); font-size:0.76rem; text-align:center;
-  }
-  .ic-alvo{
-    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
-    border-radius:6px; padding:5px 6px; font-family:var(--font-body); font-size:0.72rem; cursor:pointer;
-  }
-  .ic-alvo:focus{ outline:2px solid var(--accent-arcane); outline-offset:1px; border-color:var(--accent-arcane); }
-  .ic-btn{
-    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
-    border-radius:6px; padding:5px 10px; font-size:0.7rem; cursor:pointer;
-  }
+  .ic-controles input{ width:52px; background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text); border-radius:6px; padding:5px 6px; font-family:var(--font-mono); font-size:0.76rem; text-align:center; }
+  .ic-alvo{ background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text); border-radius:6px; padding:5px 6px; font-family:var(--font-body); font-size:0.72rem; }
+  .ic-btn{ background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text); border-radius:6px; padding:5px 10px; font-size:0.7rem; cursor:pointer; }
   .ic-btn.dano{ border-color:var(--accent-ember); color:var(--accent-ember); }
   .ic-btn.dano:hover{ background:rgba(226,89,63,0.15); }
   .ic-btn.cura{ border-color:#6fbf73; color:#6fbf73; }
   .ic-btn.cura:hover{ background:rgba(111,191,115,0.12); }
-  .ic-ficha{
-    margin-top:8px; padding-top:8px; border-top:1px solid var(--border-soft);
-    display:flex; flex-direction:column; gap:10px; font-size:0.78rem; color:var(--text-dim);
-  }
+  .ic-ficha{ margin-top:8px; padding-top:8px; border-top:1px solid var(--border-soft); display:flex; flex-direction:column; gap:10px; font-size:0.78rem; color:var(--text-dim); }
+
   .iniciativa-item-remover{
     background:none; border:1px solid var(--border-soft); color:var(--text-faint);
     border-radius:4px; width:22px; height:22px; font-size:0.7rem; cursor:pointer; flex-shrink:0; line-height:1;
@@ -276,10 +163,8 @@
     .turnos-grid{ grid-template-columns:1fr; }
     .turnos-col-contador{ width:100%; flex-direction:row; justify-content:space-between; }
     .contador-botoes{ flex-direction:row; width:auto; }
-    .anotacoes-grid{ grid-template-columns:1fr; }
   }
 
-  /* ---------- Aba Anotações ---------- */
   .anotacoes-grid{ display:grid; grid-template-columns:1fr 1.6fr; gap:14px; flex:1; min-height:0; }
   .anotacoes-col-editor{ padding:0; overflow:hidden; }
   .anotacoes-lista{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; }
@@ -306,12 +191,8 @@
   }
   .anotacao-conteudo-input:focus{ outline:none; }
 
-  /* ---------- Aba Atalhos (mesmo padrão visual da ficha do jogador) ---------- */
   .item-list{ display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1; }
-  .item-card{
-    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
-    padding:12px 14px; display:flex; flex-direction:column;
-  }
+  .item-card{ background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; }
   .item-header{ display:flex; align-items:baseline; gap:8px; cursor:pointer; user-select:none; }
   .item-chevron{ color:var(--text-faint); font-size:0.7rem; width:12px; flex-shrink:0; }
   .item-nome{ font-family:var(--font-display); font-size:1rem; font-weight:600; }
@@ -323,110 +204,43 @@
   .item-action.editar{ color:#4fd57a; }
   .item-action.editar:hover{ text-decoration:underline; }
 
-  .item-edit-form{ display:flex; flex-direction:column; gap:8px; }
-  .item-edit-form input, .item-edit-form select{
-    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
-    border-radius:6px; padding:8px 10px; font-family:var(--font-body); font-size:0.86rem;
+  .item-edit-form, .item-add-form{
+    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
+    padding:14px 16px; display:flex; flex-direction:column; gap:8px; flex-shrink:0;
   }
-  .item-edit-form-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:2px; }
-
   .item-add-card{
     background:var(--bg-panel-alt); border:1px dashed var(--border-soft); border-radius:8px;
     padding:16px; display:flex; align-items:center; justify-content:center; min-height:60px;
     cursor:pointer; color:var(--text-dim); font-family:var(--font-display); font-size:1rem; flex-shrink:0;
   }
   .item-add-card:hover{ border-color:var(--accent-arcane); color:var(--text); }
-  .item-add-form{
-    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
-    padding:14px 16px; display:flex; flex-direction:column; gap:8px; flex-shrink:0;
-  }
-  .item-add-form input{
-    background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text);
-    border-radius:6px; padding:8px 10px; font-family:var(--font-body); font-size:0.86rem;
-  }
-  .item-add-form-actions{ display:flex; justify-content:flex-end; gap:8px; }
-
   .dado-row{ display:flex; gap:8px; align-items:center; }
-  .dado-row select{ flex:1.2; background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text); border-radius:6px; padding:8px 10px; font-size:0.86rem; }
-  .dado-row input{ flex:1; background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text); border-radius:6px; padding:8px 10px; font-size:0.86rem; }
-  .dado-row-remover{
-    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
-    border-radius:5px; width:26px; height:26px; font-size:0.8rem; cursor:pointer; flex-shrink:0; line-height:1;
-  }
+  .dado-row select, .dado-row input{ flex:1; }
+  .dado-row-remover{ background:none; border:1px solid var(--border-soft); color:var(--text-faint); border-radius:5px; width:26px; height:26px; font-size:0.8rem; cursor:pointer; flex-shrink:0; }
   .dado-row-remover:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
-  .btn-add-dado{
-    background:none; border:1px dashed var(--border-soft); color:var(--text-dim);
-    border-radius:6px; padding:6px; font-size:0.76rem; cursor:pointer; font-family:var(--font-body);
-  }
-  .btn-add-dado:hover{ border-color:var(--accent-arcane); color:var(--text); }
-
+  .btn-add-dado{ background:none; border:1px dashed var(--border-soft); color:var(--text-dim); border-radius:6px; padding:6px; font-size:0.76rem; cursor:pointer; font-family:var(--font-body); }
   .atalho-formula{ margin-left:auto; font-size:0.74rem; color:var(--text-faint); font-family:var(--font-mono); white-space:nowrap; }
-  .atalho-rolar-btn{
-    background:var(--accent-arcane-dim); border:1px solid var(--accent-arcane); color:var(--text);
-    border-radius:6px; padding:5px 12px; font-size:0.76rem; cursor:pointer; flex-shrink:0;
-  }
-  .atalho-rolar-btn:hover{ background:var(--accent-arcane); }
+  .atalho-rolar-btn{ background:var(--accent-arcane-dim); border:1px solid var(--accent-arcane); color:var(--text); border-radius:6px; padding:5px 12px; font-size:0.76rem; cursor:pointer; flex-shrink:0; }
 
-  /* ---------- Modal genérico ---------- */
-  .modal-overlay{
-    display:none; position:fixed; inset:0; background:rgba(8,6,12,0.7); z-index:100;
-    align-items:center; justify-content:center; padding:20px;
-  }
-  .modal-overlay.aberto{ display:flex; }
-  .modal-panel{
-    background:var(--bg-panel); border:1px solid var(--border); border-radius:12px;
-    width:100%; max-width:480px; max-height:80vh; display:flex; flex-direction:column; overflow:hidden;
-  }
-  .modal-header{
-    display:flex; align-items:center; justify-content:space-between; padding:16px 20px;
-    border-bottom:1px solid var(--border-soft); flex-shrink:0;
-  }
-  .modal-close{
-    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
-    border-radius:6px; width:28px; height:28px; font-size:1rem; cursor:pointer; line-height:1;
-  }
-  .modal-close:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
-  .modal-body{ padding:16px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
   .modal-panel-largo{ max-width:680px; }
-  .modal-footer{ padding:14px 20px; border-top:1px solid var(--border-soft); display:flex; justify-content:flex-end; gap:8px; flex-shrink:0; }
-
-  /* ---------- Ficha de Inimigo: formulário ---------- */
-  .form-secao-titulo{
-    font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--accent-gold);
-    margin:12px 0 4px; padding-top:10px; border-top:1px solid var(--border-soft);
-  }
+  .form-secao-titulo{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--accent-gold); margin:12px 0 4px; padding-top:10px; border-top:1px solid var(--border-soft); }
   .form-secao-titulo:first-child{ margin-top:0; padding-top:0; border-top:none; }
   .form-grid-3{ display:grid; grid-template-columns:2fr 1fr 1fr; gap:10px; }
-  .form-grid-6{ display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; }
-  .form-grid-6 label.field{ text-align:center; }
-  .form-grid-6 input{ text-align:center; }
+  .form-grid-6{ display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; text-align:center; }
   .form-grid-vida{ display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:end; }
+  .checkbox-linha{ display:flex; align-items:center; gap:8px; font-size:0.82rem; color:var(--text-dim); }
+  .checkbox-linha input[type=checkbox]{ width:16px; height:16px; accent-color:var(--accent-arcane); }
 
   .acoes-lista{ display:flex; flex-direction:column; gap:8px; margin-top:6px; }
-  .acao-form-item{
-    background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:6px;
-  }
+  .acao-form-item{ background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:6px; }
   .acao-form-linha{ display:flex; gap:8px; }
   .acao-form-linha input:first-child{ flex:2; }
   .acao-form-linha input:last-child{ flex:1; }
-  .acao-form-item textarea{ min-height:50px; }
-  .acao-remover-btn{
-    align-self:flex-end; background:none; border:1px solid var(--border-soft); color:var(--text-faint);
-    border-radius:5px; padding:3px 9px; font-size:0.7rem; cursor:pointer;
-  }
-  .acao-remover-btn:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
-  .btn-add-acao{
-    background:none; border:1px dashed var(--border-soft); color:var(--text-dim);
-    border-radius:6px; padding:8px; font-size:0.78rem; cursor:pointer; font-family:var(--font-body); margin-top:4px;
-  }
-  .btn-add-acao:hover{ border-color:var(--accent-arcane); color:var(--text); }
+  .acao-remover-btn{ align-self:flex-end; background:none; border:1px solid var(--border-soft); color:var(--text-faint); border-radius:5px; padding:3px 9px; font-size:0.7rem; cursor:pointer; }
+  .btn-add-acao{ background:none; border:1px dashed var(--border-soft); color:var(--text-dim); border-radius:6px; padding:8px; font-size:0.78rem; cursor:pointer; font-family:var(--font-body); margin-top:4px; }
 
-  /* ---------- Ficha de Inimigo: biblioteca salva ---------- */
   .inimigos-lista{ display:flex; flex-direction:column; gap:8px; overflow-y:auto; flex:1; }
-  .inimigo-card{
-    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
-    padding:10px 12px; display:flex; flex-direction:column; cursor:pointer; user-select:none;
-  }
+  .inimigo-card{ background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; cursor:pointer; user-select:none; }
   .inimigo-card:hover{ border-color:var(--accent-arcane); }
   .inimigo-card-topo{ display:flex; align-items:center; gap:10px; }
   .inimigo-card-chevron{ color:var(--text-faint); font-size:0.7rem; width:12px; flex-shrink:0; }
@@ -434,210 +248,37 @@
   .inimigo-card-nome{ font-family:var(--font-display); font-size:0.92rem; }
   .inimigo-card-meta{ font-size:0.7rem; color:var(--text-faint); font-family:var(--font-mono); margin-top:2px; }
   .inimigo-card-acoes{ display:flex; gap:5px; flex-shrink:0; }
-  .inimigo-card-acoes button{
-    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
-    border-radius:5px; padding:5px 9px; font-size:0.7rem; cursor:pointer;
-  }
+  .inimigo-card-acoes button{ background:none; border:1px solid var(--border-soft); color:var(--text-faint); border-radius:5px; padding:5px 9px; font-size:0.7rem; cursor:pointer; }
   .inimigo-card-acoes button:hover{ border-color:var(--accent-arcane); color:var(--text); }
   .inimigo-card-acoes button.excluir:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
-
-  .inimigo-card-detalhes{
-    display:flex; flex-direction:column; gap:10px;
-    margin-top:10px; padding-top:10px; border-top:1px solid var(--border-soft);
-    font-size:0.8rem; color:var(--text-dim); cursor:default;
-  }
-  .inimigo-secao-label{
-    font-size:0.64rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint); margin-bottom:5px;
-  }
+  .inimigo-card-detalhes{ display:flex; flex-direction:column; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border-soft); font-size:0.8rem; color:var(--text-dim); cursor:default; }
+  .inimigo-secao-label{ font-size:0.64rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint); margin-bottom:5px; }
   .inimigo-protecao-linha{ font-family:var(--font-mono); font-size:0.76rem; color:#4d9eea; }
   .inimigo-attr-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; }
   .inimigo-pericias-texto{ white-space:pre-wrap; line-height:1.5; font-style:italic; }
-  .inimigo-acao-item{
-    background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:6px;
-    padding:8px 10px; margin-bottom:6px;
-  }
-  .inimigo-acao-item:last-child{ margin-bottom:0; }
+  .inimigo-acao-item{ background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:6px; padding:8px 10px; margin-bottom:6px; }
   .inimigo-acao-topo{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
   .inimigo-acao-nome{ font-family:var(--font-display); font-size:0.86rem; font-weight:600; color:var(--text); }
   .inimigo-acao-custo{ font-size:0.68rem; color:var(--accent-gold); font-family:var(--font-mono); }
   .inimigo-acao-descricao{ font-size:0.76rem; color:var(--text-dim); margin-top:4px; white-space:pre-wrap; line-height:1.5; }
 
-  /* ---------- Log de rolagens ---------- */
-  .log-rolagens .empty-state{ border:none; }
-  .rolagem-item{
-    background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px;
-    padding:10px 12px; display:flex; align-items:center; gap:10px;
-  }
+  .rolagem-item{ background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:10px 12px; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
   .rolagem-info{ flex:1; min-width:0; }
   .rolagem-personagem{ font-family:var(--font-display); font-size:0.86rem; color:var(--accent-gold); }
   .rolagem-teste{ font-size:0.8rem; color:var(--text); margin-top:2px; }
-  .rolagem-detalhe{ font-size:0.7rem; color:var(--text-faint); font-family:var(--font-mono); margin-top:2px; overflow-wrap:anywhere; }
+  .rolagem-detalhe{ font-size:0.7rem; color:var(--text-faint); font-family:var(--font-mono); margin-top:2px; }
   .rolagem-hora{ font-size:0.64rem; color:var(--text-faint); margin-top:2px; }
-  .rolagem-total{
-    font-family:var(--font-display); font-size:1.3rem; font-weight:600; color:var(--text);
-    flex-shrink:0; min-width:36px; text-align:right;
-  }
+  .rolagem-total{ font-family:var(--font-display); font-size:1.3rem; font-weight:600; color:var(--text); }
   .rolagem-total.automatico{ font-size:0.82rem; color:#4fd57a; }
-
-  /* ---------- Toasts de notificação de rolagem ---------- */
-  #toast-rolagens{ position:fixed; bottom:20px; right:20px; max-width:320px; z-index:50; display:flex; flex-direction:column; gap:8px; }
-  .rolagem-toast{
-    background:var(--bg-panel); border:1px solid var(--accent-arcane); border-radius:8px;
-    padding:12px 14px; font-size:0.82rem; box-shadow:0 8px 24px rgba(0,0,0,0.45);
-    animation: fadein 0.2s ease-out;
-  }
-  .rolagem-toast .rt-personagem{ color:var(--accent-gold); font-weight:600; margin-bottom:2px; font-family:var(--font-display); }
-  .rolagem-toast .rt-teste{ color:var(--text-dim); font-size:0.76rem; margin-bottom:4px; }
-  .rolagem-toast .rt-total{ font-family:var(--font-mono); font-size:1.3rem; color:var(--text); }
-  @keyframes fadein{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-
-  /* ---------- Anotações confidenciais ---------- */
-  .anotacoes-textarea{
-    width:100%; min-height:160px; background:var(--bg-inset); border:1px solid var(--border-soft);
-    border-radius:8px; padding:12px; color:var(--text); font-family:var(--font-body); font-size:0.86rem;
-    resize:vertical; line-height:1.5;
-  }
-  .anotacoes-textarea:focus{ outline:2px solid var(--accent-arcane); outline-offset:1px; border-color:var(--accent-arcane); }
-  .anotacoes-status{ font-size:0.66rem; color:var(--text-faint); margin-top:6px; text-align:right; }
-
-  /* ---------- Rastreador de iniciativa ---------- */
-  .form-linha-compacta{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
-  .form-linha-compacta input{ padding:7px 8px; font-size:0.82rem; }
-  .form-linha-compacta .campo-nome{ flex:1.4; min-width:100px; }
-  .form-linha-compacta .campo-curto{ width:56px; flex-shrink:0; }
-
-  .lista-combatentes{ display:flex; flex-direction:column; gap:6px; margin:12px 0; }
-  .combatente-row{
-    display:flex; align-items:center; gap:8px; background:var(--bg-panel-alt);
-    border:1px solid var(--border-soft); border-radius:8px; padding:7px 10px;
-  }
-  .combatente-row.ativo{ border-color:var(--accent-gold); box-shadow:0 0 0 1px var(--accent-gold) inset; }
-  .combatente-iniciativa input{
-    width:36px; text-align:center; padding:4px; font-size:0.78rem; font-family:var(--font-mono);
-  }
-  .combatente-tipo-tag{
-    font-size:0.58rem; text-transform:uppercase; padding:2px 5px; border-radius:4px;
-    border:1px solid var(--border-soft); color:var(--text-faint); flex-shrink:0; white-space:nowrap;
-  }
-  .combatente-tipo-tag.jogador{ color:#4d9eea; border-color:#4d9eea; }
-  .combatente-tipo-tag.inimigo{ color:var(--accent-ember); border-color:var(--accent-ember); }
-  .combatente-nome{ flex:1; font-size:0.82rem; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .combatente-vida{ font-family:var(--font-mono); font-size:0.74rem; color:var(--text-dim); flex-shrink:0; white-space:nowrap; }
-  .combatente-vida input{ width:44px; text-align:center; padding:3px; font-size:0.72rem; }
-  .combatente-acoes{ display:flex; gap:3px; flex-shrink:0; }
-  .combatente-acoes button{
-    background:none; border:1px solid var(--border-soft); color:var(--text-faint);
-    border-radius:4px; width:20px; height:20px; font-size:0.68rem; cursor:pointer; line-height:1;
-  }
-  .combatente-acoes button:hover{ border-color:var(--accent-arcane); color:var(--text); }
-  .combatente-acoes button.remover-combatente:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
-  .iniciativa-acoes{ display:flex; gap:8px; }
-
-  /* ---------- Escudo do Mestre (accordion) ---------- */
-  .accordion-item{ border:1px solid var(--border-soft); border-radius:8px; margin-bottom:8px; overflow:hidden; }
-  .accordion-item:last-child{ margin-bottom:0; }
-  .accordion-header{
-    padding:10px 14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
-    background:var(--bg-panel-alt); font-size:0.84rem; color:var(--text);
-  }
-  .accordion-header:hover{ color:var(--accent-arcane); }
-  .accordion-seta{ color:var(--text-faint); font-size:0.7rem; transition:transform 0.15s ease; }
-  .accordion-item.aberto .accordion-seta{ transform:rotate(90deg); }
-  .accordion-body{ padding:0 14px; max-height:0; overflow:hidden; transition:max-height 0.2s ease; font-size:0.8rem; color:var(--text-dim); line-height:1.6; }
-  .accordion-item.aberto .accordion-body{ padding:12px 14px; max-height:600px; }
-  .accordion-body table{ width:100%; border-collapse:collapse; font-size:0.78rem; margin-top:6px; }
-  .accordion-body td, .accordion-body th{ padding:4px 6px; border-bottom:1px solid var(--border-soft); text-align:left; }
-  .accordion-body th{ color:var(--text-faint); font-weight:600; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="./firebase-config.js"></script>
 </head>
 <body>
 
-<!-- ===================== FIREBASE (COMPAT) — SISTEMA DE MESAS PRIVADAS ===================== -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDHbydGJAa1hb5S0w2zvqwM0Y6Y4AKspCQ",
-    authDomain: "caos-rpg.firebaseapp.com",
-    databaseURL: "https://caos-rpg-default-rtdb.firebaseio.com",
-    projectId: "caos-rpg",
-    storageBucket: "caos-rpg.firebasestorage.app",
-    messagingSenderId: "1056651562841",
-    appId: "1:1056651562841:web:c37def09772c89e797c648"
-  };
-
-  let firebaseOk = false;
-  try{
-    firebase.initializeApp(firebaseConfig);
-    firebaseOk = true;
-  }catch(e){
-    console.warn("Firebase indisponível:", e);
-  }
-
-  /**
-   * Gera um ID único de mesa e cria a rota /mesas/{idMesa} no Firebase.
-   * @param {string} nomeMesa
-   * @returns {Promise<string>} resolve com o idMesa gerado (ex: "MESA-8492")
-   */
-  function criarNovaMesa(nomeMesa){
-    const idMesa = "MESA-" + Math.floor(1000 + Math.random() * 9000);
-    const dadosMesa = { nome: nomeMesa, criadoEm: Date.now() };
-    return firebase.database()
-      .ref(`mesas/${idMesa}`)
-      .set(dadosMesa)
-      .then(() => idMesa)
-      .catch(erro => { console.error("Erro ao criar mesa:", erro); throw erro; });
-  }
-
-  /**
-   * Salva/atualiza o personagem em /mesas/{idMesa}/jogadores/{idPersonagem}.
-   * (usada pela ficha do jogador; incluída aqui também por consistência entre os dois arquivos)
-   */
-  function conectarJogadorMesa(idMesa, dadosPersonagem){
-    if(!idMesa || !dadosPersonagem || !dadosPersonagem.id){
-      return Promise.reject(new Error("idMesa e dadosPersonagem.id são obrigatórios."));
-    }
-    return firebase.database()
-      .ref(`mesas/${idMesa}/jogadores/${dadosPersonagem.id}`)
-      .set(dadosPersonagem)
-      .catch(erro => { console.error("Erro ao conectar jogador na mesa:", erro); throw erro; });
-  }
-
-  /**
-   * Escuta em tempo real as alterações em /mesas/{idMesa}/jogadores.
-   * @param {string} idMesa
-   * @param {(jogadores: object|null) => void} callback
-   * @returns {() => void} função de cleanup
-   */
-  function escutarJogadoresDaMesa(idMesa, callback){
-    if(!idMesa) throw new Error("idMesa é obrigatório.");
-    const referencia = firebase.database().ref(`mesas/${idMesa}/jogadores`);
-    referencia.on("value",
-      (snapshot) => callback(snapshot.val()),
-      (erro) => console.error("Erro ao escutar jogadores da mesa:", erro)
-    );
-    return () => referencia.off("value");
-  }
-
-  /**
-   * Atualiza um campo específico de recursos de um jogador (ex: dano/cura) + carimba atualizadoEm.
-   */
-  function atualizarRecursoJogador(idMesa, idPersonagem, campo, novoValor){
-    const updates = {};
-    updates[`mesas/${idMesa}/jogadores/${idPersonagem}/recursos/${campo}`] = novoValor;
-    updates[`mesas/${idMesa}/jogadores/${idPersonagem}/atualizadoEm`] = Date.now();
-    return firebase.database().ref().update(updates);
-  }
-
-  /**
-   * Remove um jogador da mesa (ele volta a ficar em modo local até entrar de novo pela ficha).
-   */
-  function removerJogadorDaMesa(idMesa, idPersonagem){
-    return firebase.database().ref(`mesas/${idMesa}/jogadores/${idPersonagem}`).remove();
-  }
-</script>
-
-<!-- ===================== TELA INICIAL: CRIAR / CARREGAR MESA ===================== -->
+<!-- Tela Inicial: Criação / Entrada em Mesas -->
 <div id="tela-inicial" class="wrap-estreito">
   <header class="masthead" style="border-bottom:none; margin-bottom:24px;">
     <div>
@@ -676,9 +317,8 @@
   </p>
 </div>
 
-<!-- ===================== DASHBOARD: MESA ATIVA ===================== -->
+<!-- Dashboard da Mesa Ativa -->
 <div id="dashboard" class="wrap" style="display:none">
-
   <header class="masthead">
     <div>
       <div class="masthead-title">C.<span>A</span>.O.S — Painel do Mestre</div>
@@ -702,17 +342,13 @@
   </div>
 
   <div class="dashboard-grid">
-
     <div class="coluna-jogadores">
       <button class="btn" id="btn-historico-rolagens" style="width:100%; margin-bottom:14px;">Histórico de Rolagens</button>
-      <div id="conteudo">
-        <div class="empty-state">Carregando personagens…</div>
-      </div>
+      <div id="conteudo"><div class="empty-state">Carregando personagens…</div></div>
     </div>
 
     <div class="coluna-ferramentas">
       <section class="panel ferramentas-panel">
-
         <div class="ferramentas-tabbar">
           <button class="ferramentas-tab-btn active" data-ftab="turnos">Turnos</button>
           <button class="ferramentas-tab-btn" data-ftab="fichas">Fichas</button>
@@ -722,7 +358,6 @@
 
         <div class="ferramentas-tab-content active" data-ftab-content="turnos">
           <div class="turnos-grid">
-
             <div class="turnos-col">
               <div class="turnos-col-titulo">Tracker de Inimigos</div>
               <div class="iniciativa-lista" id="tracker-inimigos-lista"></div>
@@ -732,14 +367,14 @@
               <div class="turnos-col-titulo">Iniciativa</div>
               <div class="iniciativa-add-row">
                 <input type="text" id="iniciativa-nome-input" placeholder="Nome do personagem">
-                <button class="btn small primary" id="btn-add-iniciativa">+ Adicionar</button>
+                <button class="btn small primary" id="btn-add-iniciativa">+</button>
               </div>
               <div class="iniciativa-add-row">
                 <select id="iniciativa-inimigo-select"></select>
                 <input type="number" id="iniciativa-qtd-input" min="1" max="20" value="1" title="Quantidade">
-                <button class="btn small primary" id="btn-add-inimigos-cena">+ Adicionar à Cena</button>
+                <button class="btn small primary" id="btn-add-inimigos-cena">+ Cena</button>
               </div>
-              <button class="btn small" id="btn-puxar-jogadores" style="width:100%; margin-bottom:10px;">Puxar Jogadores Conectados</button>
+              <button class="btn small" id="btn-puxar-jogadores" style="width:100%; margin-bottom:10px;">Puxar Jogadores</button>
               <div class="iniciativa-lista" id="iniciativa-lista"></div>
             </div>
 
@@ -747,11 +382,10 @@
               <div class="contador-label">Contador<br>de turnos</div>
               <div class="contador-valor" id="contador-turno-valor">1</div>
               <div class="contador-botoes">
-                <button class="btn small" id="btn-passar-turno" title="Passar turno">▼<br>Passar turno</button>
-                <button class="btn small" id="btn-voltar-turno" title="Voltar turno">▲<br>Voltar turno</button>
+                <button class="btn small" id="btn-passar-turno" title="Passar turno">▼<br>Passar</button>
+                <button class="btn small" id="btn-voltar-turno" title="Voltar turno">▲<br>Voltar</button>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -759,78 +393,56 @@
           <button class="btn small primary" id="btn-novo-inimigo" style="width:100%; margin-bottom:10px;">+ Novo Inimigo</button>
           <div class="inimigos-lista" id="inimigos-lista"></div>
         </div>
+
         <div class="ferramentas-tab-content" data-ftab-content="atalhos">
           <div class="item-list" id="mestre-atalho-grid"></div>
         </div>
+
         <div class="ferramentas-tab-content" data-ftab-content="anotacoes">
           <div class="anotacoes-grid">
-
             <div class="turnos-col anotacoes-col-lista">
               <div class="turnos-col-titulo">Blocos de nota salvos</div>
               <button class="btn small primary" id="btn-nova-anotacao" style="width:100%; margin-bottom:10px;">+ Nova nota</button>
               <div class="anotacoes-lista" id="anotacoes-lista"></div>
             </div>
-
             <div class="turnos-col anotacoes-col-editor">
               <input type="text" id="anotacao-titulo-input" class="anotacao-titulo-input" placeholder="Título da nota" style="display:none;">
               <textarea id="anotacao-conteudo-input" class="anotacao-conteudo-input" placeholder="Escreva aqui..." style="display:none;"></textarea>
               <div class="empty-state" id="anotacao-vazio" style="flex:1; border:none;">Selecione uma nota ao lado, ou crie uma nova.</div>
             </div>
-
           </div>
         </div>
-
       </section>
     </div>
   </div>
 
-  <!-- ===================== MODAL: HISTÓRICO DE ROLAGENS ===================== -->
+  <!-- Modal: Histórico de Rolagens -->
   <div class="modal-overlay" id="modal-historico">
     <div class="modal-panel">
-      <div class="modal-header">
-        <h2 class="panel-title" style="margin:0">Histórico de Rolagens</h2>
-        <button class="modal-close" id="btn-fechar-historico">×</button>
-      </div>
-      <div class="modal-body" id="log-rolagens">
-        <div class="empty-state">Nenhuma rolagem ainda nesta mesa.</div>
-      </div>
+      <div class="modal-header"><h2 class="panel-title" style="margin:0">Histórico de Rolagens</h2><button class="modal-close" id="btn-fechar-historico">×</button></div>
+      <div class="modal-body" id="log-rolagens"><div class="empty-state">Nenhuma rolagem ainda nesta mesa.</div></div>
     </div>
   </div>
 
-  <!-- ===================== MODAL: FICHA DE INIMIGO ===================== -->
+  <!-- Modal: Ficha de Inimigo -->
   <div class="modal-overlay" id="modal-inimigo">
     <div class="modal-panel modal-panel-largo">
-      <div class="modal-header">
-        <h2 class="panel-title" style="margin:0" id="modal-inimigo-titulo">Novo Inimigo</h2>
-        <button class="modal-close" id="btn-fechar-inimigo">×</button>
-      </div>
+      <div class="modal-header"><h2 class="panel-title" style="margin:0" id="modal-inimigo-titulo">Novo Inimigo</h2><button class="modal-close" id="btn-fechar-inimigo">×</button></div>
       <div class="modal-body">
-
         <div class="form-secao-titulo">Informações Básicas</div>
         <div class="form-grid-3">
-          <label class="field">Nome
-            <input type="text" id="inimigo-nome" placeholder="Ex: Lobo sombrio">
-          </label>
-          <label class="field">Nível
-            <input type="number" id="inimigo-nivel" min="1" value="1">
-          </label>
-          <label class="field">Proficiência
-            <input type="number" id="inimigo-proficiencia" min="0" value="1">
-          </label>
+          <label class="field">Nome<input type="text" id="inimigo-nome" placeholder="Ex: Lobo sombrio"></label>
+          <label class="field">Nível<input type="number" id="inimigo-nivel" min="1" value="1"></label>
+          <label class="field">Proficiência<input type="number" id="inimigo-proficiencia" min="0" value="1"></label>
         </div>
 
         <div class="form-secao-titulo">Vida e Proteção</div>
         <div class="form-grid-vida">
-          <label class="field">Vida Máxima
-            <input type="number" id="inimigo-vida-maxima" min="0" value="10">
-          </label>
-          <label class="field">Proteção Máxima
-            <input type="number" id="inimigo-protecao-maxima" min="0" value="0">
-          </label>
+          <label class="field">Vida Máxima<input type="number" id="inimigo-vida-maxima" min="0" value="10"></label>
+          <label class="field">Proteção Máxima<input type="number" id="inimigo-protecao-maxima" min="0" value="0"></label>
         </div>
         <label class="checkbox-linha" style="margin-top:8px;">
-          <input type="checkbox" id="inimigo-usar-protecao">
-          Usar Proteção
+          <input type="checkbox" id="inimigo-usar-protecao"> Usar Proteção
         </label>
 
         <div class="form-secao-titulo">Atributos</div>
@@ -844,14 +456,13 @@
         </div>
 
         <div class="form-secao-titulo">Perícias</div>
-        <label class="field">Anotações rápidas (sem automação de rolagens)
+        <label class="field">Anotações rápidas
           <textarea id="inimigo-pericias" rows="2" placeholder="Ex: Furtividade +4, Percepção treinada..."></textarea>
         </label>
 
         <div class="form-secao-titulo">Ações</div>
         <div class="acoes-lista" id="inimigo-acoes-lista"></div>
         <button class="btn-add-acao" id="btn-add-acao">+ Adicionar Ação</button>
-
       </div>
       <div class="modal-footer">
         <button class="btn" id="btn-cancelar-inimigo">Cancelar</button>
@@ -859,7 +470,6 @@
       </div>
     </div>
   </div>
-
 </div>
 
 <div id="toast-rolagens"></div>
@@ -873,25 +483,22 @@
 
   let pararEscuta = null;
   let pararEscutaRolagens = null;
-  let mesaAtiva = null; // { id, nome }
-  const cardsExpandidos = new Set(); // ids de personagens com a guia de detalhes aberta
+  let mesaAtiva = null;
+  const cardsExpandidos = new Set();
 
-  // ---------- Aba Turnos: estado da iniciativa (local por navegador, por mesa) ----------
   let iniciativaState = { elementos: [], turnoAtivoId: null, contadorTurno: 1 };
   let iniciativaDraggedId = null;
-  const fichasAbertasCombate = new Set(); // ids de inimigos da iniciativa com o painel "Ver Ficha" aberto
-  const alvosDanoCura = {}; // id da instância em combate -> "vida" | "protecao" (última escolha do mestre, preservada entre re-renderizações)
+  const fichasAbertasCombate = new Set();
+  const alvosDanoCura = {};
 
-  // ---------- Aba Atalhos: rolagens personalizadas do mestre (local por navegador, por mesa) ----------
   let mestreAtalhos = [];
   let mestreAnotacoes = [];
   let anotacaoSelecionadaId = null;
   let mestreInimigos = [];
-  let ultimosJogadoresMesa = null; // último snapshot de /mesas/{id}/jogadores recebido do Firebase (usado pelo botão "Puxar Jogadores")
-  let inimigoEditandoId = null; // null = criando um novo
-  let inimigoAcoesTemp = []; // ações sendo editadas no modal, antes de salvar
+  let ultimosJogadoresMesa = null;
+  let inimigoEditandoId = null;
+  let inimigoAcoesTemp = [];
 
-  // ---------- localStorage: mesas conhecidas por este navegador ----------
   function listarMesasSalvas(){
     try{ return JSON.parse(localStorage.getItem(LS_MESAS)) || []; }catch(e){ return []; }
   }
@@ -905,7 +512,6 @@
     salvarMesasSalvas(listarMesasSalvas().filter(m => m.id !== id));
   }
 
-  // ---------- telas ----------
   const telaInicial = document.getElementById("tela-inicial");
   const dashboard = document.getElementById("dashboard");
 
@@ -913,11 +519,6 @@
     if(pararEscuta){ pararEscuta(); pararEscuta = null; }
     if(pararEscutaRolagens){ pararEscutaRolagens(); pararEscutaRolagens = null; }
     mesaAtiva = null;
-    iniciativaState = { elementos: [], turnoAtivoId: null, contadorTurno: 1 };
-    mestreAtalhos = [];
-    mestreAnotacoes = [];
-    anotacaoSelecionadaId = null;
-    mestreInimigos = [];
     localStorage.removeItem(LS_MESA_ATIVA);
     telaInicial.style.display = "block";
     dashboard.style.display = "none";
@@ -960,12 +561,12 @@
           <div class="mesa-item-nome">${m.nome || "(sem nome)"}</div>
           <div class="mesa-item-id">${m.id}</div>
         </div>
-        <button class="mesa-item-remover" title="Esquecer esta mesa (não apaga os dados)">×</button>
+        <button class="mesa-item-remover">×</button>
       `;
       item.addEventListener("click", ()=> mostrarDashboard(m));
       item.querySelector(".mesa-item-remover").addEventListener("click", (e)=>{
         e.stopPropagation();
-        if(confirm("Remover esta mesa da sua lista local? Os personagens continuam salvos no Firebase.")){
+        if(confirm("Remover esta mesa da sua lista local?")){
           removerMesaSalva(m.id);
           renderListaMesasSalvas();
         }
@@ -974,20 +575,16 @@
     });
   }
 
-  // ---------- criar / carregar mesa ----------
   document.getElementById("btn-criar-mesa").addEventListener("click", ()=>{
     const nomeInput = document.getElementById("input-nome-mesa");
     const nome = nomeInput.value.trim();
     if(!nome){ nomeInput.focus(); return; }
-    const btn = document.getElementById("btn-criar-mesa");
-    btn.disabled = true; btn.textContent = "Criando…";
     criarNovaMesa(nome).then(idMesa => {
       const mesa = { id: idMesa, nome, criadoEm: Date.now() };
       adicionarMesaSalva(mesa);
       nomeInput.value = "";
       mostrarDashboard(mesa);
-    }).catch(()=> alert("Não foi possível criar a mesa. Confira sua conexão e as regras do Firebase."))
-      .finally(()=>{ btn.disabled = false; btn.textContent = "Criar Mesa"; });
+    }).catch(()=> alert("Falha ao criar mesa no Firebase."));
   });
 
   document.getElementById("btn-entrar-codigo").addEventListener("click", ()=>{
@@ -1000,81 +597,29 @@
       adicionarMesaSalva(mesa);
       codigoInput.value = "";
       mostrarDashboard(mesa);
-    }).catch(()=> alert("Não foi possível encontrar essa mesa. Confira o código."));
+    }).catch(()=> alert("Mesa não encontrada."));
   });
 
   document.getElementById("btn-trocar-mesa").addEventListener("click", mostrarTelaInicial);
-
-  // ---------- modal: histórico de rolagens ----------
-  document.getElementById("btn-historico-rolagens").addEventListener("click", ()=>{
-    document.getElementById("modal-historico").classList.add("aberto");
-  });
-  document.getElementById("btn-fechar-historico").addEventListener("click", ()=>{
-    document.getElementById("modal-historico").classList.remove("aberto");
-  });
-  document.getElementById("modal-historico").addEventListener("click", (e)=>{
-    if(e.target.id === "modal-historico") e.currentTarget.classList.remove("aberto");
-  });
-
   document.getElementById("btn-copiar-codigo").addEventListener("click", ()=>{
     if(!mesaAtiva) return;
     navigator.clipboard.writeText(mesaAtiva.id).then(()=>{
       const btn = document.getElementById("btn-copiar-codigo");
-      const original = btn.textContent;
       btn.textContent = "Copiado!";
-      setTimeout(()=> btn.textContent = original, 1500);
-    }).catch(()=> alert("Código da mesa: " + mesaAtiva.id));
+      setTimeout(()=> btn.textContent = "Copiar Código de Convite", 1500);
+    });
   });
 
-  // ---------- status de conexão ----------
-  const statusPill = document.getElementById("status-pill");
-  const statusTexto = document.getElementById("status-texto");
-  if(firebaseOk){
-    firebase.database().ref(".info/connected").on("value", (snap)=>{
-      const online = snap.val() === true;
-      statusPill.className = "status-pill " + (online ? "online" : "offline");
-      statusTexto.textContent = online ? "conectado" : "sem conexão";
-    });
-  } else {
-    statusPill.className = "status-pill offline";
-    statusTexto.textContent = "Firebase indisponível";
-  }
-
-  // ---------- cards dos jogadores ----------
-  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
-  function iniciais(nome){
-    if(!nome) return "?";
-    return nome.trim().split(/\s+/).slice(0,2).map(p=>p[0].toUpperCase()).join("");
-  }
-
   const ATRIBUTOS_ABREV = [
-    { chave:"forca",      label:"FOR" },
-    { chave:"agilidade",  label:"AGI" },
-    { chave:"vigor",      label:"VIG" },
-    { chave:"instinto",   label:"INS" },
-    { chave:"influencia", label:"INF" },
-    { chave:"mente",      label:"MEN" },
+    { chave:"forca", label:"FOR" }, { chave:"agilidade", label:"AGI" }, { chave:"vigor", label:"VIG" },
+    { chave:"instinto", label:"INS" }, { chave:"influencia", label:"INF" }, { chave:"mente", label:"MEN" }
   ];
-
-  function aplicarDelta(idPersonagem, campo, atual, maximo, sinal, inputEl){
-    const qtd = Math.abs(parseInt(inputEl.value,10) || 0);
-    if(qtd === 0) return;
-    const novo = clamp(atual + sinal*qtd, 0, maximo || 9999);
-    atualizarRecursoJogador(mesaAtiva.id, idPersonagem, campo, novo)
-      .catch(err => console.warn("Falha ao atualizar:", err));
-    inputEl.value = "";
-  }
-
-  function removerJogador(idPersonagem){
-    if(!confirm("Remover este jogador da mesa? Ele para de aparecer aqui até entrar de novo pela ficha dele.")) return;
-    removerJogadorDaMesa(mesaAtiva.id, idPersonagem).catch(err => console.warn("Falha ao remover jogador:", err));
-  }
 
   function renderPersonagens(dados){
     ultimosJogadoresMesa = dados;
     const conteudo = document.getElementById("conteudo");
     if(!dados){
-      conteudo.innerHTML = `<div class="empty-state">Nenhum jogador entrou nesta mesa ainda.<br>Compartilhe o código <b>${mesaAtiva.id}</b> — seus jogadores inserem esse código no topo da ficha deles.</div>`;
+      conteudo.innerHTML = `<div class="empty-state">Nenhum jogador conectado nesta mesa.<br>Código: <b>${mesaAtiva.id}</b></div>`;
       return;
     }
 
@@ -1083,7 +628,7 @@
       .sort((a,b) => (a.identidade.nome || "").localeCompare(b.identidade.nome || "", "pt-BR"));
 
     if(lista.length === 0){
-      conteudo.innerHTML = `<div class="empty-state">Nenhum jogador entrou nesta mesa ainda.<br>Compartilhe o código <b>${mesaAtiva.id}</b> com seus jogadores.</div>`;
+      conteudo.innerHTML = `<div class="empty-state">Nenhum jogador conectado nesta mesa.</div>`;
       return;
     }
 
@@ -1097,17 +642,12 @@
       const atrib = p.atributos || {};
       const pvAtual = rec.pvAtual || 0, pvMax = rec.pvMaximo || 0;
       const protAtual = rec.protAtual || 0, protMax = rec.protMaximo || 0;
-      const pctPv = pvMax > 0 ? clamp((pvAtual/pvMax)*100, 0, 100) : 0;
-      const pctProt = protMax > 0 ? clamp((protAtual/protMax)*100, 0, 100) : 0;
+      const pctPv = pvMax > 0 ? Math.max(0, Math.min(100, (pvAtual/pvMax)*100)) : 0;
+      const pctProt = protMax > 0 ? Math.max(0, Math.min(100, (protAtual/protMax)*100)) : 0;
 
       const attrsHTML = ATRIBUTOS_ABREV.map(def => {
-        const a = atrib[def.chave];
-        if(!a) return `
-          <div class="attr-mini">
-            <div class="attr-mini-nome">${def.label}</div>
-            <div class="attr-mini-valor">—</div>
-          </div>`;
-        const base = a.pontos ?? 0;
+        const a = atrib[def.chave] || { pontos:1 };
+        const base = a.pontos || 0;
         const modTemp = a.modTemp || 0;
         const efetivo = Math.max(0, base + modTemp);
         return `
@@ -1118,13 +658,12 @@
       }).join("");
 
       const expandido = cardsExpandidos.has(id);
-
       const card = document.createElement("div");
       card.className = "pcard";
       card.innerHTML = `
         <div class="pcard-header" data-toggle="${id}">
-          <div class="pcard-avatar">${ident.foto ? `<img src="${ident.foto}" alt="">` : iniciais(ident.nome)}</div>
-          <div class="pcard-nome">${ident.nome || "Personagem sem nome"}</div>
+          <div class="pcard-avatar">${ident.foto ? `<img src="${ident.foto}" alt="">` : (ident.nome ? ident.nome.slice(0,2).toUpperCase() : "?")}</div>
+          <div class="pcard-nome">${ident.nome || "Sem Nome"}</div>
           <span class="pcard-chevron">${expandido ? "▾" : "▸"}</span>
         </div>
 
@@ -1147,9 +686,7 @@
 
         <div class="pcard-detalhes ${expandido ? "aberto" : ""}">
           <div class="pcard-sub">${ident.classe || ""}${ident.subclasse ? " · "+ident.subclasse : ""} — Nível ${ident.nivel || 1}</div>
-
           <div class="pcard-atributos">${attrsHTML}</div>
-
           <div class="pcard-meta-row">
             <span><b>DT</b>${rec.dt ?? "—"}</span>
             <span><b>Desloc.</b>${rec.deslocamento ?? "—"}</span>
@@ -1172,13 +709,9 @@
               <button class="acao-btn cura" data-campo="protAtual" data-sinal="1">Cura</button>
             </div>
             <div class="acao-linha">
-              <button class="acao-btn remover" id="remover-${id}">Remover Jogador da Mesa</button>
+              <button class="acao-btn remover" id="remover-${id}">Remover da Mesa</button>
               <button class="acao-btn abrir-ficha" id="abrir-ficha-${id}">Abrir ficha ↗</button>
             </div>
-          </div>
-
-          <div class="pcard-footer">
-            <span>Atualizado ${p.atualizadoEm ? new Date(p.atualizadoEm).toLocaleTimeString("pt-BR") : "—"}</span>
           </div>
         </div>
       `;
@@ -1190,17 +723,33 @@
 
       const inputPv = card.querySelector(`#qtd-pv-${id}`);
       const inputProt = card.querySelector(`#qtd-prot-${id}`);
+
       card.querySelectorAll('[data-campo="pvAtual"]').forEach(btn=>{
-        btn.addEventListener("click", ()=> aplicarDelta(id, "pvAtual", pvAtual, pvMax, parseInt(btn.dataset.sinal,10), inputPv));
+        btn.onclick = ()=>{
+          const qtd = Math.abs(parseInt(inputPv.value,10) || 0);
+          if(qtd === 0) return;
+          const novo = Math.max(0, Math.min(pvMax || 9999, pvAtual + parseInt(btn.dataset.sinal,10)*qtd));
+          atualizarRecursoJogador(mesaAtiva.id, id, "pvAtual", novo);
+          inputPv.value = "";
+        };
       });
+
       card.querySelectorAll('[data-campo="protAtual"]').forEach(btn=>{
-        btn.addEventListener("click", ()=> aplicarDelta(id, "protAtual", protAtual, protMax, parseInt(btn.dataset.sinal,10), inputProt));
+        btn.onclick = ()=>{
+          const qtd = Math.abs(parseInt(inputProt.value,10) || 0);
+          if(qtd === 0) return;
+          const novo = Math.max(0, Math.min(protMax || 9999, protAtual + parseInt(btn.dataset.sinal,10)*qtd));
+          atualizarRecursoJogador(mesaAtiva.id, id, "protAtual", novo);
+          inputProt.value = "";
+        };
       });
-      card.querySelector(`#remover-${id}`).addEventListener("click", ()=> removerJogador(id));
-      card.querySelector(`#abrir-ficha-${id}`).addEventListener("click", ()=>{
-        const url = `./caos-ficha-modulo1.html?mesa=${encodeURIComponent(mesaAtiva.id)}&personagem=${encodeURIComponent(id)}`;
-        window.open(url, "_blank", "noopener");
-      });
+
+      card.querySelector(`#remover-${id}`).onclick = ()=>{
+        if(confirm("Remover este jogador da mesa?")) removerJogadorDaMesa(mesaAtiva.id, id);
+      };
+      card.querySelector(`#abrir-ficha-${id}`).onclick = ()=>{
+        window.open(`./caos-ficha-modulo1.html?mesa=${encodeURIComponent(mesaAtiva.id)}&personagem=${encodeURIComponent(id)}`, "_blank");
+      };
 
       grid.appendChild(card);
     });
@@ -1209,294 +758,28 @@
     conteudo.appendChild(grid);
   }
 
-  // ---------- log de rolagens dos jogadores (visível só pelo Mestre) ----------
-  function mostrarToastRolagem(reg){
-    const container = document.getElementById("toast-rolagens");
-    const toast = document.createElement("div");
-    toast.className = "rolagem-toast";
-    const totalHTML = reg.sucessoAutomatico
-      ? `<div class="rt-total" style="color:#4fd57a; font-size:0.9rem;">✓ Sucesso Automático</div>`
-      : `<div class="rt-total">${reg.total}</div>`;
-    toast.innerHTML = `
-      <div class="rt-personagem">${reg.personagemNome}</div>
-      <div class="rt-teste">${reg.nomeTeste}</div>
-      ${totalHTML}
-    `;
-    container.appendChild(toast);
-    setTimeout(()=> toast.remove(), 6000);
-  }
-
-  function renderLogRolagens(lista){
-    const container = document.getElementById("log-rolagens");
-    if(!lista || lista.length === 0){
-      container.innerHTML = `<div class="empty-state">Nenhuma rolagem ainda nesta mesa.</div>`;
-      return;
-    }
-    container.innerHTML = "";
-    lista.forEach(reg => {
-      const item = document.createElement("div");
-      item.className = "rolagem-item";
-      const hora = reg.timestamp ? new Date(reg.timestamp).toLocaleTimeString("pt-BR") : "";
-      if(reg.sucessoAutomatico){
-        item.innerHTML = `
-          <div class="rolagem-info">
-            <div class="rolagem-personagem">${reg.personagemNome}</div>
-            <div class="rolagem-teste">${reg.nomeTeste}</div>
-            <div class="rolagem-hora">${hora}</div>
-          </div>
-          <div class="rolagem-total automatico">✓</div>`;
-      } else {
-        item.innerHTML = `
-          <div class="rolagem-info">
-            <div class="rolagem-personagem">${reg.personagemNome}</div>
-            <div class="rolagem-teste">${reg.nomeTeste}</div>
-            <div class="rolagem-detalhe">${reg.formula || ""} ${reg.detalhe || ""}</div>
-            <div class="rolagem-hora">${hora}</div>
-          </div>
-          <div class="rolagem-total">${reg.total}</div>`;
-      }
-      container.appendChild(item);
-    });
-  }
-
-  /**
-   * Escuta em tempo real as rolagens da mesa: carrega as últimas 50 já existentes
-   * (sem disparar toast pra elas) e depois notifica só as que chegarem daqui pra frente.
-   * @returns {() => void} função de cleanup
-   */
-  function escutarRolagensDaMesa(idMesa){
-    const refRolagens = firebase.database().ref(`mesas/${idMesa}/rolagens`);
-    let ultimaChaveConhecida = "";
-    const logAtual = []; // mais recente primeiro
-
-    refRolagens.orderByKey().limitToLast(50).once("value").then(snapshot => {
-      const dados = snapshot.val();
-      if(dados){
-        Object.keys(dados).sort().forEach(chave => {
-          logAtual.unshift(Object.assign({ chave }, dados[chave]));
-          ultimaChaveConhecida = chave;
-        });
-      }
-      renderLogRolagens(logAtual);
-
-      // só a partir daqui novas rolagens disparam toast — o histórico inicial não deve notificar
-      refRolagens.orderByKey().startAfter(ultimaChaveConhecida).on("child_added", (snap)=>{
-        const reg = Object.assign({ chave: snap.key }, snap.val());
-        logAtual.unshift(reg);
-        if(logAtual.length > 50) logAtual.length = 50;
-        renderLogRolagens(logAtual);
-        mostrarToastRolagem(reg);
-      });
-    });
-
-    return () => refRolagens.off("child_added");
-  }
-
-  // ---------- Ferramentas do Mestre: abas (Turnos/Fichas/Atalhos/Anotações) ----------
-  document.querySelectorAll(".ferramentas-tab-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const alvo = btn.dataset.ftab;
-      document.querySelectorAll(".ferramentas-tab-btn").forEach(b => b.classList.toggle("active", b === btn));
-      document.querySelectorAll(".ferramentas-tab-content").forEach(painel => {
-        painel.classList.toggle("active", painel.dataset.ftabContent === alvo);
-      });
-    });
-  });
-
-  // ---------- Aba Turnos: Iniciativa ----------
+  // Turnos, Iniciativa & Tracker
   function chaveIniciativa(idMesa){ return `caos_mestre_iniciativa_${idMesa}`; }
-
   function carregarIniciativa(idMesa){
     try{
       const bruto = localStorage.getItem(chaveIniciativa(idMesa));
       iniciativaState = bruto ? JSON.parse(bruto) : { elementos: [], turnoAtivoId: null, contadorTurno: 1 };
-    }catch(e){
-      iniciativaState = { elementos: [], turnoAtivoId: null, contadorTurno: 1 };
-    }
+    }catch(e){ iniciativaState = { elementos: [], turnoAtivoId: null, contadorTurno: 1 }; }
     renderIniciativa();
   }
-
   function salvarIniciativa(){
-    if(!mesaAtiva) return;
-    localStorage.setItem(chaveIniciativa(mesaAtiva.id), JSON.stringify(iniciativaState));
-  }
-
-  function gerarIdIniciativa(){
-    return "ini_" + Date.now() + "_" + Math.floor(Math.random()*10000);
-  }
-
-  function adicionarElementoIniciativa(nome){
-    const elemento = { id: gerarIdIniciativa(), nome };
-    iniciativaState.elementos.push(elemento);
-    if(!iniciativaState.turnoAtivoId) iniciativaState.turnoAtivoId = elemento.id; // primeiro elemento já começa com o turno
-    salvarIniciativa();
-    renderIniciativa();
-  }
-
-  // ---- inserção rápida de inimigos salvos na iniciativa ----
-  function adicionarInimigosACena(){
-    const select = document.getElementById("iniciativa-inimigo-select");
-    const inimigo = mestreInimigos.find(i => i.id === select.value);
-    if(!inimigo) return;
-    const quantidade = Math.max(1, Math.min(20, parseInt(document.getElementById("iniciativa-qtd-input").value,10) || 1));
-
-    // continua a numeração a partir das instâncias já existentes na cena (ex: já há "Goblin 1" e "Goblin 2" → próximo é "Goblin 3")
-    const instanciasExistentes = iniciativaState.elementos.filter(el => el.inimigoModeloId === inimigo.id).length;
-
-    for(let i = 1; i <= quantidade; i++){
-      iniciativaState.elementos.push({
-        id: gerarIdIniciativa() + "_" + i,
-        nome: `${inimigo.nome} ${instanciasExistentes + i}`,
-        tipo: "inimigo",
-        inimigoModeloId: inimigo.id,
-        vidaAtual: inimigo.vidaMaxima,
-        vidaMaxima: inimigo.vidaMaxima,
-        protecaoAtual: inimigo.usarProtecao ? inimigo.protecaoMaxima : 0,
-        protecaoMaxima: inimigo.usarProtecao ? inimigo.protecaoMaxima : 0,
-        atributos: Object.assign({}, inimigo.atributos)
-      });
-    }
-    if(!iniciativaState.turnoAtivoId && iniciativaState.elementos.length){
-      iniciativaState.turnoAtivoId = iniciativaState.elementos[0].id;
-    }
-    salvarIniciativa();
-    renderIniciativa();
-  }
-
-  // ---- inserção automática dos jogadores conectados à mesa ----
-  function puxarJogadoresParaIniciativa(){
-    if(!ultimosJogadoresMesa) return;
-    let adicionados = 0;
-    Object.keys(ultimosJogadoresMesa).forEach(idJogador => {
-      // não duplica quem já está na cena
-      if(iniciativaState.elementos.some(el => el.personagemId === idJogador)) return;
-      const p = ultimosJogadoresMesa[idJogador];
-      if(!p || !p.identidade) return;
-      const rec = p.recursos || {};
-      iniciativaState.elementos.push({
-        id: gerarIdIniciativa() + "_" + idJogador,
-        nome: p.identidade.nome || "Personagem sem nome",
-        tipo: "jogador",
-        personagemId: idJogador,
-        vidaAtual: rec.pvAtual ?? 0,
-        vidaMaxima: rec.pvMaximo ?? 0,
-        protecaoAtual: rec.protAtual ?? 0,
-        protecaoMaxima: rec.protMaximo ?? 0,
-        atributos: null
-      });
-      adicionados++;
-    });
-    if(adicionados === 0) return;
-    if(!iniciativaState.turnoAtivoId && iniciativaState.elementos.length){
-      iniciativaState.turnoAtivoId = iniciativaState.elementos[0].id;
-    }
-    salvarIniciativa();
-    renderIniciativa();
-  }
-
-  function removerElementoIniciativa(id){
-    const eraAtivo = iniciativaState.turnoAtivoId === id;
-    iniciativaState.elementos = iniciativaState.elementos.filter(el => el.id !== id);
-    if(eraAtivo){
-      iniciativaState.turnoAtivoId = iniciativaState.elementos.length ? iniciativaState.elementos[0].id : null;
-    }
-    salvarIniciativa();
-    renderIniciativa();
-  }
-
-  function passarTurno(){
-    const lista = iniciativaState.elementos;
-    if(lista.length === 0) return;
-    let idx = lista.findIndex(el => el.id === iniciativaState.turnoAtivoId);
-    if(idx === -1) idx = 0;
-    let proximo = idx + 1;
-    if(proximo >= lista.length){
-      proximo = 0;
-      iniciativaState.contadorTurno += 1; // fechou a rodada com todo mundo: avança o contador
-    }
-    iniciativaState.turnoAtivoId = lista[proximo].id;
-    salvarIniciativa();
-    renderIniciativa();
-  }
-
-  function voltarTurno(){
-    const lista = iniciativaState.elementos;
-    if(lista.length === 0) return;
-    let idx = lista.findIndex(el => el.id === iniciativaState.turnoAtivoId);
-    if(idx === -1) idx = 0;
-    let anterior = idx - 1;
-    if(anterior < 0){
-      anterior = lista.length - 1;
-      iniciativaState.contadorTurno = Math.max(1, iniciativaState.contadorTurno - 1); // nunca abaixo de 1
-    }
-    iniciativaState.turnoAtivoId = lista[anterior].id;
-    salvarIniciativa();
-    renderIniciativa();
-  }
-
-  // Painel "Ver Ficha" da instância em combate: atributos da instância + perícias/ações do modelo salvo
-  function htmlFichaInimigoCombate(el){
-    const modelo = mestreInimigos.find(i => i.id === el.inimigoModeloId);
-    const atributosInstancia = el.atributos || (modelo ? modelo.atributos : {}) || {};
-    const ATRIBUTOS_ABREV_COMBATE = [
-      { chave:"forca", label:"FOR" }, { chave:"agilidade", label:"AGI" }, { chave:"vigor", label:"VIG" },
-      { chave:"instinto", label:"INS" }, { chave:"influencia", label:"INF" }, { chave:"mente", label:"MEN" },
-    ];
-    const attrsHTML = ATRIBUTOS_ABREV_COMBATE.map(def => `
-      <div class="attr-mini">
-        <div class="attr-mini-nome">${def.label}</div>
-        <div class="attr-mini-valor">${atributosInstancia[def.chave] ?? 0}</div>
-      </div>`).join("");
-
-    if(!modelo){
-      return `<div class="ic-ficha">
-        <div>
-          <div class="inimigo-secao-label">Atributos</div>
-          <div class="inimigo-attr-grid">${attrsHTML}</div>
-        </div>
-        <div style="font-style:italic;">A ficha modelo deste inimigo foi removida da biblioteca.</div>
-      </div>`;
-    }
-
-    const periciasHTML = (modelo.pericias || "").trim()
-      ? `<div>
-          <div class="inimigo-secao-label">Perícias</div>
-          <div class="inimigo-pericias-texto">${modelo.pericias}</div>
-        </div>` : "";
-
-    const acoesHTML = (modelo.acoes || []).length
-      ? `<div>
-          <div class="inimigo-secao-label">Ações</div>
-          ${modelo.acoes.map(acao => `
-            <div class="inimigo-acao-item">
-              <div class="inimigo-acao-topo">
-                <span class="inimigo-acao-nome">${acao.nome || "(sem nome)"}</span>
-                ${acao.custo ? `<span class="inimigo-acao-custo">${acao.custo}</span>` : ""}
-              </div>
-              ${acao.descricao ? `<div class="inimigo-acao-descricao">${acao.descricao}</div>` : ""}
-            </div>`).join("")}
-        </div>` : "";
-
-    return `<div class="ic-ficha">
-      <div>
-        <div class="inimigo-secao-label">Atributos</div>
-        <div class="inimigo-attr-grid">${attrsHTML}</div>
-      </div>
-      ${periciasHTML}
-      ${acoesHTML}
-    </div>`;
+    if(mesaAtiva) localStorage.setItem(chaveIniciativa(mesaAtiva.id), JSON.stringify(iniciativaState));
   }
 
   function renderIniciativa(){
     document.getElementById("contador-turno-valor").textContent = iniciativaState.contadorTurno;
-
     const lista = document.getElementById("iniciativa-lista");
     if(!lista) return;
     lista.innerHTML = "";
 
     if(iniciativaState.elementos.length === 0){
-      lista.innerHTML = `<div class="empty-state" style="border:none;">Nenhum elemento adicionado ainda.</div>`;
-      renderTrackerInimigos(); // sem early return sem atualizar o tracker — senão o último card removido ficaria "preso" na tela
+      lista.innerHTML = `<div class="empty-state" style="border:none;">Nenhum combatente na cena.</div>`;
+      renderTrackerInimigos();
       return;
     }
 
@@ -1506,177 +789,362 @@
       item.draggable = true;
       item.dataset.id = el.id;
 
-      // a iniciativa é só um guia visual de ordem de turno — detalhes de combate ficam no Tracker de Inimigos
-      const tipoTagHTML = el.tipo ? `<span class="iniciativa-item-tipo ${el.tipo}">${el.tipo === "jogador" ? "Jogador" : "Inimigo"}</span>` : "";
-
       item.innerHTML = `
         <span class="iniciativa-item-handle">⠿</span>
-        ${tipoTagHTML}
+        <span class="iniciativa-item-tipo ${el.tipo||'jogador'}">${el.tipo === 'inimigo' ? 'Inimigo' : 'Jogador'}</span>
         <span class="iniciativa-item-nome">${el.nome}</span>
-        <button class="iniciativa-item-remover" title="Remover">×</button>
+        <button class="iniciativa-item-remover">×</button>
       `;
 
-      item.addEventListener("dragstart", ()=>{
-        iniciativaDraggedId = el.id;
-        item.classList.add("arrastando");
-      });
-      item.addEventListener("dragend", ()=>{
-        item.classList.remove("arrastando");
-        iniciativaDraggedId = null;
-      });
-      item.addEventListener("dragover", (e)=> e.preventDefault());
-      item.addEventListener("drop", (e)=>{
+      item.ondragstart = ()=>{ iniciativaDraggedId = el.id; item.classList.add("arrastando"); };
+      item.ondragend = ()=>{ item.classList.remove("arrastando"); iniciativaDraggedId = null; };
+      item.ondragover = (e)=> e.preventDefault();
+      item.ondrop = (e)=>{
         e.preventDefault();
         if(!iniciativaDraggedId || iniciativaDraggedId === el.id) return;
         const arr = iniciativaState.elementos;
-        const origemIdx = arr.findIndex(x => x.id === iniciativaDraggedId);
-        const destinoIdx = arr.findIndex(x => x.id === el.id);
-        if(origemIdx === -1 || destinoIdx === -1) return;
-        const [movido] = arr.splice(origemIdx, 1);
-        arr.splice(destinoIdx, 0, movido);
-        salvarIniciativa();
-        renderIniciativa();
-      });
+        const o = arr.findIndex(x => x.id === iniciativaDraggedId);
+        const d = arr.findIndex(x => x.id === el.id);
+        if(o !== -1 && d !== -1){
+          const [mov] = arr.splice(o, 1);
+          arr.splice(d, 0, mov);
+          salvarIniciativa(); renderIniciativa();
+        }
+      };
 
-      item.querySelector(".iniciativa-item-remover").addEventListener("click", ()=> removerElementoIniciativa(el.id));
+      item.querySelector(".iniciativa-item-remover").onclick = ()=>{
+        iniciativaState.elementos = iniciativaState.elementos.filter(x => x.id !== el.id);
+        if(iniciativaState.turnoAtivoId === el.id) iniciativaState.turnoAtivoId = iniciativaState.elementos[0] ? iniciativaState.elementos[0].id : null;
+        salvarIniciativa(); renderIniciativa();
+      };
 
       lista.appendChild(item);
     });
 
-    renderTrackerInimigos(); // o tracker acompanha qualquer mudança na cena
+    renderTrackerInimigos();
   }
 
-  // ---------- Tracker de Inimigos: cards de combate das instâncias de inimigo na cena ----------
   function renderTrackerInimigos(){
     const lista = document.getElementById("tracker-inimigos-lista");
     if(!lista) return;
     lista.innerHTML = "";
-
-    const inimigosEmCena = iniciativaState.elementos.filter(el => el.tipo === "inimigo");
-    if(inimigosEmCena.length === 0){
-      lista.innerHTML = `<div class="empty-state" style="border:none;">Nenhum inimigo na cena.<br>Use o seletor na coluna da iniciativa para adicionar.</div>`;
+    const inimigos = iniciativaState.elementos.filter(el => el.tipo === "inimigo");
+    if(inimigos.length === 0){
+      lista.innerHTML = `<div class="empty-state" style="border:none;">Nenhum monstro na cena.</div>`;
       return;
     }
 
-    inimigosEmCena.forEach(el => {
+    inimigos.forEach(el => {
       const card = document.createElement("div");
       card.className = "iniciativa-item inimigo-combate" + (el.id === iniciativaState.turnoAtivoId ? " turno-ativo" : "");
+      if((el.vidaAtual || 0) <= 0) card.classList.add("morto");
 
-      const morto = (el.vidaAtual ?? 0) <= 0;
-      if(morto) card.classList.add("morto");
-
-      const pctVida = el.vidaMaxima > 0 ? clamp((el.vidaAtual / el.vidaMaxima) * 100, 0, 100) : 0;
-      const barraVidaHTML = `
-        <div class="vital-bar-track ic-bar-track">
-          <div class="vital-bar-fill vida" style="width:${pctVida}%"></div>
-          <div class="vital-numeros">Vida ${el.vidaAtual ?? 0} / ${el.vidaMaxima ?? 0}</div>
-        </div>`;
-      const pctProt = el.protecaoMaxima > 0 ? clamp((el.protecaoAtual / el.protecaoMaxima) * 100, 0, 100) : 0;
-      const barraProtHTML = el.protecaoMaxima > 0 ? `
-        <div class="vital-bar-track ic-bar-track">
-          <div class="vital-bar-fill protecao" style="width:${pctProt}%"></div>
-          <div class="vital-numeros">Proteção ${el.protecaoAtual ?? 0} / ${el.protecaoMaxima}</div>
-        </div>` : "";
-
+      const pctVida = el.vidaMaxima > 0 ? Math.max(0, Math.min(100, (el.vidaAtual/el.vidaMaxima)*100)) : 0;
+      const pctProt = el.protecaoMaxima > 0 ? Math.max(0, Math.min(100, (el.protecaoAtual/el.protecaoMaxima)*100)) : 0;
       const fichaAberta = fichasAbertasCombate.has(el.id);
-      const fichaHTML = fichaAberta ? htmlFichaInimigoCombate(el) : "";
 
       card.innerHTML = `
         <div class="ic-topo">
           <span class="iniciativa-item-tipo inimigo">Inimigo</span>
-          <span class="iniciativa-item-nome">${el.nome}${morto ? " (morto)" : ""}</span>
+          <span class="iniciativa-item-nome">${el.nome}</span>
           <button class="ic-ver-ficha">${fichaAberta ? "Ocultar" : "Ver Ficha"}</button>
-          <button class="iniciativa-item-remover" title="Remover da cena">×</button>
+          <button class="iniciativa-item-remover">×</button>
         </div>
-        <div class="ic-barras">${barraVidaHTML}${barraProtHTML}</div>
-        <div class="ic-controles">
-          <input type="number" class="ic-qtd" placeholder="Qtd" min="0">
+        <div class="ic-barras">
+          <div class="vital-bar-track ic-bar-track">
+            <div class="vital-bar-fill vida" style="width:${pctVida}%"></div>
+            <div class="vital-numeros">Vida ${el.vidaAtual||0}/${el.vidaMaxima||0}</div>
+          </div>
           ${el.protecaoMaxima > 0 ? `
-          <select class="ic-alvo">
-            <option value="vida" ${alvosDanoCura[el.id] !== "protecao" ? "selected" : ""}>Vida</option>
-            <option value="protecao" ${alvosDanoCura[el.id] === "protecao" ? "selected" : ""}>Proteção</option>
-          </select>` : ""}
+          <div class="vital-bar-track ic-bar-track">
+            <div class="vital-bar-fill protecao" style="width:${pctProt}%"></div>
+            <div class="vital-numeros">Proteção ${el.protecaoAtual||0}/${el.protecaoMaxima}</div>
+          </div>` : ''}
+        </div>
+        <div class="ic-controles">
+          <input type="number" class="ic-qtd" placeholder="Qtd">
+          ${el.protecaoMaxima > 0 ? `<select class="ic-alvo"><option value="vida">Vida</option><option value="protecao">Proteção</option></select>` : ''}
           <button class="ic-btn dano">Dano</button>
           <button class="ic-btn cura">Cura</button>
         </div>
-        ${fichaHTML}
+        ${fichaAberta ? htmlFichaInimigoCombate(el) : ''}
       `;
 
       const inputQtd = card.querySelector(".ic-qtd");
-      const selectAlvo = card.querySelector(".ic-alvo");
-      if(selectAlvo){
-        selectAlvo.value = alvosDanoCura[el.id] || "vida";
-        selectAlvo.addEventListener("change", ()=>{ alvosDanoCura[el.id] = selectAlvo.value; });
-      }
-      card.querySelector(".ic-btn.dano").addEventListener("click", ()=>{
-        const qtd = Math.abs(parseInt(inputQtd.value,10) || 0);
-        if(qtd === 0) return;
-        // só na instância da cena, nunca na ficha modelo; o alvo é escolhido pelo mestre quando a proteção está ativa
-        if(selectAlvo && selectAlvo.value === "protecao"){
-          el.protecaoAtual = Math.max(0, (el.protecaoAtual ?? 0) - qtd);
-        } else {
-          el.vidaAtual = Math.max(0, (el.vidaAtual ?? 0) - qtd);
-        }
+      const selAlvo = card.querySelector(".ic-alvo");
+      if(selAlvo && alvosDanoCura[el.id]) selAlvo.value = alvosDanoCura[el.id];
+
+      card.querySelector(".ic-btn.dano").onclick = ()=>{
+        const qtd = Math.abs(parseInt(inputQtd.value,10)||0);
+        if(!qtd) return;
+        if(selAlvo && selAlvo.value === "protecao") el.protecaoAtual = Math.max(0, (el.protecaoAtual||0) - qtd);
+        else el.vidaAtual = Math.max(0, (el.vidaAtual||0) - qtd);
         inputQtd.value = "";
         salvarIniciativa(); renderIniciativa();
-      });
-      card.querySelector(".ic-btn.cura").addEventListener("click", ()=>{
-        const qtd = Math.abs(parseInt(inputQtd.value,10) || 0);
-        if(qtd === 0) return;
-        if(selectAlvo && selectAlvo.value === "protecao"){
-          el.protecaoAtual = Math.min(el.protecaoMaxima ?? 0, (el.protecaoAtual ?? 0) + qtd);
-        } else {
-          el.vidaAtual = Math.min(el.vidaMaxima ?? 0, (el.vidaAtual ?? 0) + qtd);
-        }
+      };
+      card.querySelector(".ic-btn.cura").onclick = ()=>{
+        const qtd = Math.abs(parseInt(inputQtd.value,10)||0);
+        if(!qtd) return;
+        if(selAlvo && selAlvo.value === "protecao") el.protecaoAtual = Math.min(el.protecaoMaxima||0, (el.protecaoAtual||0) + qtd);
+        else el.vidaAtual = Math.min(el.vidaMaxima||0, (el.vidaAtual||0) + qtd);
         inputQtd.value = "";
         salvarIniciativa(); renderIniciativa();
-      });
-      card.querySelector(".ic-ver-ficha").addEventListener("click", ()=>{
+      };
+      card.querySelector(".ic-ver-ficha").onclick = ()=>{
         if(fichasAbertasCombate.has(el.id)) fichasAbertasCombate.delete(el.id);
         else fichasAbertasCombate.add(el.id);
         renderIniciativa();
-      });
-      card.querySelector(".iniciativa-item-remover").addEventListener("click", ()=> removerElementoIniciativa(el.id));
-
+      };
+      card.querySelector(".iniciativa-item-remover").onclick = ()=>{
+        iniciativaState.elementos = iniciativaState.elementos.filter(x => x.id !== el.id);
+        salvarIniciativa(); renderIniciativa();
+      };
       lista.appendChild(card);
     });
   }
 
-  document.getElementById("btn-add-iniciativa").addEventListener("click", ()=>{
+  function htmlFichaInimigoCombate(el){
+    const mod = mestreInimigos.find(i => i.id === el.inimigoModeloId) || el;
+    const atribs = el.atributos || mod.atributos || {};
+    const attrsHTML = ATRIBUTOS_ABREV.map(def => `
+      <div class="attr-mini">
+        <div class="attr-mini-nome">${def.label}</div>
+        <div class="attr-mini-valor">${atribs[def.chave] || 0}</div>
+      </div>`).join("");
+
+    return `
+      <div class="ic-ficha">
+        <div class="inimigo-attr-grid">${attrsHTML}</div>
+        ${mod.pericias ? `<div><b>Perícias:</b> ${mod.pericias}</div>` : ''}
+        ${(mod.acoes||[]).map(a => `<div class="inimigo-acao-item"><b>${a.nome}</b> (${a.custo}): ${a.descricao}</div>`).join('')}
+      </div>`;
+  }
+
+  document.getElementById("btn-add-iniciativa").onclick = ()=>{
     const input = document.getElementById("iniciativa-nome-input");
     const nome = input.value.trim();
     if(!nome) return;
-    adicionarElementoIniciativa(nome);
+    const el = { id: "ini_" + Date.now(), nome, tipo: "jogador" };
+    iniciativaState.elementos.push(el);
+    if(!iniciativaState.turnoAtivoId) iniciativaState.turnoAtivoId = el.id;
     input.value = "";
-    input.focus();
-  });
-  document.getElementById("iniciativa-nome-input").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter") document.getElementById("btn-add-iniciativa").click();
-  });
-  document.getElementById("btn-passar-turno").addEventListener("click", passarTurno);
-  document.getElementById("btn-voltar-turno").addEventListener("click", voltarTurno);
-  document.getElementById("btn-add-inimigos-cena").addEventListener("click", adicionarInimigosACena);
-  document.getElementById("btn-puxar-jogadores").addEventListener("click", puxarJogadoresParaIniciativa);
+    salvarIniciativa(); renderIniciativa();
+  };
 
-  // mantém o dropdown de "Inimigo Salvo" da iniciativa sincronizado com a biblioteca
-  function renderSelectInimigosIniciativa(){
-    const select = document.getElementById("iniciativa-inimigo-select");
-    if(!select) return;
-    const valorAnterior = select.value;
-    if(mestreInimigos.length === 0){
-      select.innerHTML = `<option value="">— nenhum inimigo salvo —</option>`;
-      return;
+  document.getElementById("btn-puxar-jogadores").onclick = ()=>{
+    if(!ultimosJogadoresMesa) return;
+    Object.keys(ultimosJogadoresMesa).forEach(id => {
+      const p = ultimosJogadoresMesa[id];
+      if(!iniciativaState.elementos.some(x => x.personagemId === id)){
+        iniciativaState.elementos.push({
+          id: "ini_" + Date.now() + "_" + id,
+          nome: p.identidade.nome || "Sem Nome",
+          tipo: "jogador",
+          personagemId: id
+        });
+      }
+    });
+    if(!iniciativaState.turnoAtivoId && iniciativaState.elementos.length) iniciativaState.turnoAtivoId = iniciativaState.elementos[0].id;
+    salvarIniciativa(); renderIniciativa();
+  };
+
+  document.getElementById("btn-add-inimigos-cena").onclick = ()=>{
+    const sel = document.getElementById("iniciativa-inimigo-select");
+    const mod = mestreInimigos.find(i => i.id === sel.value);
+    if(!mod) return;
+    const qtd = Math.max(1, parseInt(document.getElementById("iniciativa-qtd-input").value,10)||1);
+    const count = iniciativaState.elementos.filter(x => x.inimigoModeloId === mod.id).length;
+
+    for(let i=1; i<=qtd; i++){
+      iniciativaState.elementos.push({
+        id: "ini_mon_" + Date.now() + "_" + i,
+        nome: `${mod.nome} ${count + i}`,
+        tipo: "inimigo",
+        inimigoModeloId: mod.id,
+        vidaAtual: mod.vidaMaxima,
+        vidaMaxima: mod.vidaMaxima,
+        protecaoAtual: mod.usarProtecao ? mod.protecaoMaxima : 0,
+        protecaoMaxima: mod.usarProtecao ? mod.protecaoMaxima : 0,
+        atributos: Object.assign({}, mod.atributos)
+      });
     }
-    select.innerHTML = mestreInimigos.map(i => `<option value="${i.id}">${i.nome}</option>`).join("");
-    if(mestreInimigos.some(i => i.id === valorAnterior)) select.value = valorAnterior;
+    if(!iniciativaState.turnoAtivoId && iniciativaState.elementos.length) iniciativaState.turnoAtivoId = iniciativaState.elementos[0].id;
+    salvarIniciativa(); renderIniciativa();
+  };
+
+  document.getElementById("btn-passar-turno").onclick = ()=>{
+    const list = iniciativaState.elementos;
+    if(!list.length) return;
+    let idx = list.findIndex(x => x.id === iniciativaState.turnoAtivoId);
+    if(idx === -1 || idx === list.length - 1){
+      iniciativaState.turnoAtivoId = list[0].id;
+      iniciativaState.contadorTurno++;
+    } else {
+      iniciativaState.turnoAtivoId = list[idx + 1].id;
+    }
+    salvarIniciativa(); renderIniciativa();
+  };
+
+  document.getElementById("btn-voltar-turno").onclick = ()=>{
+    const list = iniciativaState.elementos;
+    if(!list.length) return;
+    let idx = list.findIndex(x => x.id === iniciativaState.turnoAtivoId);
+    if(idx <= 0){
+      iniciativaState.turnoAtivoId = list[list.length - 1].id;
+      iniciativaState.contadorTurno = Math.max(1, iniciativaState.contadorTurno - 1);
+    } else {
+      iniciativaState.turnoAtivoId = list[idx - 1].id;
+    }
+    salvarIniciativa(); renderIniciativa();
+  };
+
+  // Fichas de Inimigos
+  function chaveInimigosMestre(idMesa){ return `caos_mestre_inimigos_${idMesa}`; }
+  function carregarInimigosMestre(idMesa){
+    try{
+      const bruto = localStorage.getItem(chaveInimigosMestre(idMesa));
+      mestreInimigos = bruto ? JSON.parse(bruto) : [];
+    }catch(e){ mestreInimigos = []; }
+    renderInimigosMestre();
+  }
+  function salvarInimigosMestre(){
+    if(mesaAtiva) localStorage.setItem(chaveInimigosMestre(mesaAtiva.id), JSON.stringify(mestreInimigos));
   }
 
-  // ---------- Aba Atalhos (mesmo comportamento da aba Atalhos da ficha do jogador) ----------
-  let mestreAtalhoFormAberto = false; // estado transiente de UI, não persiste
-  const DADO_TIPOS = ["d4","d6","d8","d10","d12","d20"];
+  const inimigosExpandidos = new Set();
+  function renderInimigosMestre(){
+    const lista = document.getElementById("inimigos-lista");
+    const sel = document.getElementById("iniciativa-inimigo-select");
+    if(sel) sel.innerHTML = mestreInimigos.map(i => `<option value="${i.id}">${i.nome}</option>`).join("");
+    if(!lista) return;
+    lista.innerHTML = "";
+    if(!mestreInimigos.length){ lista.innerHTML = `<div class="empty-state">Nenhum monstro salvo.</div>`; return; }
 
+    mestreInimigos.forEach(inimigo => {
+      const exp = inimigosExpandidos.has(inimigo.id);
+      const card = document.createElement("div");
+      card.className = "inimigo-card";
+      card.innerHTML = `
+        <div class="inimigo-card-topo">
+          <span class="inimigo-card-chevron">${exp ? "▾" : "▸"}</span>
+          <div class="inimigo-card-info">
+            <div class="inimigo-card-nome">${inimigo.nome}</div>
+            <div class="inimigo-card-meta">Nv. ${inimigo.nivel} · Vida ${inimigo.vidaMaxima}${inimigo.usarProtecao ? ' · Prot ' + inimigo.protecaoMaxima : ''}</div>
+          </div>
+          <div class="inimigo-card-acoes">
+            <button class="editar">Editar</button>
+            <button class="duplicar">Duplicar</button>
+            <button class="excluir">Excluir</button>
+          </div>
+        </div>
+        ${exp ? `
+          <div class="inimigo-card-detalhes">
+            <div class="inimigo-attr-grid">${ATRIBUTOS_ABREV.map(d => `<div class="attr-mini"><div class="attr-mini-nome">${d.label}</div><div class="attr-mini-valor">${inimigo.atributos[d.chave]||0}</div></div>`).join('')}</div>
+            ${inimigo.pericias ? `<div><b>Perícias:</b> ${inimigo.pericias}</div>` : ''}
+            ${(inimigo.acoes||[]).map(a => `<div class="inimigo-acao-item"><b>${a.nome}</b> (${a.custo}): ${a.descricao}</div>`).join('')}
+          </div>` : ''}
+      `;
+
+      card.onclick = ()=>{ if(exp) inimigosExpandidos.delete(inimigo.id); else inimigosExpandidos.add(inimigo.id); renderInimigosMestre(); };
+      card.querySelector(".editar").onclick = (e)=>{ e.stopPropagation(); abrirModalInimigo(inimigo); };
+      card.querySelector(".duplicar").onclick = (e)=>{
+        e.stopPropagation();
+        const c = JSON.parse(JSON.stringify(inimigo));
+        c.id = "inimigo_" + Date.now(); c.nome += " (Cópia)";
+        mestreInimigos.push(c); salvarInimigosMestre(); renderInimigosMestre();
+      };
+      card.querySelector(".excluir").onclick = (e)=>{
+        e.stopPropagation();
+        if(confirm(`Excluir ${inimigo.nome}?`)){
+          mestreInimigos = mestreInimigos.filter(x => x.id !== inimigo.id);
+          salvarInimigosMestre(); renderInimigosMestre();
+        }
+      };
+      lista.appendChild(card);
+    });
+  }
+
+  function abrirModalInimigo(inimigo){
+    inimigoEditandoId = inimigo ? inimigo.id : null;
+    document.getElementById("modal-inimigo-titulo").textContent = inimigo ? "Editar Inimigo" : "Novo Inimigo";
+    document.getElementById("inimigo-nome").value = inimigo ? inimigo.nome : "";
+    document.getElementById("inimigo-nivel").value = inimigo ? inimigo.nivel : 1;
+    document.getElementById("inimigo-proficiencia").value = inimigo ? inimigo.proficiencia : 1;
+    document.getElementById("inimigo-vida-maxima").value = inimigo ? inimigo.vidaMaxima : 10;
+    document.getElementById("inimigo-protecao-maxima").value = inimigo ? inimigo.protecaoMaxima : 0;
+    document.getElementById("inimigo-usar-protecao").checked = inimigo ? !!inimigo.usarProtecao : false;
+    document.getElementById("inimigo-pericias").value = inimigo ? inimigo.pericias : "";
+
+    ATRIBUTOS_ABREV.forEach(d => {
+      document.getElementById(`inimigo-attr-${d.chave}`).value = inimigo && inimigo.atributos ? (inimigo.atributos[d.chave]||1) : 1;
+    });
+
+    inimigoAcoesTemp = inimigo && inimigo.acoes ? JSON.parse(JSON.stringify(inimigo.acoes)) : [];
+    renderAcoesForm();
+    document.getElementById("modal-inimigo").classList.add("aberto");
+  }
+
+  function renderAcoesForm(){
+    const lista = document.getElementById("inimigo-acoes-lista");
+    lista.innerHTML = "";
+    inimigoAcoesTemp.forEach((a, idx)=>{
+      const div = document.createElement("div");
+      div.className = "acao-form-item";
+      div.innerHTML = `
+        <div class="acao-form-linha">
+          <input type="text" placeholder="Nome" value="${a.nome||''}" data-f="nome">
+          <input type="text" placeholder="Custo" value="${a.custo||''}" data-f="custo">
+        </div>
+        <textarea placeholder="Descrição">${a.descricao||''}</textarea>
+        <button type="button" class="acao-remover-btn">Remover</button>`;
+      div.querySelectorAll("input, textarea").forEach(el=>{
+        el.oninput = ()=>{
+          a.nome = div.querySelector('[data-f="nome"]').value;
+          a.custo = div.querySelector('[data-f="custo"]').value;
+          a.descricao = div.querySelector('textarea').value;
+        };
+      });
+      div.querySelector(".acao-remover-btn").onclick = ()=>{ inimigoAcoesTemp.splice(idx,1); renderAcoesForm(); };
+      lista.appendChild(div);
+    });
+  }
+
+  document.getElementById("btn-add-acao").onclick = ()=>{ inimigoAcoesTemp.push({ nome:"", custo:"", descricao:"" }); renderAcoesForm(); };
+  document.getElementById("btn-novo-inimigo").onclick = ()=> abrirModalInimigo(null);
+  document.getElementById("btn-fechar-inimigo").onclick = ()=> document.getElementById("modal-inimigo").classList.remove("aberto");
+  document.getElementById("btn-cancelar-inimigo").onclick = ()=> document.getElementById("modal-inimigo").classList.remove("aberto");
+
+  document.getElementById("btn-salvar-inimigo").onclick = ()=>{
+    const nome = document.getElementById("inimigo-nome").value.trim();
+    if(!nome) return;
+    const obj = {
+      id: inimigoEditandoId || ("inimigo_" + Date.now()),
+      nome,
+      nivel: parseInt(document.getElementById("inimigo-nivel").value,10)||1,
+      proficiencia: parseInt(document.getElementById("inimigo-proficiencia").value,10)||1,
+      vidaMaxima: parseInt(document.getElementById("inimigo-vida-maxima").value,10)||10,
+      usarProtecao: document.getElementById("inimigo-usar-protecao").checked,
+      protecaoMaxima: parseInt(document.getElementById("inimigo-protecao-maxima").value,10)||0,
+      atributos: {},
+      pericias: document.getElementById("inimigo-pericias").value,
+      acoes: inimigoAcoesTemp
+    };
+    ATRIBUTOS_ABREV.forEach(d => {
+      obj.atributos[d.chave] = parseInt(document.getElementById(`inimigo-attr-${d.chave}`).value,10)||1;
+    });
+
+    if(inimigoEditandoId){
+      const idx = mestreInimigos.findIndex(x => x.id === inimigoEditandoId);
+      if(idx !== -1) mestreInimigos[idx] = obj;
+    } else {
+      mestreInimigos.push(obj);
+    }
+    salvarInimigosMestre(); renderInimigosMestre();
+    document.getElementById("modal-inimigo").classList.remove("aberto");
+  };
+
+  // Atalhos do Mestre
   function chaveAtalhosMestre(idMesa){ return `caos_mestre_atalhos_${idMesa}`; }
-
   function carregarAtalhosMestre(idMesa){
     try{
       const bruto = localStorage.getItem(chaveAtalhosMestre(idMesa));
@@ -1684,221 +1152,78 @@
     }catch(e){ mestreAtalhos = []; }
     renderAtalhosMestre();
   }
-
   function salvarAtalhosMestre(){
-    if(!mesaAtiva) return;
-    localStorage.setItem(chaveAtalhosMestre(mesaAtiva.id), JSON.stringify(mestreAtalhos));
+    if(mesaAtiva) localStorage.setItem(chaveAtalhosMestre(mesaAtiva.id), JSON.stringify(mestreAtalhos));
   }
 
-  function opcoesDadoTipoHTML(selecionado){
-    return DADO_TIPOS.map(t => `<option value="${t}" ${t===selecionado?"selected":""}>${t}</option>`).join("");
-  }
-
-  function criarLinhaDadoNode(tipo, quantidade){
-    const row = document.createElement("div");
-    row.className = "dado-row";
-    row.innerHTML = `
-      <select class="dado-tipo-select">${opcoesDadoTipoHTML(tipo || "d20")}</select>
-      <input type="number" class="dado-qtd-input" value="${quantidade || 1}" min="1" step="1" placeholder="Qtd">
-      <button type="button" class="dado-row-remover">×</button>`;
-    row.querySelector(".dado-row-remover").addEventListener("click", ()=>{
-      const lista = row.parentElement;
-      if(lista.children.length > 1) row.remove(); // sempre mantém ao menos 1 linha de dado
-    });
-    return row;
-  }
-
-  function lerDadosDoContainer(container){
-    const resultado = [];
-    container.querySelectorAll(".dado-row").forEach(row=>{
-      const tipo = row.querySelector(".dado-tipo-select").value;
-      const quantidade = parseInt(row.querySelector(".dado-qtd-input").value,10) || 0;
-      if(quantidade > 0) resultado.push({ tipo, quantidade });
-    });
-    return resultado;
-  }
-
-  function formulaAtalhoMestre(atalho){
-    if(!atalho.dados || atalho.dados.length === 0) return "—";
-    let f = atalho.dados.map(d => `${d.quantidade}${d.tipo}`).join(" + ");
-    if(atalho.bonus){ f += atalho.bonus > 0 ? ` + ${atalho.bonus}` : ` - ${Math.abs(atalho.bonus)}`; }
-    return f;
-  }
-
-  function rolarAtalhoMestre(atalho){
-    let total = 0;
-    const partes = [];
-    atalho.dados.forEach(d=>{
-      const faces = parseInt(d.tipo.slice(1),10);
-      const rolagens = Array.from({length:d.quantidade}, ()=> 1 + Math.floor(Math.random()*faces));
-      total += rolagens.reduce((a,b)=>a+b,0);
-      partes.push(`${d.tipo}:[${rolagens.join(", ")}]`);
-    });
-    total += (atalho.bonus || 0);
-    let breakdown = "→ " + partes.join(" ");
-    if(atalho.bonus) breakdown += ` ${atalho.bonus > 0 ? "+" : ""}${atalho.bonus}`;
-    return { total, formula: formulaAtalhoMestre(atalho), breakdown };
-  }
-
-  function mostrarToastAtalhoMestre(nome, resultado){
-    const container = document.getElementById("toast-rolagens");
-    const toast = document.createElement("div");
-    toast.className = "rolagem-toast";
-    toast.innerHTML = `
-      <div class="rt-personagem">Mestre</div>
-      <div class="rt-teste">${nome}</div>
-      <div class="rt-total">${resultado.total}</div>
-    `;
-    container.appendChild(toast);
-    setTimeout(()=> toast.remove(), 6000);
-  }
-
+  let matalhoForm = false;
   function renderAtalhosMestre(){
     const lista = document.getElementById("mestre-atalho-grid");
     if(!lista) return;
     lista.innerHTML = "";
-
-    // ---- card / formulário de adicionar atalho (no topo) ----
-    if(mestreAtalhoFormAberto){
-      const form = document.createElement("div");
-      form.className = "item-add-form";
-      form.innerHTML = `
-        <input type="text" id="novo-matalho-nome" placeholder="Nome do atalho">
-        <div class="dados-lista" id="novo-matalho-dados-lista"></div>
-        <button type="button" class="btn-add-dado" id="novo-matalho-add-dado">+ Adicionar dado</button>
-        <input type="number" id="novo-matalho-bonus" placeholder="Bônus fixo (opcional, pode ser negativo)" step="1">
-        <div class="item-add-form-actions">
-          <button class="btn" id="novo-matalho-cancelar">Cancelar</button>
-          <button class="btn primary" id="novo-matalho-salvar">Salvar</button>
+    if(matalhoForm){
+      lista.innerHTML = `
+        <div class="item-add-form">
+          <input type="text" id="novo-mata-nome" placeholder="Nome do atalho">
+          <div class="dado-row">
+            <select id="novo-mata-tipo"><option value="d4">d4</option><option value="d6">d6</option><option value="d8">d8</option><option value="d10" selected>d10</option><option value="d12">d12</option><option value="d20">d20</option></select>
+            <input type="number" id="novo-mata-qtd" value="1" min="1">
+          </div>
+          <input type="number" id="novo-mata-bonus" value="0" placeholder="Bônus (+/-)">
+          <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button class="btn" id="canc-mata">Cancelar</button><button class="btn primary" id="salv-mata">Salvar</button>
+          </div>
         </div>`;
-      lista.appendChild(form);
-
-      const dadosListaEl = document.getElementById("novo-matalho-dados-lista");
-      dadosListaEl.appendChild(criarLinhaDadoNode("d20", 1));
-      document.getElementById("novo-matalho-add-dado").addEventListener("click", ()=>{
-        dadosListaEl.appendChild(criarLinhaDadoNode("d20", 1));
-      });
-
-      document.getElementById("novo-matalho-nome").focus();
-      document.getElementById("novo-matalho-cancelar").addEventListener("click", ()=>{
-        mestreAtalhoFormAberto = false; renderAtalhosMestre();
-      });
-      document.getElementById("novo-matalho-salvar").addEventListener("click", ()=>{
-        const nome = document.getElementById("novo-matalho-nome").value.trim();
-        const dados = lerDadosDoContainer(dadosListaEl);
-        const bonus = parseInt(document.getElementById("novo-matalho-bonus").value,10) || 0;
-        if(!nome || dados.length === 0) return;
-        mestreAtalhos.push({ nome, dados, bonus, aberta:false, editando:false });
-        mestreAtalhoFormAberto = false;
-        renderAtalhosMestre(); salvarAtalhosMestre();
-      });
-    } else {
-      const addCard = document.createElement("div");
-      addCard.className = "item-add-card";
-      addCard.textContent = "+ Adicionar atalho";
-      addCard.addEventListener("click", ()=>{
-        mestreAtalhoFormAberto = true; renderAtalhosMestre();
-      });
-      lista.appendChild(addCard);
+      document.getElementById("canc-mata").onclick = ()=>{ matalhoForm = false; renderAtalhosMestre(); };
+      document.getElementById("salv-mata").onclick = ()=>{
+        const nome = document.getElementById("novo-mata-nome").value.trim();
+        if(!nome) return;
+        mestreAtalhos.push({
+          nome, tipo: document.getElementById("novo-mata-tipo").value,
+          qtd: parseInt(document.getElementById("novo-mata-qtd").value,10)||1,
+          bonus: parseInt(document.getElementById("novo-mata-bonus").value,10)||0
+        });
+        matalhoForm = false; salvarAtalhosMestre(); renderAtalhosMestre();
+      };
+      return;
     }
+    const add = document.createElement("div");
+    add.className = "item-add-card"; add.textContent = "+ Adicionar atalho";
+    add.onclick = ()=>{ matalhoForm = true; renderAtalhosMestre(); };
+    lista.appendChild(add);
 
-    mestreAtalhos.forEach((atalho, idx) => {
+    mestreAtalhos.forEach((ata, idx)=>{
       const card = document.createElement("div");
       card.className = "item-card";
-
-      if(atalho.editando){
-        card.innerHTML = `
-          <div class="item-edit-form">
-            <input type="text" id="edit-matalho-nome-${idx}" value="${atalho.nome}" placeholder="Nome do atalho">
-            <div class="dados-lista" id="edit-matalho-dados-lista-${idx}"></div>
-            <button type="button" class="btn-add-dado" id="edit-matalho-add-dado-${idx}">+ Adicionar dado</button>
-            <input type="number" id="edit-matalho-bonus-${idx}" value="${atalho.bonus || 0}" placeholder="Bônus fixo" step="1">
-            <div class="item-edit-form-actions">
-              <button class="btn" data-idx="${idx}" data-acao="cancelar-edicao-matalho">Cancelar</button>
-              <button class="btn primary" data-idx="${idx}" data-acao="salvar-edicao-matalho">Salvar</button>
-            </div>
-          </div>`;
-        lista.appendChild(card);
-
-        const dadosListaEl = card.querySelector(`#edit-matalho-dados-lista-${idx}`);
-        atalho.dados.forEach(d => dadosListaEl.appendChild(criarLinhaDadoNode(d.tipo, d.quantidade)));
-        card.querySelector(`#edit-matalho-add-dado-${idx}`).addEventListener("click", ()=>{
-          dadosListaEl.appendChild(criarLinhaDadoNode("d20", 1));
-        });
-        return;
-      }
-
       card.innerHTML = `
-        <div class="item-header" data-idx="${idx}" data-acao="toggle-matalho">
-          <span class="item-chevron">${atalho.aberta ? "▾" : "▸"}</span>
-          <span class="item-nome">${atalho.nome}</span>
-          <span class="atalho-formula">${formulaAtalhoMestre(atalho)}</span>
-          <button class="atalho-rolar-btn" data-idx="${idx}" data-acao="rolar-matalho">Rolar</button>
-        </div>
-        ${atalho.aberta ? `
-          <div class="item-body">
-            <div class="item-footer-actions">
-              <button class="item-action remover" data-idx="${idx}" data-acao="remover-matalho">Remover</button>
-              <button class="item-action editar" data-idx="${idx}" data-acao="editar-matalho">Editar</button>
-            </div>
-          </div>` : ""}
-      `;
+        <div class="item-header">
+          <span class="item-nome">${ata.nome}</span>
+          <span class="atalho-formula">${ata.qtd}${ata.tipo}${ata.bonus ? (ata.bonus>0?"+":"")+ata.bonus : ""}</span>
+          <button class="atalho-rolar-btn" data-r="${idx}">Rolar</button>
+          <button class="item-action remover" data-d="${idx}" style="margin-left:8px;">×</button>
+        </div>`;
+      card.querySelector("[data-r]").onclick = ()=>{
+        const faces = parseInt(ata.tipo.replace("d",""),10);
+        const rolls = Array.from({length: ata.qtd}, ()=> 1 + Math.floor(Math.random()*faces));
+        const total = rolls.reduce((a,b)=>a+b,0) + (ata.bonus||0);
+        mostrarToastMestre(ata.nome, total, `${ata.qtd}${ata.tipo}${ata.bonus?'+'+ata.bonus:''} → [${rolls.join(", ")}]`);
+      };
+      card.querySelector("[data-d]").onclick = ()=>{ mestreAtalhos.splice(idx,1); salvarAtalhosMestre(); renderAtalhosMestre(); };
       lista.appendChild(card);
-    });
-
-    lista.querySelectorAll('[data-acao="toggle-matalho"]').forEach(el=>{
-      el.addEventListener("click", ()=>{
-        const atalho = mestreAtalhos[el.dataset.idx];
-        atalho.aberta = !atalho.aberta;
-        renderAtalhosMestre(); salvarAtalhosMestre();
-      });
-    });
-    lista.querySelectorAll('[data-acao="rolar-matalho"]').forEach(btn=>{
-      btn.addEventListener("click", (e)=>{
-        e.stopPropagation();
-        const atalho = mestreAtalhos[btn.dataset.idx];
-        mostrarToastAtalhoMestre(atalho.nome, rolarAtalhoMestre(atalho));
-      });
-    });
-    lista.querySelectorAll('[data-acao="remover-matalho"]').forEach(btn=>{
-      btn.addEventListener("click", (e)=>{
-        e.stopPropagation();
-        mestreAtalhos.splice(btn.dataset.idx, 1);
-        renderAtalhosMestre(); salvarAtalhosMestre();
-      });
-    });
-    lista.querySelectorAll('[data-acao="editar-matalho"]').forEach(btn=>{
-      btn.addEventListener("click", (e)=>{
-        e.stopPropagation();
-        mestreAtalhos[btn.dataset.idx].editando = true;
-        renderAtalhosMestre();
-      });
-    });
-    lista.querySelectorAll('[data-acao="cancelar-edicao-matalho"]').forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        mestreAtalhos[btn.dataset.idx].editando = false;
-        renderAtalhosMestre();
-      });
-    });
-    lista.querySelectorAll('[data-acao="salvar-edicao-matalho"]').forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const idx = btn.dataset.idx;
-        const nome = document.getElementById(`edit-matalho-nome-${idx}`).value.trim();
-        const dados = lerDadosDoContainer(document.getElementById(`edit-matalho-dados-lista-${idx}`));
-        if(!nome || dados.length === 0) return;
-        const atalho = mestreAtalhos[idx];
-        atalho.nome = nome;
-        atalho.dados = dados;
-        atalho.bonus = parseInt(document.getElementById(`edit-matalho-bonus-${idx}`).value,10) || 0;
-        atalho.editando = false;
-        renderAtalhosMestre(); salvarAtalhosMestre();
-      });
     });
   }
 
-  // ---------- Aba Anotações ----------
-  function chaveAnotacoesMestre(idMesa){ return `caos_mestre_anotacoes_${idMesa}`; }
+  function mostrarToastMestre(nome, total, formula){
+    const container = document.getElementById("toast-rolagens");
+    const toast = document.createElement("div");
+    toast.className = "rolagem-toast";
+    toast.innerHTML = `<div class="rt-personagem">Mestre</div><div class="rt-teste">${nome}</div><div class="rt-total">${total}</div><div class="rt-breakdown">${formula}</div>`;
+    container.appendChild(toast);
+    setTimeout(()=> toast.remove(), 6000);
+  }
 
+  // Anotações do Mestre
+  function chaveAnotacoesMestre(idMesa){ return `caos_mestre_anotacoes_${idMesa}`; }
   function carregarAnotacoesMestre(idMesa){
     try{
       const bruto = localStorage.getItem(chaveAnotacoesMestre(idMesa));
@@ -1907,370 +1232,108 @@
     anotacaoSelecionadaId = mestreAnotacoes.length ? mestreAnotacoes[0].id : null;
     renderAnotacoesMestre();
   }
-
   function salvarAnotacoesMestre(){
-    if(!mesaAtiva) return;
-    localStorage.setItem(chaveAnotacoesMestre(mesaAtiva.id), JSON.stringify(mestreAnotacoes));
-  }
-
-  function novaAnotacaoMestre(){
-    const nota = { id: "nota_" + Date.now() + "_" + Math.floor(Math.random()*10000), titulo: "Nova nota", conteudo: "" };
-    mestreAnotacoes.unshift(nota);
-    anotacaoSelecionadaId = nota.id;
-    salvarAnotacoesMestre();
-    renderAnotacoesMestre();
-    document.getElementById("anotacao-titulo-input").focus();
-    document.getElementById("anotacao-titulo-input").select();
-  }
-
-  function removerAnotacaoMestre(id){
-    mestreAnotacoes = mestreAnotacoes.filter(n => n.id !== id);
-    if(anotacaoSelecionadaId === id){
-      anotacaoSelecionadaId = mestreAnotacoes.length ? mestreAnotacoes[0].id : null;
-    }
-    salvarAnotacoesMestre();
-    renderAnotacoesMestre();
+    if(mesaAtiva) localStorage.setItem(chaveAnotacoesMestre(mesaAtiva.id), JSON.stringify(mestreAnotacoes));
   }
 
   function renderAnotacoesMestre(){
     const lista = document.getElementById("anotacoes-lista");
     if(!lista) return;
-
-    if(mestreAnotacoes.length === 0){
-      lista.innerHTML = `<div class="empty-state" style="border:none;">Nenhuma nota salva ainda.</div>`;
-    } else {
-      lista.innerHTML = "";
-      mestreAnotacoes.forEach(nota => {
-        const item = document.createElement("div");
-        item.className = "anotacao-item" + (nota.id === anotacaoSelecionadaId ? " selecionada" : "");
-        item.innerHTML = `
-          <span class="anotacao-item-titulo">${nota.titulo || "(sem título)"}</span>
-          <button class="anotacao-item-remover" title="Remover nota">×</button>
-        `;
-        item.addEventListener("click", ()=>{
-          anotacaoSelecionadaId = nota.id;
-          renderAnotacoesMestre();
-        });
-        item.querySelector(".anotacao-item-remover").addEventListener("click", (e)=>{
-          e.stopPropagation();
-          if(confirm(`Remover a nota "${nota.titulo || "(sem título)"}"?`)) removerAnotacaoMestre(nota.id);
-        });
-        lista.appendChild(item);
-      });
-    }
-
-    const tituloInput = document.getElementById("anotacao-titulo-input");
-    const conteudoInput = document.getElementById("anotacao-conteudo-input");
-    const vazio = document.getElementById("anotacao-vazio");
-    const notaAtiva = mestreAnotacoes.find(n => n.id === anotacaoSelecionadaId);
-
-    if(notaAtiva){
-      tituloInput.style.display = "block";
-      conteudoInput.style.display = "block";
-      vazio.style.display = "none";
-      if(document.activeElement !== tituloInput) tituloInput.value = notaAtiva.titulo;
-      if(document.activeElement !== conteudoInput) conteudoInput.value = notaAtiva.conteudo;
-    } else {
-      tituloInput.style.display = "none";
-      conteudoInput.style.display = "none";
-      vazio.style.display = "flex";
-    }
-  }
-
-  document.getElementById("btn-nova-anotacao").addEventListener("click", novaAnotacaoMestre);
-  document.getElementById("anotacao-titulo-input").addEventListener("input", (e)=>{
-    const nota = mestreAnotacoes.find(n => n.id === anotacaoSelecionadaId);
-    if(!nota) return;
-    nota.titulo = e.target.value;
-    salvarAnotacoesMestre();
-    // atualiza só o título na lista, sem re-renderizar o input (perderia o foco/cursor)
-    const itemAtivo = document.querySelector(".anotacao-item.selecionada .anotacao-item-titulo");
-    if(itemAtivo) itemAtivo.textContent = nota.titulo || "(sem título)";
-  });
-  document.getElementById("anotacao-conteudo-input").addEventListener("input", (e)=>{
-    const nota = mestreAnotacoes.find(n => n.id === anotacaoSelecionadaId);
-    if(!nota) return;
-    nota.conteudo = e.target.value;
-    salvarAnotacoesMestre();
-  });
-
-  // ---------- Aba Fichas: biblioteca de Inimigos/Monstros ----------
-  const ATRIBUTOS_INIMIGO = ["forca","agilidade","vigor","instinto","influencia","mente"];
-
-  function chaveInimigosMestre(idMesa){ return `caos_mestre_inimigos_${idMesa}`; }
-
-  function carregarInimigosMestre(idMesa){
-    try{
-      const bruto = localStorage.getItem(chaveInimigosMestre(idMesa));
-      mestreInimigos = bruto ? JSON.parse(bruto) : [];
-    }catch(e){ mestreInimigos = []; }
-    renderInimigosMestre();
-  }
-
-  function salvarInimigosMestre(){
-    if(!mesaAtiva) return;
-    localStorage.setItem(chaveInimigosMestre(mesaAtiva.id), JSON.stringify(mestreInimigos));
-  }
-
-  function inimigoPadrao(){
-    return {
-      id: null,
-      nome: "",
-      nivel: 1,
-      proficiencia: 1,
-      vidaMaxima: 10,
-      usarProtecao: false,
-      protecaoMaxima: 0,
-      atributos: { forca:1, agilidade:1, vigor:1, instinto:1, influencia:1, mente:1 },
-      pericias: "",
-      acoes: []
-    };
-  }
-
-  // ---- modal: abrir / fechar ----
-  function abrirModalInimigo(inimigoParaEditar){
-    inimigoEditandoId = inimigoParaEditar ? inimigoParaEditar.id : null;
-    const dados = inimigoParaEditar ? inimigoParaEditar : inimigoPadrao();
-
-    document.getElementById("modal-inimigo-titulo").textContent = inimigoParaEditar ? "Editar Inimigo" : "Novo Inimigo";
-    document.getElementById("inimigo-nome").value = dados.nome;
-    document.getElementById("inimigo-nivel").value = dados.nivel;
-    document.getElementById("inimigo-proficiencia").value = dados.proficiencia;
-    document.getElementById("inimigo-vida-maxima").value = dados.vidaMaxima;
-    document.getElementById("inimigo-protecao-maxima").value = dados.protecaoMaxima;
-    document.getElementById("inimigo-usar-protecao").checked = !!dados.usarProtecao;
-    ATRIBUTOS_INIMIGO.forEach(attr=>{
-      document.getElementById(`inimigo-attr-${attr}`).value = dados.atributos[attr] ?? 1;
-    });
-    document.getElementById("inimigo-pericias").value = dados.pericias || "";
-
-    // clona as ações pra um array temporário (não editar o objeto original até salvar)
-    inimigoAcoesTemp = (dados.acoes || []).map(a => Object.assign({}, a));
-    renderAcoesForm();
-
-    atualizarVisibilidadeProtecaoForm();
-    document.getElementById("modal-inimigo").classList.add("aberto");
-    document.getElementById("inimigo-nome").focus();
-  }
-
-  function fecharModalInimigo(){
-    document.getElementById("modal-inimigo").classList.remove("aberto");
-    inimigoEditandoId = null;
-    inimigoAcoesTemp = [];
-  }
-
-  function atualizarVisibilidadeProtecaoForm(){
-    const usar = document.getElementById("inimigo-usar-protecao").checked;
-    document.getElementById("inimigo-protecao-maxima").disabled = !usar;
-    document.getElementById("inimigo-protecao-maxima").style.opacity = usar ? "1" : "0.4";
-  }
-
-  // ---- ações dinâmicas dentro do modal ----
-  function renderAcoesForm(){
-    const lista = document.getElementById("inimigo-acoes-lista");
     lista.innerHTML = "";
-    if(inimigoAcoesTemp.length === 0){
-      lista.innerHTML = `<div class="empty-state" style="border:none; padding:14px;">Nenhuma ação adicionada.</div>`;
-    }
-    inimigoAcoesTemp.forEach((acao, idx)=>{
-      const item = document.createElement("div");
-      item.className = "acao-form-item";
-      item.innerHTML = `
-        <div class="acao-form-linha">
-          <input type="text" placeholder="Nome da ação" value="${acao.nome || ""}" data-campo="nome" data-idx="${idx}">
-          <input type="text" placeholder="Custo/Tipo (ex: Ação, Reação)" value="${acao.custo || ""}" data-campo="custo" data-idx="${idx}">
-        </div>
-        <textarea placeholder="Descrição/Efeito" rows="2" data-campo="descricao" data-idx="${idx}">${acao.descricao || ""}</textarea>
-        <button type="button" class="acao-remover-btn" data-idx="${idx}">Remover ação</button>
-      `;
-      lista.appendChild(item);
-    });
-
-    lista.querySelectorAll("[data-campo]").forEach(el=>{
-      el.addEventListener("input", (e)=>{
-        const idx = parseInt(e.target.dataset.idx,10);
-        inimigoAcoesTemp[idx][e.target.dataset.campo] = e.target.value;
-      });
-    });
-    lista.querySelectorAll(".acao-remover-btn").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        inimigoAcoesTemp.splice(parseInt(btn.dataset.idx,10), 1);
-        renderAcoesForm();
-      });
-    });
-  }
-
-  document.getElementById("btn-add-acao").addEventListener("click", ()=>{
-    inimigoAcoesTemp.push({ nome:"", custo:"", descricao:"" });
-    renderAcoesForm();
-  });
-
-  document.getElementById("inimigo-usar-protecao").addEventListener("change", atualizarVisibilidadeProtecaoForm);
-
-  // ---- salvar (criar ou atualizar) ----
-  document.getElementById("btn-salvar-inimigo").addEventListener("click", ()=>{
-    const nome = document.getElementById("inimigo-nome").value.trim();
-    if(!nome){ document.getElementById("inimigo-nome").focus(); return; }
-
-    const dados = {
-      id: inimigoEditandoId || ("inimigo_" + Date.now() + "_" + Math.floor(Math.random()*10000)),
-      nome,
-      nivel: parseInt(document.getElementById("inimigo-nivel").value,10) || 1,
-      proficiencia: parseInt(document.getElementById("inimigo-proficiencia").value,10) || 0,
-      vidaMaxima: parseInt(document.getElementById("inimigo-vida-maxima").value,10) || 0,
-      usarProtecao: document.getElementById("inimigo-usar-protecao").checked,
-      protecaoMaxima: parseInt(document.getElementById("inimigo-protecao-maxima").value,10) || 0,
-      atributos: {},
-      pericias: document.getElementById("inimigo-pericias").value,
-      acoes: inimigoAcoesTemp.filter(a => a.nome.trim() || a.custo.trim() || a.descricao.trim())
-    };
-    ATRIBUTOS_INIMIGO.forEach(attr=>{
-      dados.atributos[attr] = parseInt(document.getElementById(`inimigo-attr-${attr}`).value,10) || 0;
-    });
-
-    if(inimigoEditandoId){
-      const idx = mestreInimigos.findIndex(i => i.id === inimigoEditandoId);
-      if(idx !== -1) mestreInimigos[idx] = dados;
-    } else {
-      mestreInimigos.push(dados);
-    }
-
-    salvarInimigosMestre();
-    renderInimigosMestre();
-    fecharModalInimigo();
-  });
-
-  document.getElementById("btn-cancelar-inimigo").addEventListener("click", fecharModalInimigo);
-  document.getElementById("btn-fechar-inimigo").addEventListener("click", fecharModalInimigo);
-  document.getElementById("modal-inimigo").addEventListener("click", (e)=>{
-    if(e.target.id === "modal-inimigo") fecharModalInimigo();
-  });
-
-  document.getElementById("btn-novo-inimigo").addEventListener("click", ()=> abrirModalInimigo(null));
-
-  // ---- duplicar / excluir ----
-  function duplicarInimigoMestre(id){
-    const original = mestreInimigos.find(i => i.id === id);
-    if(!original) return;
-    const copia = JSON.parse(JSON.stringify(original));
-    copia.id = "inimigo_" + Date.now() + "_" + Math.floor(Math.random()*10000);
-    copia.nome = original.nome + " (cópia)";
-    mestreInimigos.push(copia);
-    salvarInimigosMestre();
-    renderInimigosMestre();
-  }
-
-  function excluirInimigoMestre(id){
-    const inimigo = mestreInimigos.find(i => i.id === id);
-    if(!inimigo) return;
-    if(!confirm(`Excluir "${inimigo.nome}" da biblioteca de inimigos?`)) return;
-    mestreInimigos = mestreInimigos.filter(i => i.id !== id);
-    salvarInimigosMestre();
-    renderInimigosMestre();
-  }
-
-  // ---- listagem ----
-  const inimigosExpandidos = new Set(); // ids de inimigos com a gaveta de detalhes aberta
-
-  function renderInimigosMestre(){
-    const lista = document.getElementById("inimigos-lista");
-    if(!lista) return;
-
-    if(mestreInimigos.length === 0){
-      lista.innerHTML = `<div class="empty-state">Nenhum inimigo salvo ainda.</div>`;
+    if(!mestreAnotacoes.length){
+      document.getElementById("anotacao-titulo-input").style.display = "none";
+      document.getElementById("anotacao-conteudo-input").style.display = "none";
+      document.getElementById("anotacao-vazio").style.display = "flex";
       return;
     }
+    if(!anotacaoSelecionadaId && mestreAnotacoes.length) anotacaoSelecionadaId = mestreAnotacoes[0].id;
+    const nota = mestreAnotacoes.find(n => n.id === anotacaoSelecionadaId) || mestreAnotacoes[0];
 
-    lista.innerHTML = "";
-    mestreInimigos.forEach(inimigo=>{
-      const expandido = inimigosExpandidos.has(inimigo.id);
-      const card = document.createElement("div");
-      card.className = "inimigo-card";
-      const metaProtecao = inimigo.usarProtecao ? ` · Proteção ${inimigo.protecaoMaxima}` : "";
+    document.getElementById("anotacao-titulo-input").style.display = "block";
+    document.getElementById("anotacao-conteudo-input").style.display = "block";
+    document.getElementById("anotacao-vazio").style.display = "none";
+    document.getElementById("anotacao-titulo-input").value = nota.titulo;
+    document.getElementById("anotacao-conteudo-input").value = nota.conteudo;
 
-      let detalhesHTML = "";
-      if(expandido){
-        const ATRIBUTOS_ABREV_INIMIGO = [
-          { chave:"forca", label:"FOR" }, { chave:"agilidade", label:"AGI" }, { chave:"vigor", label:"VIG" },
-          { chave:"instinto", label:"INS" }, { chave:"influencia", label:"INF" }, { chave:"mente", label:"MEN" },
-        ];
-        const atributosInimigo = inimigo.atributos || {};
-        const attrsHTML = ATRIBUTOS_ABREV_INIMIGO.map(def => `
-          <div class="attr-mini">
-            <div class="attr-mini-nome">${def.label}</div>
-            <div class="attr-mini-valor">${atributosInimigo[def.chave] ?? 0}</div>
-          </div>`).join("");
-
-        const protecaoHTML = inimigo.usarProtecao
-          ? `<div class="inimigo-protecao-linha">Proteção: ${inimigo.protecaoMaxima}</div>` : "";
-
-        const periciasHTML = (inimigo.pericias || "").trim()
-          ? `<div>
-              <div class="inimigo-secao-label">Perícias</div>
-              <div class="inimigo-pericias-texto">${inimigo.pericias}</div>
-            </div>` : "";
-
-        const acoesHTML = (inimigo.acoes || []).length
-          ? `<div>
-              <div class="inimigo-secao-label">Ações</div>
-              ${inimigo.acoes.map(acao => `
-                <div class="inimigo-acao-item">
-                  <div class="inimigo-acao-topo">
-                    <span class="inimigo-acao-nome">${acao.nome || "(sem nome)"}</span>
-                    ${acao.custo ? `<span class="inimigo-acao-custo">${acao.custo}</span>` : ""}
-                  </div>
-                  ${acao.descricao ? `<div class="inimigo-acao-descricao">${acao.descricao}</div>` : ""}
-                </div>`).join("")}
-            </div>` : "";
-
-        detalhesHTML = `
-          <div class="inimigo-card-detalhes">
-            ${protecaoHTML}
-            <div>
-              <div class="inimigo-secao-label">Atributos</div>
-              <div class="inimigo-attr-grid">${attrsHTML}</div>
-            </div>
-            ${periciasHTML}
-            ${acoesHTML}
-          </div>`;
-      }
-
-      card.innerHTML = `
-        <div class="inimigo-card-topo">
-          <span class="inimigo-card-chevron">${expandido ? "▾" : "▸"}</span>
-          <div class="inimigo-card-info">
-            <div class="inimigo-card-nome">${inimigo.nome}</div>
-            <div class="inimigo-card-meta">Nível ${inimigo.nivel} · Vida ${inimigo.vidaMaxima}${metaProtecao}</div>
-          </div>
-          <div class="inimigo-card-acoes">
-            <button class="editar">Editar</button>
-            <button class="duplicar">Duplicar</button>
-            <button class="excluir">Excluir</button>
-          </div>
-        </div>
-        ${detalhesHTML}
-      `;
-
-      card.addEventListener("click", ()=>{
-        if(inimigosExpandidos.has(inimigo.id)) inimigosExpandidos.delete(inimigo.id);
-        else inimigosExpandidos.add(inimigo.id);
-        renderInimigosMestre();
-      });
-      card.querySelector(".editar").addEventListener("click", (e)=>{ e.stopPropagation(); abrirModalInimigo(inimigo); });
-      card.querySelector(".duplicar").addEventListener("click", (e)=>{ e.stopPropagation(); duplicarInimigoMestre(inimigo.id); });
-      card.querySelector(".excluir").addEventListener("click", (e)=>{ e.stopPropagation(); excluirInimigoMestre(inimigo.id); });
-      lista.appendChild(card);
+    mestreAnotacoes.forEach(n => {
+      const item = document.createElement("div");
+      item.className = "anotacao-item" + (n.id === anotacaoSelecionadaId ? " selecionada" : "");
+      item.innerHTML = `<span class="anotacao-item-titulo">${n.titulo||"(sem título)"}</span><button class="anotacao-item-remover">×</button>`;
+      item.onclick = ()=>{ anotacaoSelecionadaId = n.id; renderAnotacoesMestre(); };
+      item.querySelector(".anotacao-item-remover").onclick = (e)=>{
+        e.stopPropagation(); mestreAnotacoes = mestreAnotacoes.filter(x => x.id !== n.id);
+        if(anotacaoSelecionadaId === n.id) anotacaoSelecionadaId = null;
+        salvarAnotacoesMestre(); renderAnotacoesMestre();
+      };
+      lista.appendChild(item);
     });
-
-    renderSelectInimigosIniciativa(); // dropdown da iniciativa acompanha a biblioteca
   }
 
-  // ---------- inicialização ----------
+  document.getElementById("btn-nova-anotacao").onclick = ()=>{
+    const n = { id: "nota_" + Date.now(), titulo: "Nova nota", conteudo: "" };
+    mestreAnotacoes.unshift(n); anotacaoSelecionadaId = n.id;
+    salvarAnotacoesMestre(); renderAnotacoesMestre();
+  };
+  document.getElementById("anotacao-titulo-input").oninput = (e)=>{
+    const n = mestreAnotacoes.find(x => x.id === anotacaoSelecionadaId);
+    if(n){ n.titulo = e.target.value; salvarAnotacoesMestre(); }
+  };
+  document.getElementById("anotacao-conteudo-input").oninput = (e)=>{
+    const n = mestreAnotacoes.find(x => x.id === anotacaoSelecionadaId);
+    if(n){ n.conteudo = e.target.value; salvarAnotacoesMestre(); }
+  };
+
+  // Histórico e Escuta de Rolagens dos Jogadores
+  function escutarRolagensDaMesa(idMesa){
+    const ref = firebase.database().ref(`mesas/${idMesa}/rolagens`);
+    const log = [];
+    ref.limitToLast(30).on("child_added", snap => {
+      const reg = snap.val();
+      log.unshift(reg);
+      renderLogRolagens(log);
+      mostrarToastRolagem(reg);
+    });
+    return () => ref.off("child_added");
+  }
+
+  function mostrarToastRolagem(reg){
+    const container = document.getElementById("toast-rolagens");
+    const toast = document.createElement("div");
+    toast.className = "rolagem-toast";
+    toast.innerHTML = `<div class="rt-personagem">${reg.personagemNome}</div><div class="rt-teste">${reg.nomeTeste}</div><div class="rt-total">${reg.sucessoAutomatico ? '✓ Sucesso Automático' : reg.total}</div>`;
+    container.appendChild(toast);
+    setTimeout(()=> toast.remove(), 6000);
+  }
+
+  function renderLogRolagens(lista){
+    const container = document.getElementById("log-rolagens");
+    if(!container) return;
+    container.innerHTML = "";
+    lista.forEach(reg => {
+      const item = document.createElement("div");
+      item.className = "rolagem-item";
+      item.innerHTML = `<div class="rolagem-info"><div class="rolagem-personagem">${reg.personagemNome}</div><div class="rolagem-teste">${reg.nomeTeste} (${reg.formula||''})</div><div class="rolagem-detalhe">${reg.detalhe||''}</div></div><div class="rolagem-total">${reg.sucessoAutomatico ? '✓' : reg.total}</div>`;
+      container.appendChild(item);
+    });
+  }
+
+  document.getElementById("btn-historico-rolagens").onclick = ()=> document.getElementById("modal-historico").classList.add("aberto");
+  document.getElementById("btn-fechar-historico").onclick = ()=> document.getElementById("modal-historico").classList.remove("aberto");
+
+  // Alternar Abas do Painel
+  document.querySelectorAll(".ferramentas-tab-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+      const alvo = btn.dataset.ftab;
+      document.querySelectorAll(".ferramentas-tab-btn").forEach(b => b.classList.toggle("active", b === btn));
+      document.querySelectorAll(".ferramentas-tab-content").forEach(p => p.classList.toggle("active", p.dataset.ftabContent === alvo));
+    };
+  });
+
   renderListaMesasSalvas();
-  const idAtivoSalvo = localStorage.getItem(LS_MESA_ATIVA);
-  if(idAtivoSalvo){
-    const conhecida = listarMesasSalvas().find(m => m.id === idAtivoSalvo);
-    if(conhecida) mostrarDashboard(conhecida);
+  const idSalvo = localStorage.getItem(LS_MESA_ATIVA);
+  if(idSalvo){
+    const m = listarMesasSalvas().find(x => x.id === idSalvo);
+    if(m) mostrarDashboard(m);
   }
 })();
 </script>
