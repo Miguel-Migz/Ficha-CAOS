@@ -888,7 +888,7 @@
     });
   }
 
-  // --- TÉCNICAS ---
+// --- TÉCNICAS ---
   function renderTecnicas(){
     const list = document.getElementById("tecnica-grid");
     list.innerHTML = "";
@@ -896,10 +896,17 @@
       list.innerHTML = `
         <div class="item-add-form">
           <input type="text" id="novo-tec-nome" placeholder="Nome da técnica">
-          <select id="novo-tec-tipo"><option value="tecnica">Técnica</option><option value="estilo">Estilo de Luta</option></select>
+          <div class="item-form-row">
+            <select id="novo-tec-tipo">
+              <option value="tecnica">Técnica</option>
+              <option value="estilo">Estilo de Luta</option>
+            </select>
+            <input type="number" id="novo-tec-nv" placeholder="Nível" value="1" min="0" step="1">
+          </div>
           <textarea id="novo-tec-desc" placeholder="Descrição"></textarea>
           <div style="display:flex; justify-content:flex-end; gap:8px;">
-            <button class="btn" id="canc-tec">Cancelar</button><button class="btn primary" id="salv-tec">Salvar</button>
+            <button class="btn" id="canc-tec">Cancelar</button>
+            <button class="btn primary" id="salv-tec">Salvar</button>
           </div>
         </div>`;
       document.getElementById("canc-tec").onclick = ()=>{ tecForm = false; renderTecnicas(); };
@@ -907,8 +914,12 @@
         const nome = document.getElementById("novo-tec-nome").value.trim();
         if(!nome) return;
         estado.tecnicas.push({
-          nome, tipo: document.getElementById("novo-tec-tipo").value,
-          descricao: document.getElementById("novo-tec-desc").value.trim(), aberta: false, editando: false
+          nome,
+          tipo: document.getElementById("novo-tec-tipo").value,
+          nivel: parseInt(document.getElementById("novo-tec-nv").value, 10) || 1,
+          descricao: document.getElementById("novo-tec-desc").value.trim(),
+          aberta: false,
+          editando: false
         });
         tecForm = false; renderTecnicas(); salvar();
       };
@@ -927,10 +938,13 @@
         card.innerHTML = `
           <div class="item-edit-form">
             <input type="text" id="edit-tec-nome-${idx}" value="${tec.nome}">
-            <select id="edit-tec-tipo-${idx}">
-              <option value="tecnica" ${tec.tipo==="tecnica"?"selected":""}>Técnica</option>
-              <option value="estilo" ${tec.tipo==="estilo"?"selected":""}>Estilo de Luta</option>
-            </select>
+            <div class="item-form-row">
+              <select id="edit-tec-tipo-${idx}">
+                <option value="tecnica" ${tec.tipo==="tecnica"?"selected":""}>Técnica</option>
+                <option value="estilo" ${tec.tipo==="estilo"?"selected":""}>Estilo de Luta</option>
+              </select>
+              <input type="number" id="edit-tec-nv-${idx}" value="${tec.nivel !== undefined ? tec.nivel : 1}" min="0" step="1">
+            </div>
             <textarea id="edit-tec-desc-${idx}">${tec.descricao||""}</textarea>
             <div style="display:flex; justify-content:flex-end; gap:8px;">
               <button class="btn" id="canc-edit-tec-${idx}">Cancelar</button>
@@ -941,6 +955,7 @@
         card.querySelector(`#salv-edit-tec-${idx}`).onclick = ()=>{
           tec.nome = document.getElementById(`edit-tec-nome-${idx}`).value.trim() || tec.nome;
           tec.tipo = document.getElementById(`edit-tec-tipo-${idx}`).value;
+          tec.nivel = parseInt(document.getElementById(`edit-tec-nv-${idx}`).value, 10) || 1;
           tec.descricao = document.getElementById(`edit-tec-desc-${idx}`).value.trim();
           tec.editando = false; renderTecnicas(); salvar();
         };
@@ -952,6 +967,7 @@
         <div class="item-header">
           <span class="item-chevron">${tec.aberta ? "▾" : "▸"}</span>
           <span class="item-nome tipo-${tec.tipo}">${tec.nome}</span>
+          <span class="item-meta">Nv. ${tec.nivel !== undefined ? tec.nivel : 1}</span>
         </div>
         ${tec.aberta ? `
           <div class="item-body">
