@@ -888,7 +888,7 @@
     });
   }
 
-// --- TÉCNICAS ---
+  // --- TÉCNICAS (Com campo Nível e Ordenação por Nível) ---
   function renderTecnicas(){
     const list = document.getElementById("tecnica-grid");
     list.innerHTML = "";
@@ -930,7 +930,7 @@
     add.onclick = ()=>{ tecForm = true; renderTecnicas(); };
     list.appendChild(add);
 
-    // Mapeia o índice original e ordena do menor nível para o maior
+    // Mapeia os índices originais e ordena as técnicas do menor para o maior nível
     const tecnicasOrdenadas = (estado.tecnicas || [])
       .map((tec, idx) => ({ tec, idx }))
       .sort((a, b) => {
@@ -940,62 +940,6 @@
       });
 
     tecnicasOrdenadas.forEach(({ tec, idx })=>{
-      const card = document.createElement("div");
-      card.className = "item-card";
-
-      if(tec.editando){
-        card.innerHTML = `
-          <div class="item-edit-form">
-            <input type="text" id="edit-tec-nome-${idx}" value="${tec.nome}">
-            <div class="item-form-row">
-              <select id="edit-tec-tipo-${idx}">
-                <option value="tecnica" ${tec.tipo==="tecnica"?"selected":""}>Técnica</option>
-                <option value="estilo" ${tec.tipo==="estilo"?"selected":""}>Estilo de Luta</option>
-              </select>
-              <input type="number" id="edit-tec-nv-${idx}" value="${tec.nivel !== undefined ? tec.nivel : 1}" min="0" step="1">
-            </div>
-            <textarea id="edit-tec-desc-${idx}">${tec.descricao||""}</textarea>
-            <div style="display:flex; justify-content:flex-end; gap:8px;">
-              <button class="btn" id="canc-edit-tec-${idx}">Cancelar</button>
-              <button class="btn primary" id="salv-edit-tec-${idx}">Salvar</button>
-            </div>
-          </div>`;
-        card.querySelector(`#canc-edit-tec-${idx}`).onclick = ()=>{ tec.editando = false; renderTecnicas(); };
-        card.querySelector(`#salv-edit-tec-${idx}`).onclick = ()=>{
-          tec.nome = document.getElementById(`edit-tec-nome-${idx}`).value.trim() || tec.nome;
-          tec.tipo = document.getElementById(`edit-tec-tipo-${idx}`).value;
-          tec.nivel = parseInt(document.getElementById(`edit-tec-nv-${idx}`).value, 10) || 1;
-          tec.descricao = document.getElementById(`edit-tec-desc-${idx}`).value.trim();
-          tec.editando = false; renderTecnicas(); salvar();
-        };
-        list.appendChild(card);
-        return;
-      }
-
-      card.innerHTML = `
-        <div class="item-header">
-          <span class="item-chevron">${tec.aberta ? "▾" : "▸"}</span>
-          <span class="item-nome tipo-${tec.tipo}">${tec.nome}</span>
-          <span class="item-meta">Nv. ${tec.nivel !== undefined ? tec.nivel : 1}</span>
-        </div>
-        ${tec.aberta ? `
-          <div class="item-body">
-            <div class="item-desc-text">${tec.descricao||"Sem descrição."}</div>
-            <div class="item-footer-actions">
-              <button class="item-action remover" data-del="${idx}">Remover</button>
-              <button class="item-action editar" data-edit="${idx}">Editar</button>
-            </div>
-          </div>` : ""}`;
-      card.querySelector(".item-header").onclick = ()=>{ tec.aberta = !tec.aberta; renderTecnicas(); };
-      const del = card.querySelector("[data-del]");
-      if(del) del.onclick = (e)=>{ e.stopPropagation(); estado.tecnicas.splice(idx,1); renderTecnicas(); salvar(); };
-      const edit = card.querySelector("[data-edit]");
-      if(edit) edit.onclick = (e)=>{ e.stopPropagation(); tec.editando = true; renderTecnicas(); };
-      list.appendChild(card);
-    });
-  }
-
-    estado.tecnicas.forEach((tec, idx)=>{
       const card = document.createElement("div");
       card.className = "item-card";
 
@@ -1378,7 +1322,6 @@
     ctx.scale(cropScale*ratio, cropScale*ratio);
     ctx.drawImage(cropImg, -cropImg.naturalWidth/2, -cropImg.naturalHeight/2);
     
-    // Converte e atualiza
     estado.identidade.foto = canvas.toDataURL("image/jpeg", 0.7);
     document.getElementById("modal-editar-foto").classList.remove("aberto");
     render(); 
@@ -1569,8 +1512,7 @@
     const reader = new FileReader();
     reader.onload = (evt)=>{
       try {
-        const dados = JSON.parse(evt.target.result);
-        estado = mesclarEstado(dados, dados.id);
+        estado = mesclarEstado(JSON.parse(evt.target.result), estado.id);
         render(); salvar();
       } catch(err){ alert("Erro ao importar JSON."); }
     };
