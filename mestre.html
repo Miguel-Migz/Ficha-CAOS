@@ -64,7 +64,6 @@
   .attr-mini-efetivo.buff{ color:#4fd57a; }
   .attr-mini-efetivo.debuff{ color:var(--accent-ember); }
 
-  /* Ajustes das Barras Vitais dos Cards */
   .pcard-vitais{ display:flex; flex-direction:column; gap:8px; }
   .vital-linha{ display:flex; align-items:center; gap:8px; }
   .vital-label{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); width:60px; flex-shrink:0; }
@@ -73,8 +72,6 @@
     height:22px; overflow:hidden; position:relative; min-width:120px;
   }
   .vital-bar-fill{ height:100%; transition:width 0.2s ease; }
-  .vital-bar-fill.vida{ background:linear-gradient(90deg, #3f9142, #6fbf73); }
-  .vital-bar-fill.protecao{ background:repeating-linear-gradient(135deg, #4d9eea, #4d9eea 6px, #3b7fc4 6px, #3b7fc4 12px); }
   .vital-numeros{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
     font-size:0.75rem; font-family:var(--font-mono); color:var(--text); text-shadow:0 1px 2px rgba(0,0,0,0.8);
@@ -99,6 +96,10 @@
   .acao-btn.dano:hover{ background:rgba(226,89,63,0.15); }
   .acao-btn.cura{ border-color:#6fbf73; color:#6fbf73; }
   .acao-btn.cura:hover{ background:rgba(111,191,115,0.12); }
+  .acao-btn.gasto{ border-color:var(--accent-arcane); color:var(--accent-arcane); }
+  .acao-btn.gasto:hover{ background:rgba(155,107,242,0.15); }
+  .acao-btn.recarga{ border-color:#ba8fff; color:#ba8fff; }
+  .acao-btn.recarga:hover{ background:rgba(186,143,255,0.15); }
   .acao-btn.remover{ border-color:var(--border-soft); color:var(--text-faint); }
   .acao-btn.remover:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
   .acao-btn.abrir-ficha{ border-color:var(--border-soft); color:var(--text-faint); text-decoration:none; text-align:center; }
@@ -264,22 +265,14 @@
   .inimigo-card-acoes button:hover{ border-color:var(--accent-arcane); color:var(--text); }
   .inimigo-card-acoes button.excluir:hover{ border-color:var(--accent-ember); color:var(--accent-ember); }
   .inimigo-card-detalhes{ display:flex; flex-direction:column; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border-soft); font-size:0.8rem; color:var(--text-dim); cursor:default; }
-  .inimigo-secao-label{ font-size:0.64rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint); margin-bottom:5px; }
-  .inimigo-protecao-linha{ font-family:var(--font-mono); font-size:0.76rem; color:#4d9eea; }
   .inimigo-attr-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; }
-  .inimigo-pericias-texto{ white-space:pre-wrap; line-height:1.5; font-style:italic; }
   .inimigo-acao-item{ background:var(--bg-inset); border:1px solid var(--border-soft); border-radius:6px; padding:8px 10px; margin-bottom:6px; }
-  .inimigo-acao-topo{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
-  .inimigo-acao-nome{ font-family:var(--font-display); font-size:0.86rem; font-weight:600; color:var(--text); }
-  .inimigo-acao-custo{ font-size:0.68rem; color:var(--accent-gold); font-family:var(--font-mono); }
-  .inimigo-acao-descricao{ font-size:0.76rem; color:var(--text-dim); margin-top:4px; white-space:pre-wrap; line-height:1.5; }
 
   .rolagem-item{ background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:10px 12px; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
   .rolagem-info{ flex:1; min-width:0; }
   .rolagem-personagem{ font-family:var(--font-display); font-size:0.86rem; color:var(--accent-gold); }
   .rolagem-teste{ font-size:0.8rem; color:var(--text); margin-top:2px; }
   .rolagem-detalhe{ font-size:0.7rem; color:var(--text-faint); font-family:var(--font-mono); margin-top:2px; }
-  .rolagem-hora{ font-size:0.64rem; color:var(--text-faint); margin-top:2px; }
   .rolagem-total{ font-family:var(--font-display); font-size:1.3rem; font-weight:600; color:var(--text); }
   .rolagem-total.automatico{ font-size:0.82rem; color:#4fd57a; }
 </style>
@@ -294,7 +287,7 @@
   <header class="masthead" style="border-bottom:none; margin-bottom:24px;">
     <div>
       <div class="masthead-title">C.<span>A</span>.O.S — Painel do Mestre</div>
-      <div class="masthead-sub">Escolha, crie ou entre em uma mesa</div>
+      <div class="masthead-sub">Escolha, crie ou entre numa mesa</div>
     </div>
   </header>
 
@@ -507,7 +500,6 @@
   let inimigoEditandoId = null;
   let inimigoAcoesTemp = [];
 
-  // --- Status de Conexão com Firebase no Topo ---
   const statusPill = document.getElementById("status-pill");
   const statusTexto = document.getElementById("status-texto");
   if(firebaseOk){
@@ -667,14 +659,16 @@
       const rec = p.recursos || {};
       const atrib = p.atributos || {};
       
-      // Suporte a formatos de chaves compatíveis
       const pvAtual = rec.pvAtual !== undefined ? parseInt(rec.pvAtual, 10) : 10;
       const pvMax = rec.pvMaximo !== undefined ? parseInt(rec.pvMaximo, 10) : (rec.pvMax !== undefined ? parseInt(rec.pvMax, 10) : 10);
       const protAtual = rec.protAtual !== undefined ? parseInt(rec.protAtual, 10) : 0;
       const protMax = rec.protMaximo !== undefined ? parseInt(rec.protMaximo, 10) : (rec.protMax !== undefined ? parseInt(rec.protMax, 10) : 0);
+      const manaAtual = rec.manaAtual !== undefined ? parseInt(rec.manaAtual, 10) : 10;
+      const manaMax = rec.manaMaximo !== undefined ? parseInt(rec.manaMaximo, 10) : 10;
       
       const pctPv = pvMax > 0 ? Math.max(0, Math.min(100, (pvAtual / pvMax) * 100)) : 0;
       const pctProt = protMax > 0 ? Math.max(0, Math.min(100, (protAtual / protMax) * 100)) : 0;
+      const pctMana = manaMax > 0 ? Math.max(0, Math.min(100, (manaAtual / manaMax) * 100)) : 0;
 
       const attrsHTML = ATRIBUTOS_ABREV.map(def => {
         const a = atrib[def.chave] || { pontos: 1 };
@@ -713,6 +707,13 @@
               <div class="vital-numeros">${protAtual} / ${protMax}</div>
             </div>
           </div>
+          <div class="vital-linha">
+            <span class="vital-label" style="color:var(--accent-arcane);">Mana</span>
+            <div class="vital-bar-track">
+              <div class="vital-bar-fill mana" style="width:${pctMana}%;"></div>
+              <div class="vital-numeros">${manaAtual} / ${manaMax}</div>
+            </div>
+          </div>
         </div>
 
         <div class="pcard-detalhes ${expandido ? "aberto" : ""}">
@@ -740,6 +741,12 @@
               <button class="acao-btn cura" data-campo="protAtual" data-sinal="1">Cura</button>
             </div>
             <div class="acao-linha">
+              <span>Mana</span>
+              <input type="number" placeholder="Qtd" id="qtd-mana-${id}">
+              <button class="acao-btn gasto" data-campo="manaAtual" data-sinal="-1">Gasto</button>
+              <button class="acao-btn recarga" data-campo="manaAtual" data-sinal="1">Recarga</button>
+            </div>
+            <div class="acao-linha">
               <button class="acao-btn remover" id="remover-${id}">Remover da Mesa</button>
               <button class="acao-btn abrir-ficha" id="abrir-ficha-${id}">Abrir ficha ↗</button>
             </div>
@@ -754,6 +761,7 @@
 
       const inputPv = card.querySelector(`#qtd-pv-${id}`);
       const inputProt = card.querySelector(`#qtd-prot-${id}`);
+      const inputMana = card.querySelector(`#qtd-mana-${id}`);
 
       card.querySelectorAll('[data-campo="pvAtual"]').forEach(btn=>{
         btn.onclick = ()=>{
@@ -772,6 +780,16 @@
           const novo = Math.max(0, Math.min(protMax || 9999, protAtual + parseInt(btn.dataset.sinal,10)*qtd));
           atualizarRecursoJogador(mesaAtiva.id, id, "protAtual", novo);
           inputProt.value = "";
+        };
+      });
+
+      card.querySelectorAll('[data-campo="manaAtual"]').forEach(btn=>{
+        btn.onclick = ()=>{
+          const qtd = Math.abs(parseInt(inputMana.value,10) || 0);
+          if(qtd === 0) return;
+          const novo = Math.max(0, Math.min(manaMax || 9999, manaAtual + parseInt(btn.dataset.sinal,10)*qtd));
+          atualizarRecursoJogador(mesaAtiva.id, id, "manaAtual", novo);
+          inputMana.value = "";
         };
       });
 
@@ -1314,7 +1332,7 @@
     if(n){ n.conteudo = e.target.value; salvarAnotacoesMestre(); }
   };
 
-  // --- Histórico e Escuta de Rolagens dos Jogadores ---
+  // --- Histórico e Escuta de Rolagens ---
   function escutarRolagensDaMesa(idMesa){
     const ref = firebase.database().ref(`mesas/${idMesa}/rolagens`);
     const log = [];
@@ -1351,7 +1369,6 @@
   document.getElementById("btn-historico-rolagens").onclick = ()=> document.getElementById("modal-historico").classList.add("aberto");
   document.getElementById("btn-fechar-historico").onclick = ()=> document.getElementById("modal-historico").classList.remove("aberto");
 
-  // --- Alternar Abas do Painel ---
   document.querySelectorAll(".ferramentas-tab-btn").forEach(btn=>{
     btn.onclick = ()=>{
       const alvo = btn.dataset.ftab;
