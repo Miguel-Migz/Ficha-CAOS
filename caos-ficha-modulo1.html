@@ -43,7 +43,6 @@
   }
   .step-btn:hover{ border-color:var(--accent-arcane); color:var(--accent-arcane); }
 
-  .vitals-grid{ display:grid; grid-template-columns:1.6fr 1fr; grid-auto-rows:1fr; gap:12px; }
   .vital-card{ background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
   .vital-top-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
   .vital-left{ display:flex; align-items:center; gap:10px; }
@@ -51,7 +50,6 @@
   .vital-inputs{ display:flex; align-items:center; gap:4px; }
   .vital-inputs input{ width:52px; text-align:center; font-family:var(--font-mono); font-size:0.95rem; padding:6px 4px; }
   .vital-inputs .slash{ color:var(--text-faint); font-family:var(--font-mono); }
-  .vital-card.protecao-card .vital-card-label{ color:var(--accent-arcane); }
   .dano-cura-row{ display:flex; align-items:center; gap:5px; }
   .dano-cura-row input{ width:44px; text-align:center; font-family:var(--font-mono); font-size:0.78rem; padding:6px 4px; }
   .dc-btn{ background:var(--bg-inset); border:1px solid var(--border-soft); color:var(--text); border-radius:6px; padding:6px 10px; font-size:0.74rem; cursor:pointer; }
@@ -178,7 +176,7 @@
     </div>
   </header>
 
-  <!-- Painel de Conexão com a Mesa & Chave de Sincronização -->
+  <!-- Painel de Ligação da Mesa & Chave de Sincronização -->
   <section class="panel mesa-panel">
     <div class="mesa-form" id="mesa-form">
       <label class="field" style="width:220px;">ID da Mesa
@@ -198,7 +196,7 @@
         <span>Conectado: <b id="mesa-status-id" style="color:var(--accent-gold); font-family:var(--font-mono);"></b></span>
       </div>
       <div style="display:flex; gap:8px;">
-        <button class="btn small" id="btn-copiar-chave" title="Copia a chave única para abrir exatamente esta ficha em outro computador ou celular">Copiar Chave de Sinc</button>
+        <button class="btn small" id="btn-copiar-chave" title="Copia a chave única para abrir exatamente esta ficha em outro dispositivo">Copiar Chave de Sinc</button>
         <button class="btn small" id="btn-sair-mesa">Sair da mesa</button>
       </div>
     </div>
@@ -232,7 +230,7 @@
     </div>
   </div>
 
-  <!-- Grid Principal -->
+  <!-- Grelha Principal -->
   <div class="layout-grid">
     <div class="layout-col">
       <section class="panel">
@@ -336,19 +334,16 @@
         </div>
       </section>
 
-<section class="panel">
+      <!-- Status Vitais e Combate com Mana e Grelha do Protótipo -->
+      <section class="panel">
         <h2 class="panel-title">Status Vitais e Combate</h2>
         <div class="vitals-grid">
-          <!-- Vida -->
+          <!-- Linha 1: Vida | DT -->
           <div class="vital-card" data-area="vida">
             <div class="vital-top-row">
               <div class="vital-left">
                 <span class="vital-card-label">Vida</span>
-                <div class="vital-inputs">
-                  <input type="number" id="v-pv-atual">
-                  <span class="slash">/</span>
-                  <input type="number" id="v-pv-max">
-                </div>
+                <div class="vital-inputs"><input type="number" id="v-pv-atual"><span class="slash">/</span><input type="number" id="v-pv-max"></div>
               </div>
               <div class="dano-cura-row">
                 <input type="number" id="v-pv-delta" placeholder="Qtd">
@@ -356,27 +351,16 @@
                 <button class="dc-btn cura" data-vital="pv" data-sinal="1">Cura</button>
               </div>
             </div>
-            <div class="bar-track">
-              <div class="bar-fill vida" id="v-pv-bar" style="width:100%"></div>
-            </div>
+            <div class="bar-track"><div class="bar-fill vida" id="v-pv-bar" style="width:100%"></div></div>
           </div>
+          <div class="derived-card" data-area="dt"><span class="derived-label">DT</span><input type="text" id="v-dt"></div>
 
-          <!-- DT -->
-          <div class="derived-card" data-area="dt">
-            <span class="derived-label">DT</span>
-            <input type="text" id="v-dt">
-          </div>
-
-          <!-- Proteção -->
+          <!-- Linha 2: Proteção | Deslocamento -->
           <div class="vital-card protecao-card" data-area="protecao">
             <div class="vital-top-row">
               <div class="vital-left">
                 <span class="vital-card-label">Proteção</span>
-                <div class="vital-inputs">
-                  <input type="number" id="v-prot-atual">
-                  <span class="slash">/</span>
-                  <input type="number" id="v-prot-max">
-                </div>
+                <div class="vital-inputs"><input type="number" id="v-prot-atual"><span class="slash">/</span><input type="number" id="v-prot-max"></div>
               </div>
               <div class="dano-cura-row">
                 <input type="number" id="v-prot-delta" placeholder="Qtd">
@@ -384,27 +368,16 @@
                 <button class="dc-btn cura" data-vital="prot" data-sinal="1">Cura</button>
               </div>
             </div>
-            <div class="bar-track">
-              <div class="bar-fill protecao" id="v-prot-bar" style="width:100%"></div>
-            </div>
+            <div class="bar-track"><div class="bar-fill protecao" id="v-prot-bar" style="width:100%"></div></div>
           </div>
+          <div class="derived-card" data-area="desloc"><span class="derived-label">Deslocamento</span><input type="text" id="v-desloc-input"></div>
 
-          <!-- Deslocamento -->
-          <div class="derived-card" data-area="desloc">
-            <span class="derived-label">Deslocamento</span>
-            <input type="text" id="v-desloc-input">
-          </div>
-
-          <!-- Mana -->
+          <!-- Linha 3: Mana -->
           <div class="vital-card mana-card" data-area="mana">
             <div class="vital-top-row">
               <div class="vital-left">
                 <span class="vital-card-label">Mana</span>
-                <div class="vital-inputs">
-                  <input type="number" id="v-mana-atual">
-                  <span class="slash">/</span>
-                  <input type="number" id="v-mana-max">
-                </div>
+                <div class="vital-inputs"><input type="number" id="v-mana-atual"><span class="slash">/</span><input type="number" id="v-mana-max"></div>
               </div>
               <div class="dano-cura-row">
                 <input type="number" id="v-mana-delta" placeholder="Qtd">
@@ -412,9 +385,7 @@
                 <button class="dc-btn recarga" data-vital="mana" data-sinal="1">Recarga</button>
               </div>
             </div>
-            <div class="bar-track">
-              <div class="bar-fill mana" id="v-mana-bar" style="width:100%"></div>
-            </div>
+            <div class="bar-track"><div class="bar-fill mana" id="v-mana-bar" style="width:100%"></div></div>
           </div>
         </div>
       </section>
@@ -499,7 +470,7 @@
       identidade:{ nome:"", classe:"Sicário", subclasse:"Arcanista", antecedente:"", oficio:"", nivel:1, proficiencia:1, cansaco:0, exaustao:0, foto:null },
       atributos,
       pericias,
-      recursos:{ pvAtual:10, pvMaximo:10, protAtual:0, protMaximo:0, dt:"16", deslocamento:"10m" },
+      recursos:{ pvAtual:10, pvMaximo:10, protAtual:0, protMaximo:0, manaAtual:10, manaMaximo:10, dt:"16", deslocamento:"10m" },
       inventario: [], habilidades: [], talentos: [], tecnicas: [], atalhos: [], historicoRolagens: [], anotacoes: []
     };
   }
@@ -1437,13 +1408,26 @@
       rm.style.display = "none";
     }
 
-    const r = estado.recursos || { pvAtual:10, pvMaximo:10, protAtual:0, protMaximo:0, dt:"16", deslocamento:"10m" };
+    const r = estado.recursos || { pvAtual:10, pvMaximo:10, protAtual:0, protMaximo:0, manaAtual:10, manaMaximo:10, dt:"16", deslocamento:"10m" };
+    
+    // Vida
     document.getElementById("v-pv-atual").value = r.pvAtual;
     document.getElementById("v-pv-max").value = r.pvMaximo;
     document.getElementById("v-pv-bar").style.width = (r.pvMaximo > 0 ? (r.pvAtual/r.pvMaximo)*100 : 0) + "%";
+    
+    // Proteção
     document.getElementById("v-prot-atual").value = r.protAtual;
     document.getElementById("v-prot-max").value = r.protMaximo;
     document.getElementById("v-prot-bar").style.width = (r.protMaximo > 0 ? (r.protAtual/r.protMaximo)*100 : 0) + "%";
+
+    // Mana
+    const mAtu = r.manaAtual !== undefined ? r.manaAtual : 10;
+    const mMax = r.manaMaximo !== undefined ? r.manaMaximo : 10;
+    document.getElementById("v-mana-atual").value = mAtu;
+    document.getElementById("v-mana-max").value = mMax;
+    document.getElementById("v-mana-bar").style.width = (mMax > 0 ? (mAtu/mMax)*100 : 0) + "%";
+
+    // DT e Deslocamento
     document.getElementById("v-dt").value = r.dt;
     document.getElementById("v-desloc-input").value = r.deslocamento;
 
@@ -1513,7 +1497,6 @@
     renderAtributos(); salvar();
   };
 
-  // Entrar na mesa por código simples
   document.getElementById("btn-entrar-mesa").onclick = ()=>{
     const id = document.getElementById("f-id-mesa").value.trim();
     if(!id) return;
@@ -1523,7 +1506,6 @@
     render();
   };
 
-  // Vincular Chave de Sincronização direta
   document.getElementById("btn-vincular-chave").onclick = ()=>{
     const chave = document.getElementById("f-chave-vincular").value.trim();
     if(!chave || !chave.includes("::")){
@@ -1546,16 +1528,15 @@
       localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
       escutarPersonagemRemoto();
       render();
-      alert(`Ficha "${estado.identidade.nome || 'Personagem'}" vinculada e sincronizada com sucesso!`);
+      alert(`Ficha "${estado.identidade.nome || 'Personagem'}" vinculada com sucesso!`);
     }).catch(err => {
       console.error(err);
       alert("Erro ao conectar à chave.");
     });
   };
 
-  // Copiar Chave de Sincronização
   document.getElementById("btn-copiar-chave").onclick = ()=>{
-    if(!estado.idMesa){ alert("Você precisa estar conectado a uma mesa."); return; }
+    if(!estado.idMesa){ alert("Conecte-se a uma mesa primeiro."); return; }
     const chave = `${estado.idMesa}::${estado.id}`;
     navigator.clipboard.writeText(chave).then(()=>{
       const btn = document.getElementById("btn-copiar-chave");
@@ -1578,10 +1559,23 @@
     btn.onclick = ()=>{
       const vital = btn.dataset.vital;
       const sinal = parseInt(btn.dataset.sinal,10);
-      const input = document.getElementById(vital === "pv" ? "v-pv-delta" : "v-prot-delta");
+      let inputId = "v-pv-delta";
+      if(vital === "prot") inputId = "v-prot-delta";
+      if(vital === "mana") inputId = "v-mana-delta";
+
+      const input = document.getElementById(inputId);
       const qtd = Math.abs(parseInt(input.value,10) || 0);
-      if(vital === "pv") estado.recursos.pvAtual = Math.max(0, Math.min(estado.recursos.pvMaximo, estado.recursos.pvAtual + sinal*qtd));
-      else estado.recursos.protAtual = Math.max(0, Math.min(estado.recursos.protMaximo, estado.recursos.protAtual + sinal*qtd));
+
+      if(vital === "pv"){
+        estado.recursos.pvAtual = Math.max(0, Math.min(estado.recursos.pvMaximo, estado.recursos.pvAtual + sinal*qtd));
+      } else if(vital === "prot"){
+        estado.recursos.protAtual = Math.max(0, Math.min(estado.recursos.protMaximo, estado.recursos.protAtual + sinal*qtd));
+      } else if(vital === "mana"){
+        const max = estado.recursos.manaMaximo !== undefined ? estado.recursos.manaMaximo : 10;
+        const atu = estado.recursos.manaAtual !== undefined ? estado.recursos.manaAtual : 10;
+        estado.recursos.manaAtual = Math.max(0, Math.min(max, atu + sinal*qtd));
+      }
+
       input.value = "";
       render(); salvar();
     };
@@ -1591,6 +1585,8 @@
   document.getElementById("v-pv-max").onchange = (e)=> { estado.recursos.pvMaximo = parseInt(e.target.value,10)||0; render(); salvar(); };
   document.getElementById("v-prot-atual").onchange = (e)=> { estado.recursos.protAtual = parseInt(e.target.value,10)||0; render(); salvar(); };
   document.getElementById("v-prot-max").onchange = (e)=> { estado.recursos.protMaximo = parseInt(e.target.value,10)||0; render(); salvar(); };
+  document.getElementById("v-mana-atual").onchange = (e)=> { estado.recursos.manaAtual = parseInt(e.target.value,10)||0; render(); salvar(); };
+  document.getElementById("v-mana-max").onchange = (e)=> { estado.recursos.manaMaximo = parseInt(e.target.value,10)||0; render(); salvar(); };
   document.getElementById("v-dt").oninput = (e)=> { estado.recursos.dt = e.target.value; salvar(); };
   document.getElementById("v-desloc-input").oninput = (e)=> { estado.recursos.deslocamento = e.target.value; salvar(); };
 
@@ -1629,7 +1625,6 @@
   salvar();
   if(estado.idMesa) escutarPersonagemRemoto();
 
-  // Abertura direta via URL com parâmetros ?mesa=...&personagem=...
   (function abrirPersonagemViaLinkDireto(){
     const params = new URLSearchParams(location.search);
     const mesaParam = params.get("mesa");
