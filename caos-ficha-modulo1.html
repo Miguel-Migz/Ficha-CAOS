@@ -43,7 +43,52 @@
   }
   .step-btn:hover{ border-color:var(--accent-arcane); color:var(--accent-arcane); }
 
-  .vital-card{ background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
+  /* Grelha de Vitais ajustada conforme a proporção exata da imagem */
+  .vitals-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.1fr;
+    grid-template-rows: repeat(6, auto);
+    gap: 12px 14px;
+    align-items: center;
+  }
+
+  .vital-card[data-area="vida"] {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  .vital-card[data-area="protecao"] {
+    grid-column: 1;
+    grid-row: 3 / span 2;
+  }
+  .vital-card[data-area="mana"] {
+    grid-column: 1;
+    grid-row: 5 / span 2;
+  }
+  .derived-card[data-area="dt"] {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+  }
+  .derived-card[data-area="desloc"] {
+    grid-column: 2;
+    grid-row: 4 / span 2;
+  }
+
+  @media (max-width: 640px) {
+    .vitals-grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+    .vital-card[data-area="vida"],
+    .vital-card[data-area="protecao"],
+    .vital-card[data-area="mana"],
+    .derived-card[data-area="dt"],
+    .derived-card[data-area="desloc"] {
+      grid-column: 1;
+      grid-row: auto;
+    }
+  }
+
+  .vital-card{ background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
   .vital-top-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
   .vital-left{ display:flex; align-items:center; gap:10px; }
   .vital-card-label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); }
@@ -57,6 +102,23 @@
   .dc-btn.dano:hover{ background:rgba(226,89,63,0.15); }
   .dc-btn.cura{ border-color:#6fbf73; color:#6fbf73; }
   .dc-btn.cura:hover{ background:rgba(111,191,115,0.12); }
+
+  /* Barras com maior espessura */
+  .bar-track {
+    background: var(--bg-inset);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    height: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    transition: width 0.2s ease;
+  }
+  .bar-fill.vida { background: #4fd57a; }
+  .bar-fill.protecao { background: #4d9eea; }
+  .bar-fill.mana { background: var(--accent-arcane); }
 
   .derived-card{ background:var(--bg-panel-alt); border:1px solid var(--border-soft); border-radius:8px; padding:16px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .derived-label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); margin-bottom:10px; }
@@ -176,7 +238,7 @@
     </div>
   </header>
 
-  <!-- Painel de Ligação da Mesa & Chave de Sincronização -->
+  <!-- Painel de Conexão com a Mesa -->
   <section class="panel mesa-panel">
     <div class="mesa-form" id="mesa-form">
       <label class="field" style="width:220px;">ID da Mesa
@@ -230,7 +292,7 @@
     </div>
   </div>
 
-  <!-- Grelha Principal -->
+  <!-- Grid Principal -->
   <div class="layout-grid">
     <div class="layout-col">
       <section class="panel">
@@ -334,11 +396,11 @@
         </div>
       </section>
 
-      <!-- Status Vitais e Combate com Mana e Grelha do Protótipo -->
+      <!-- Status Vitais e Combate Conforme Imagem -->
       <section class="panel">
         <h2 class="panel-title">Status Vitais e Combate</h2>
         <div class="vitals-grid">
-          <!-- Linha 1: Vida | DT -->
+          <!-- Coluna 1, Linha 1 a 2: Vida -->
           <div class="vital-card" data-area="vida">
             <div class="vital-top-row">
               <div class="vital-left">
@@ -353,9 +415,14 @@
             </div>
             <div class="bar-track"><div class="bar-fill vida" id="v-pv-bar" style="width:100%"></div></div>
           </div>
-          <div class="derived-card" data-area="dt"><span class="derived-label">DT</span><input type="text" id="v-dt"></div>
 
-          <!-- Linha 2: Proteção | Deslocamento -->
+          <!-- Coluna 2, Linha 2 a 3: DT -->
+          <div class="derived-card" data-area="dt">
+            <span class="derived-label">DT</span>
+            <input type="text" id="v-dt">
+          </div>
+
+          <!-- Coluna 1, Linha 3 a 4: Proteção -->
           <div class="vital-card protecao-card" data-area="protecao">
             <div class="vital-top-row">
               <div class="vital-left">
@@ -370,9 +437,14 @@
             </div>
             <div class="bar-track"><div class="bar-fill protecao" id="v-prot-bar" style="width:100%"></div></div>
           </div>
-          <div class="derived-card" data-area="desloc"><span class="derived-label">Deslocamento</span><input type="text" id="v-desloc-input"></div>
 
-          <!-- Linha 3: Mana -->
+          <!-- Coluna 2, Linha 4 a 5: Deslocamento -->
+          <div class="derived-card" data-area="desloc">
+            <span class="derived-label">Deslocamento</span>
+            <input type="text" id="v-desloc-input">
+          </div>
+
+          <!-- Coluna 1, Linha 5 a 6: Mana -->
           <div class="vital-card mana-card" data-area="mana">
             <div class="vital-top-row">
               <div class="vital-left">
