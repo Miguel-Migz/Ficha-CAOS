@@ -178,17 +178,29 @@
     </div>
   </header>
 
-  <!-- Painel de Conexão com a Mesa -->
+  <!-- Painel de Conexão com a Mesa & Chave de Sincronização -->
   <section class="panel mesa-panel">
     <div class="mesa-form" id="mesa-form">
-      <label class="field" style="width:240px;">ID da Mesa
+      <label class="field" style="width:220px;">ID da Mesa
         <input type="text" id="f-id-mesa" placeholder="Ex: MESA-8492">
       </label>
       <button class="btn primary" id="btn-entrar-mesa">Entrar na Mesa</button>
+      
+      <div style="height:28px; width:1px; background:var(--border-soft); margin:0 6px;"></div>
+
+      <label class="field" style="width:240px;">Vincular Chave (Outro Dispositivo)
+        <input type="text" id="f-chave-vincular" placeholder="Cole a chave da ficha aqui">
+      </label>
+      <button class="btn" id="btn-vincular-chave">Vincular</button>
     </div>
-    <div id="mesa-status" style="display:none; align-items:center; gap:14px; width:100%; justify-content:space-between;">
-      <span>Conectado à mesa <b id="mesa-status-id" style="color:var(--accent-gold); font-family:var(--font-mono);"></b></span>
-      <button class="btn" id="btn-sair-mesa">Sair da mesa</button>
+    <div id="mesa-status" style="display:none; align-items:center; gap:10px; width:100%; justify-content:space-between; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span>Conectado: <b id="mesa-status-id" style="color:var(--accent-gold); font-family:var(--font-mono);"></b></span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn small" id="btn-copiar-chave" title="Copia a chave única para abrir exatamente esta ficha em outro computador ou celular">Copiar Chave de Sinc</button>
+        <button class="btn small" id="btn-sair-mesa">Sair da mesa</button>
+      </div>
     </div>
   </section>
 
@@ -222,7 +234,6 @@
 
   <!-- Grid Principal -->
   <div class="layout-grid">
-    <!-- Coluna Esquerda -->
     <div class="layout-col">
       <section class="panel">
         <div class="tabbar" id="tabbar">
@@ -263,7 +274,6 @@
       </section>
     </div>
 
-    <!-- Coluna Direita -->
     <div class="layout-col">
       <section class="panel">
         <h2 class="panel-title">Identidade</h2>
@@ -888,7 +898,7 @@
     });
   }
 
-  // --- TÉCNICAS (Com campo Nível e Ordenação por Nível) ---
+  // --- TÉCNICAS (Com Nível e Ordenação) ---
   function renderTecnicas(){
     const list = document.getElementById("tecnica-grid");
     list.innerHTML = "";
@@ -930,7 +940,6 @@
     add.onclick = ()=>{ tecForm = true; renderTecnicas(); };
     list.appendChild(add);
 
-    // Mapeia os índices originais e ordena as técnicas do menor para o maior nível
     const tecnicasOrdenadas = (estado.tecnicas || [])
       .map((tec, idx) => ({ tec, idx }))
       .sort((a, b) => {
@@ -1366,7 +1375,6 @@
     document.getElementById("f-cansaco").value = estado.identidade.cansaco || 0;
     document.getElementById("f-exaustao").value = estado.identidade.exaustao || 0;
 
-    // Renderização do Avatar
     const img = document.getElementById("avatar-img");
     const ph = document.getElementById("avatar-placeholder");
     const rm = document.getElementById("avatar-remove");
@@ -1405,7 +1413,6 @@
     atualizarIndicadorConexao();
   }
 
-  // Eventos seguros para não apagar outros campos da identidade
   ["f-nome","f-classe","f-subclasse","f-antecedente","f-oficio","f-nivel","f-proficiencia","f-cansaco","f-exaustao"].forEach(id=>{
     document.getElementById(id).addEventListener("input", (e)=>{
       const campo = id.replace("f-","");
@@ -1459,6 +1466,7 @@
     renderAtributos(); salvar();
   };
 
+  // Entrar na mesa por código simples
   document.getElementById("btn-entrar-mesa").onclick = ()=>{
     const id = document.getElementById("f-id-mesa").value.trim();
     if(!id) return;
@@ -1466,6 +1474,48 @@
     salvar();
     escutarPersonagemRemoto();
     render();
+  };
+
+  // Vincular Chave de Sincronização direta
+  document.getElementById("btn-vincular-chave").onclick = ()=>{
+    const chave = document.getElementById("f-chave-vincular").value.trim();
+    if(!chave || !chave.includes("::")){
+      alert("Chave inválida. Formato esperado: ID_MESA::ID_PERSONAGEM");
+      return;
+    }
+    const [idMesa, idPersonagem] = chave.split("::");
+    if(!firebaseOk){ alert("Firebase indisponível no momento."); return; }
+
+    firebase.database().ref(`mesas/${idMesa}/jogadores/${idPersonagem}`).once("value").then(snap => {
+      const dados = snap.val();
+      if(!dados){
+        alert("Ficha não encontrada com essa chave.");
+        return;
+      }
+      estado = mesclarEstado(dados, idPersonagem);
+      estado.idMesa = idMesa;
+      sessionStorage.setItem(SESSION_KEY, estado.id);
+      localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado));
+      localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
+      escutarPersonagemRemoto();
+      render();
+      alert(`Ficha "${estado.identidade.nome || 'Personagem'}" vinculada e sincronizada com sucesso!`);
+    }).catch(err => {
+      console.error(err);
+      alert("Erro ao conectar à chave.");
+    });
+  };
+
+  // Copiar Chave de Sincronização
+  document.getElementById("btn-copiar-chave").onclick = ()=>{
+    if(!estado.idMesa){ alert("Você precisa estar conectado a uma mesa."); return; }
+    const chave = `${estado.idMesa}::${estado.id}`;
+    navigator.clipboard.writeText(chave).then(()=>{
+      const btn = document.getElementById("btn-copiar-chave");
+      const original = btn.textContent;
+      btn.textContent = "Chave Copiada!";
+      setTimeout(()=> btn.textContent = original, 2000);
+    }).catch(()=> prompt("Copie a chave:", chave));
   };
 
   document.getElementById("btn-sair-mesa").onclick = ()=>{
@@ -1531,6 +1581,27 @@
   render();
   salvar();
   if(estado.idMesa) escutarPersonagemRemoto();
+
+  // Abertura direta via URL com parâmetros ?mesa=...&personagem=...
+  (function abrirPersonagemViaLinkDireto(){
+    const params = new URLSearchParams(location.search);
+    const mesaParam = params.get("mesa");
+    const personagemParam = params.get("personagem");
+    if(!mesaParam || !personagemParam) return;
+    if(!firebaseOk) return;
+
+    firebase.database().ref(`mesas/${mesaParam}/jogadores/${personagemParam}`).once("value").then(snapshot => {
+      const dados = snapshot.val();
+      if(!dados) return;
+      estado = mesclarEstado(dados, personagemParam);
+      estado.idMesa = mesaParam;
+      sessionStorage.setItem(SESSION_KEY, estado.id);
+      localStorage.setItem(LOCALSTORAGE_PREFIX + estado.id, JSON.stringify(estado));
+      localStorage.setItem(LAST_ACTIVE_KEY, estado.id);
+      escutarPersonagemRemoto();
+      render();
+    }).catch(()=>{});
+  })();
 })();
 </script>
 </body>
