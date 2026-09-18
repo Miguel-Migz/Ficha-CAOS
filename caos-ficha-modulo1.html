@@ -336,14 +336,19 @@
         </div>
       </section>
 
-      <section class="panel">
+<section class="panel">
         <h2 class="panel-title">Status Vitais e Combate</h2>
         <div class="vitals-grid">
-          <div class="vital-card">
+          <!-- Vida -->
+          <div class="vital-card" data-area="vida">
             <div class="vital-top-row">
               <div class="vital-left">
                 <span class="vital-card-label">Vida</span>
-                <div class="vital-inputs"><input type="number" id="v-pv-atual"><span class="slash">/</span><input type="number" id="v-pv-max"></div>
+                <div class="vital-inputs">
+                  <input type="number" id="v-pv-atual">
+                  <span class="slash">/</span>
+                  <input type="number" id="v-pv-max">
+                </div>
               </div>
               <div class="dano-cura-row">
                 <input type="number" id="v-pv-delta" placeholder="Qtd">
@@ -351,14 +356,27 @@
                 <button class="dc-btn cura" data-vital="pv" data-sinal="1">Cura</button>
               </div>
             </div>
-            <div class="bar-track"><div class="bar-fill vida" id="v-pv-bar" style="width:100%"></div></div>
+            <div class="bar-track">
+              <div class="bar-fill vida" id="v-pv-bar" style="width:100%"></div>
+            </div>
           </div>
-          <div class="derived-card"><span class="derived-label">DT</span><input type="text" id="v-dt"></div>
-          <div class="vital-card protecao-card">
+
+          <!-- DT -->
+          <div class="derived-card" data-area="dt">
+            <span class="derived-label">DT</span>
+            <input type="text" id="v-dt">
+          </div>
+
+          <!-- Proteção -->
+          <div class="vital-card protecao-card" data-area="protecao">
             <div class="vital-top-row">
               <div class="vital-left">
                 <span class="vital-card-label">Proteção</span>
-                <div class="vital-inputs"><input type="number" id="v-prot-atual"><span class="slash">/</span><input type="number" id="v-prot-max"></div>
+                <div class="vital-inputs">
+                  <input type="number" id="v-prot-atual">
+                  <span class="slash">/</span>
+                  <input type="number" id="v-prot-max">
+                </div>
               </div>
               <div class="dano-cura-row">
                 <input type="number" id="v-prot-delta" placeholder="Qtd">
@@ -366,9 +384,38 @@
                 <button class="dc-btn cura" data-vital="prot" data-sinal="1">Cura</button>
               </div>
             </div>
-            <div class="bar-track"><div class="bar-fill protecao" id="v-prot-bar" style="width:100%"></div></div>
+            <div class="bar-track">
+              <div class="bar-fill protecao" id="v-prot-bar" style="width:100%"></div>
+            </div>
           </div>
-          <div class="derived-card"><span class="derived-label">Deslocamento</span><input type="text" id="v-desloc-input"></div>
+
+          <!-- Deslocamento -->
+          <div class="derived-card" data-area="desloc">
+            <span class="derived-label">Deslocamento</span>
+            <input type="text" id="v-desloc-input">
+          </div>
+
+          <!-- Mana -->
+          <div class="vital-card mana-card" data-area="mana">
+            <div class="vital-top-row">
+              <div class="vital-left">
+                <span class="vital-card-label">Mana</span>
+                <div class="vital-inputs">
+                  <input type="number" id="v-mana-atual">
+                  <span class="slash">/</span>
+                  <input type="number" id="v-mana-max">
+                </div>
+              </div>
+              <div class="dano-cura-row">
+                <input type="number" id="v-mana-delta" placeholder="Qtd">
+                <button class="dc-btn gasto" data-vital="mana" data-sinal="-1">Gasto</button>
+                <button class="dc-btn recarga" data-vital="mana" data-sinal="1">Recarga</button>
+              </div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill mana" id="v-mana-bar" style="width:100%"></div>
+            </div>
+          </div>
         </div>
       </section>
 
