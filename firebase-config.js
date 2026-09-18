@@ -13,7 +13,7 @@ try {
   firebase.initializeApp(firebaseConfig);
   firebaseOk = true;
 } catch (e) {
-  console.warn("Firebase indisponível — rodando no modo local:", e);
+  console.warn("Firebase indisponível — a rodar no modo local:", e);
 }
 
 function criarNovaMesa(nomeMesa) {
@@ -34,7 +34,6 @@ function conectarJogadorMesa(idMesa, dadosPersonagem) {
     return Promise.reject(new Error("idMesa e dadosPersonagem.id são obrigatórios."));
   }
 
-  // Clona e limpa possíveis valores undefined antes de enviar
   const pacote = JSON.parse(JSON.stringify(dadosPersonagem));
   pacote.atualizadoEm = Date.now();
 
