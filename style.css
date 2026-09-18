@@ -1,23 +1,23 @@
 :root {
-  --bg-main: #0f0d13;
-  --bg-panel: #16131c;
-  --bg-panel-alt: #1c1824;
-  --bg-inset: #0a080d;
-  --border: #2d2638;
-  --border-soft: #231e2c;
-  
-  --text: #e9e4f2;
-  --text-dim: #9d95ab;
-  --text-faint: #5f576d;
-  
+  --bg-main: #0d0d11;
+  --bg-panel: #141318;
+  --bg-panel-alt: #1a1921;
+  --bg-inset: #09090c;
+  --border: #26242e;
+  --border-soft: #1f1d26;
+
+  --text: #e8e6ed;
+  --text-dim: #9894a0;
+  --text-faint: #5a5666;
+
   --accent-arcane: #9b6bf2;
-  --accent-arcane-dim: rgba(155, 107, 242, 0.15);
+  --accent-arcane-dim: rgba(155, 107, 242, 0.12);
   --accent-ember: #e2593f;
   --accent-gold: #e5b958;
-  
-  --font-display: "Cinzel", "Georgia", serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Consolas", monospace;
 }
 
 * {
@@ -33,26 +33,25 @@ body {
   font-size: 14px;
   line-height: 1.5;
   min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
 }
 
-/* Tipografia e Títulos */
+/* Títulos */
 h1, h2, h3, .panel-title, .masthead-title {
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: 0.04em;
 }
 
 .panel-title {
-  font-size: 0.92rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  color: var(--accent-gold);
+  color: var(--text-dim);
   border-bottom: 1px solid var(--border-soft);
   padding-bottom: 8px;
   margin-bottom: 14px;
+  letter-spacing: 0.05em;
 }
 
-/* Layout Estrutural */
+/* Layout */
 .wrap {
   max-width: 1360px;
   margin: 0 auto;
@@ -81,11 +80,11 @@ h1, h2, h3, .panel-title, .masthead-title {
 .panel {
   background: var(--bg-panel);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 18px 20px;
+  border-radius: 8px;
+  padding: 16px 18px;
 }
 
-/* Cabeçalho Superior */
+/* Cabeçalho */
 .masthead {
   display: flex;
   align-items: center;
@@ -98,9 +97,8 @@ h1, h2, h3, .panel-title, .masthead-title {
 }
 
 .masthead-title {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   color: var(--text);
-  line-height: 1.1;
 }
 
 .masthead-title span {
@@ -109,7 +107,7 @@ h1, h2, h3, .panel-title, .masthead-title {
 
 .masthead-sub {
   font-size: 0.78rem;
-  color: var(--text-dim);
+  color: var(--text-faint);
   margin-top: 2px;
 }
 
@@ -119,15 +117,15 @@ h1, h2, h3, .panel-title, .masthead-title {
   gap: 10px;
 }
 
-/* Formulários, Inputs e Seletores */
+/* Inputs e Formulários */
 .field {
   display: flex;
   flex-direction: column;
   gap: 5px;
   font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--text-dim);
+  letter-spacing: 0.04em;
 }
 
 input[type="text"],
@@ -140,8 +138,7 @@ textarea {
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.88rem;
-  padding: 8px 10px;
-  transition: border-color 0.15s ease;
+  padding: 7px 10px;
 }
 
 input[type="text"]:focus,
@@ -157,10 +154,6 @@ textarea {
   resize: vertical;
 }
 
-select {
-  cursor: pointer;
-}
-
 /* Botões */
 .btn {
   display: inline-flex;
@@ -172,10 +165,8 @@ select {
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.8rem;
-  font-weight: 500;
-  padding: 7px 14px;
+  padding: 6px 12px;
   cursor: pointer;
-  transition: all 0.15s ease;
   user-select: none;
 }
 
@@ -197,7 +188,7 @@ select {
 }
 
 .btn.small {
-  padding: 5px 10px;
+  padding: 4px 8px;
   font-size: 0.72rem;
 }
 
@@ -212,7 +203,7 @@ select {
   text-decoration: underline;
 }
 
-/* Grelha de Vitais e Barras de Progresso */
+/* Grelha de Vitais */
 .vitals-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -220,7 +211,7 @@ select {
     "vida dt"
     "protecao desloc"
     "mana .";
-  gap: 12px;
+  gap: 10px;
 }
 
 @media (max-width: 640px) {
@@ -241,39 +232,32 @@ select {
 .derived-card[data-area="dt"] { grid-area: dt; }
 .derived-card[data-area="desloc"] { grid-area: desloc; }
 
+/* Barras Vitais Planares */
 .bar-track {
   background: var(--bg-inset);
   border: 1px solid var(--border-soft);
-  border-radius: 6px;
-  height: 10px;
+  border-radius: 4px;
+  height: 8px;
   overflow: hidden;
-  position: relative;
 }
 
 .bar-fill {
   height: 100%;
-  transition: width 0.25s ease;
 }
 
 .bar-fill.vida {
-  background: linear-gradient(90deg, #2d6630, #52a856);
+  background: #4fd57a;
 }
 
 .bar-fill.protecao {
-  background: repeating-linear-gradient(
-    135deg,
-    #3b7fc4,
-    #3b7fc4 6px,
-    #4d9eea 6px,
-    #4d9eea 12px
-  );
+  background: #4d9eea;
 }
 
 .bar-fill.mana {
-  background: linear-gradient(90deg, #5b309e, var(--accent-arcane));
+  background: var(--accent-arcane);
 }
 
-/* Cores de Cartões e Botões de Ação Rápida */
+/* Indicadores de Vitais */
 .vital-card.protecao-card .vital-card-label {
   color: #4d9eea;
 }
@@ -288,7 +272,7 @@ select {
 }
 
 .dc-btn.gasto:hover {
-  background: rgba(155, 107, 242, 0.15);
+  background: rgba(155, 107, 242, 0.12);
 }
 
 .dc-btn.recarga {
@@ -297,7 +281,7 @@ select {
 }
 
 .dc-btn.recarga:hover {
-  background: rgba(186, 143, 255, 0.15);
+  background: rgba(186, 143, 255, 0.12);
 }
 
 /* Status Pill */
@@ -322,7 +306,6 @@ select {
 
 .status-pill.online .status-dot {
   background: #4fd57a;
-  box-shadow: 0 0 6px rgba(79, 213, 122, 0.5);
 }
 
 .status-pill.offline .status-dot {
@@ -334,7 +317,6 @@ select {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(3px);
   display: none;
   align-items: center;
   justify-content: center;
@@ -349,21 +331,20 @@ select {
 .modal-panel {
   background: var(--bg-panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border-soft);
 }
 
@@ -371,9 +352,8 @@ select {
   background: none;
   border: none;
   color: var(--text-faint);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   cursor: pointer;
-  line-height: 1;
 }
 
 .modal-close:hover {
@@ -381,7 +361,7 @@ select {
 }
 
 .modal-body {
-  padding: 16px 18px;
+  padding: 14px 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -389,7 +369,7 @@ select {
 }
 
 .modal-footer {
-  padding: 12px 18px;
+  padding: 10px 16px;
   border-top: 1px solid var(--border-soft);
   display: flex;
   justify-content: flex-end;
@@ -397,7 +377,7 @@ select {
   background: var(--bg-panel-alt);
 }
 
-/* Notificações e Toasts de Rolagens */
+/* Notificações / Toasts de Rolagens */
 #roll-log,
 #toast-rolagens {
   position: fixed;
@@ -413,21 +393,18 @@ select {
 .roll-toast,
 .rolagem-toast {
   background: var(--bg-panel);
-  border: 1px solid var(--accent-arcane);
-  border-radius: 8px;
-  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
   min-width: 200px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  animation: slideIn 0.2s ease;
   pointer-events: auto;
 }
 
 .rt-title,
 .rt-personagem {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--accent-gold);
+  color: var(--accent-arcane);
 }
 
 .rt-teste {
@@ -437,7 +414,7 @@ select {
 
 .rt-total {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--text);
   margin: 2px 0;
@@ -447,16 +424,4 @@ select {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   color: var(--text-faint);
-  word-break: break-all;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
 }
